@@ -1,5 +1,4 @@
 using WJb.Extensions;
-using WJb.Demo.Full.Actions;
 using WJb.Demo.Full.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,12 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddScoped<DemoAction>();
-
 builder.Services
     .AddWJb()
     .UseMemory()
-    .UseRetry();
+    .UseRetry()
+    .AddActions(b =>
+    {
+        b.Scan(typeof(DemoAction).Assembly);
+    });
 
 var app = builder.Build();
 
