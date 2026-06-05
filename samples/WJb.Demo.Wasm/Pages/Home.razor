@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using WJb.Abstractions
 
 @inject IJobEngine Engine
 
@@ -51,8 +50,8 @@
                         <div class="progress" style="height:20px;">
                             <div class="progress-bar
                                 @(t.State.Status == JobStatus.Processing
-                                      ? "progress-bar-striped progress-bar-animated"
-                                      : "")
+                                       ? "progress-bar-striped progress-bar-animated"
+                                       : "")
                                 d-flex align-items-center justify-content-center"
                                  role="progressbar"
                                  style="width:@t.State.Progress%">

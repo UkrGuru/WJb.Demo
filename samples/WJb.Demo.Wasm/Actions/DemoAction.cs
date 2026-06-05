@@ -1,4 +1,4 @@
-﻿using WJb.Abstractions;
+﻿using WJb.Core;
 
 public class DemoPayload
 {

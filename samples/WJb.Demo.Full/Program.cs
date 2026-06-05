@@ -1,4 +1,4 @@
-using WJb.Extensions;
+using WJb.Hosting;
 using WJb.Demo.Full.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,10 +11,7 @@ builder.Services
     .AddWJb()
     .UseMemory()
     .UseRetry()
-    .AddActions(b =>
-    {
-        b.Scan(typeof(DemoAction).Assembly);
-    });
+    .ScanActions(typeof(DemoAction).Assembly);
 
 var app = builder.Build();
 
