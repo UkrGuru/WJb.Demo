@@ -34,7 +34,7 @@ await executor.EnqueueAsync<SendEmailAction>(
 // run loop (controlled)
 Console.WriteLine("[App] Start execution...\n");
 
-while (await executor.ExecuteOnceAsync()) { }
+await executor.ExecuteLoopAsync();
 
 Console.WriteLine("\n=== Done ===");
 Console.WriteLine("All steps were explicitly defined.");
