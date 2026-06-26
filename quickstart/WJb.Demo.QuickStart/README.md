@@ -26,7 +26,7 @@ A simple job flow where:
 
 ```bash
 dotnet run
-````
+```
 
 ***
 
