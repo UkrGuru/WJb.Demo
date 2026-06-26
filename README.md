@@ -1,7 +1,9 @@
 # ⚡ WJb Demo
 
-👉 Start here (30 seconds):  
+👉 Start here (30 seconds):
 https://github.com/UkrGuru/WJb.Demo/tree/main/quickstart
+
+This is enough to understand WJb.
 
 ---
 
