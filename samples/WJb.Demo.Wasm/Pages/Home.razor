@@ -1,88 +1,17 @@
 ﻿@page "/"
 
-@inject IJobEngine Engine
+@inject IJobClient Client
+@inject IJobQuery Query
+@inject IJobNotifier Notifier
 
 <h3 class="mb-3">WJb Demo (WASM)</h3>
 
 <button class="btn btn-success w-100 mb-4"
-        @onclick="Start"
-        data-bs-toggle="tooltip"
-        title="Enqueue a demo job">
+        @onclick="Start">
     🚀 Run Demo Job
 </button>
 
-@* ================= ACTIVE ================= *@
 <h5>Active Jobs</h5>
-
-<div class="table-responsive mb-4">
-    <table class="table table-sm align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>ID</th>
-                <th>Status</th>
-                <th>Progress</th>
-                <th class="d-none d-md-table-cell">Message</th>
-                <th class="d-none d-md-table-cell">Attempts</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var t in queue)
-            {
-                <tr class="@(t.State.Status == JobStatus.Processing ? "table-primary" : "")">
-                    <td><code>@t.JobId[..6]</code></td>
-
-                    <td>
-                        <span class="badge
-                            @(t.State.Status switch
-                              {
-                                  JobStatus.Processing => "bg-primary",
-                                  JobStatus.Completed => "bg-success",
-                                  JobStatus.Failed => "bg-danger",
-                                  JobStatus.Cancelled => "bg-danger",
-                                  _ => "bg-secondary"
-                              })">
-                            @t.State.Status
-                        </span>
-                    </td>
-
-                    <td style="min-width:120px;">
-                        <div class="progress" style="height:20px;">
-                            <div class="progress-bar
-                                @(t.State.Status == JobStatus.Processing
-                                       ? "progress-bar-striped progress-bar-animated"
-                                       : "")
-                                d-flex align-items-center justify-content-center"
-                                 role="progressbar"
-                                 style="width:@t.State.Progress%">
-                                <small>@t.State.Progress%</small>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td class="d-none d-md-table-cell">@t.State.Message</td>
-                    <td class="d-none d-md-table-cell">@t.State.Attempts</td>
-
-                    <td>
-                        <div class="d-flex justify-content-end gap-2">
-                            @if (t.State.Status is JobStatus.Queued or JobStatus.Processing)
-                            {
-                                <button class="btn btn-sm btn-danger px-2"
-                                        @onclick="() => Cancel(t.JobId)"
-                                        title="Cancel">
-                                    ❌
-                                </button>
-                            }
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-@* ================= RETRY ================= *@
-<h5>Failed / Cancelled</h5>
 
 <div class="table-responsive">
     <table class="table table-sm align-middle">
@@ -90,34 +19,57 @@
             <tr>
                 <th>ID</th>
                 <th>Status</th>
+                <th>Progress</th>
                 <th class="d-none d-md-table-cell">Message</th>
-                <th>Attempts</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var t in retry)
+            @foreach (var t in queue)
             {
-                <tr>
-                    <td><code>@t.JobId[..6]</code></td>
+                <tr class="@(t.Status == JobStatus.Processing ? "table-primary" : "")">
+
+                    <td><code>@Short(t.Id)</code></td>
 
                     <td>
-                        <span class="badge bg-danger">
-                            @t.State.Status
+                        <span class="badge
+                            @(t.Status switch
+                              {
+                                  JobStatus.Processing => "bg-primary",
+                                  JobStatus.Completed => "bg-success",
+                                  JobStatus.Failed => "bg-danger",
+                                  _ => "bg-secondary"
+                              })">
+                            @t.Status
                         </span>
                     </td>
 
-                    <td class="d-none d-md-table-cell">@t.State.Message</td>
+                    <td style="min-width:120px;">
+                        <div class="progress" style="height:20px;">
+                            <div class="progress-bar
+                                @(t.Status == JobStatus.Processing
+                                      ? "progress-bar-striped progress-bar-animated"
+                                      : "")
+                                d-flex align-items-center justify-content-center"
+                                 role="progressbar"
+                                 style="width:@t.Progress%">
+                                <small>@t.Progress%</small>
+                            </div>
+                        </div>
+                    </td>
 
-                    <td>@t.State.Attempts</td>
+                    <td class="d-none d-md-table-cell">@t.Message</td>
 
                     <td>
-                        <button class="btn btn-sm btn-warning px-2"
-                                @onclick="() => Retry(t.JobId)"
-                                title="Retry">
-                            🔄
-                        </button>
+                        @if (t.Status is JobStatus.Pending or JobStatus.Processing)
+                        {
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => Cancel(t.Id)">
+                                ❌
+                            </button>
+                        }
                     </td>
+
                 </tr>
             }
         </tbody>
@@ -125,12 +77,11 @@
 </div>
 
 @code {
-    private List<IJob> queue = new();
-    private List<IJob> retry = new();
+    private IReadOnlyList<JobInfo> queue = Array.Empty<JobInfo>();
 
     protected override void OnInitialized()
     {
-        Engine.Changed += HandleChanged;
+        Notifier.Changed += HandleChanged;
         Load();
     }
 
@@ -143,23 +94,12 @@
         });
     }
 
-    private void Load()
-    {
-        queue = Engine.GetQueue().ToList();
+    private async Task Load()
+        => queue = await Query.GetJobs();
 
-        retry = Engine.GetHistory(new JobQuery
-        {
-            Statuses = new[]
-            {
-                JobStatus.Failed,
-                JobStatus.Cancelled
-            }
-        }).ToList();
-    }
-
-    private void Start()
+    private async Task Start()
     {
-        Engine.Enqueue<DemoAction, DemoPayload>(
+        await Client.EnqueueAsync<DemoAction, DemoPayload>(
             new DemoPayload
             {
                 DelayMs = 5000,
@@ -167,12 +107,12 @@
             });
     }
 
-    private void Retry(string id) => Engine.Retry(id);
+    private Task Cancel(string id)
+        => Client.CancelAsync(id);
 
-    private void Cancel(string id) => Engine.Cancel(id);
+    private static string Short(string id)
+        => id[..Math.Min(6, id.Length)];
 
     public void Dispose()
-    {
-        Engine.Changed -= HandleChanged;
-    }
+        => Notifier.Changed -= HandleChanged;
 }

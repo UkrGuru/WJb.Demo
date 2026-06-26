@@ -1,0 +1,12 @@
+
+@host = http://localhost:5102
+
+###
+# 1. Create job ✅
+POST {{host}}/jobs
+Accept: application/json
+
+###
+# 2. Check jobs ✅ (run this after POST)
+GET {{host}}/jobs
+Accept: application/json
