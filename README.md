@@ -1,106 +1,46 @@
-# WJb Samples
+# ⚡ WJb Demo
 
-This folder contains runnable examples demonstrating how to use **WJb** in different environments.
+👉 Start here (30 seconds):  
+https://github.com/UkrGuru/WJb.Demo/tree/main/quickstart
 
 ---
-![WJb WASM Demo](./assets/wasm-demo.png)
+
+## 📦 Other examples
+
+If you want to explore more:
+
+- Action tests
+- Minimal API integration
+- WASM demo
+
+These are advanced scenarios and not required to understand WJb.
+
 ---
-## 📦 Available Samples
 
-### 🔹 WASM Demo
+## 🧠 What to expect
 
-📁 `WJb.Demo.Wasm`
-
-A client-side Blazor WebAssembly demo showing:
-
-- Job queue in browser
-- Live progress updates
-- Retry for failed / cancelled jobs
-- No server required
-
-#### Features
-
-- Active jobs view (queue)
-- Failed / Cancelled jobs with retry
-- Progress tracking
-- In-memory execution
-
-#### Run
-
-```bash
-cd samples/WJb.Demo.Wasm
-dotnet run
-```
-
-Open:
+In QuickStart you will see:
 
 ```
-https://localhost:xxxx
+
+SendEmail → Log → Done
+
 ```
 
-***
+Where each step is explicitly defined in code.
 
-### 🔹 Full Demo
+👉 No hidden behavior. No magic.
 
-📁 `WJb.Demo.Full`
+---
 
-A full-stack demo (Server + Worker) showing:
+## 🔥 Goal
 
-* Background worker loop
-* Concurrent job execution
-* Retry middleware
-* Queue + History lifecycle
+Understand WJb in under 30 seconds.
 
-#### Features
+---
 
-* Worker-based processing
-* Configurable concurrency
-* Retry handling
-* Real job lifecycle:
-  ```
-  Queued → Processing → Completed / Failed / Cancelled → History
-  ```
+## 💡 Tip
 
-#### Run
+If you feel lost:
 
-```bash
-cd samples/WJb.Demo.Full
-dotnet run
-```
-
-***
-
-## 🧠 What These Samples Show
-
-Together, the samples demonstrate:
-
-* Job execution without infrastructure (WASM)
-* Real background processing with workers (Full)
-* Retry model and lifecycle behavior
-* Queue vs History separation
-* Progress reporting and UI integration
-
-***
-
-## 🎯 When to Use Which
-
-| Scenario                | Sample |
-| ----------------------- | ------ |
-| UI experimentation      | WASM   |
-| Real backend processing | Full   |
-| Learning lifecycle      | Both   |
-
-***
-
-## 🔗 Related
-
-* Main library: <https://github.com/UkrGuru/WJb>
-* Core concepts: see `WJb.Core`
-
-***
-
-## Philosophy
-
-> WJb is designed to be simple, explicit, and predictable —  
-> these samples reflect that approach.
-
+👉 go back to QuickStart
