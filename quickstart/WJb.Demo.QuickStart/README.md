@@ -74,7 +74,7 @@ return ActionResults.Next(
 
 ## ⚡ Learn more
 
-➡️ <https://www.nuget.org/packages/WJb>  
+➡️ <https://www.nuget.org/packages?q=WJb>  
 ➡️ <https://github.com/UkrGuru/WJb.Demo>
 
 ***
