@@ -1,0 +1,84 @@
+﻿@page "/progress"
+@using WJb.Demo.Wasm.Actions
+
+@inject IJobClient Client
+@inject NavigationManager Nav
+
+<h3 class="mb-3">Progress Action</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Demonstrates progress reporting via ReportProgress.
+        </p>
+
+        <button class="btn btn-success w-100 mb-3"
+                @onclick="Start">
+            <i class="bi bi-activity me-1"></i>
+            Run
+        </button>
+
+        <div class="small text-muted">
+            Flow: Enqueue → Execute → ReportProgress → Complete
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== OPTIONAL DETAILS ===== -->
+<details class="mt-3">
+    <summary class="text-muted">Show code</summary>
+
+    <div class="mt-3">
+
+        <pre class="bg-light p-2 rounded small"><code>
+await Client.EnqueueAsync&lt;ProgressAction, ProgressPayload&gt;(
+    new ProgressPayload { DelayMs = 300 });
+        </code></pre>
+
+        <pre class="bg-light p-2 rounded small"><code>
+public sealed class ProgressPayload
+{
+    public int DelayMs { get; set; } = 300;
+}
+        </code></pre>
+
+        <pre class="bg-light p-2 rounded small"><code>
+public sealed class ProgressAction : JobAction&lt;ProgressPayload&gt;
+{
+    public override async Task&lt;ActionResult&gt; ExecuteAsync(
+        ProgressPayload input,
+        CancellationToken ct = default)
+    {
+        for (int i = 0; i &lt;= 100; i += 25)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            ReportProgress(i, $"Processing {i}%");
+
+            await Task.Delay(input.DelayMs, ct);
+        }
+
+        ReportProgress(100, "Completed ✅");
+
+        return ActionResults.None();
+    }
+}
+        </code></pre>
+
+    </div>
+</details>
+
+@code {
+    private async Task Start()
+    {
+        await Client.EnqueueAsync<ProgressAction, ProgressPayload>(
+            new ProgressPayload
+            {
+                DelayMs = 300
+            });
+
+        Nav.NavigateTo("/");
+    }
+}

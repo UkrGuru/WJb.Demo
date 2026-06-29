@@ -1,0 +1,123 @@
+﻿@page "/chain"
+@using WJb.Demo.Wasm.Actions
+
+@inject IJobClient Client
+@inject NavigationManager Nav
+
+<h3 class="mb-3">Chained Email Action</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Demonstrates action chaining via <code>ActionResults.Next</code>.
+        </p>
+
+        <button class="btn btn-success w-100 mb-3"
+                @onclick="Start">
+            <i class="bi bi-link-45deg me-1"></i>
+            Run
+        </button>
+
+        <div class="small text-muted">
+            Flow: Enqueue → SendEmail → Next(LogAction) → Complete
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== CODE ===== -->
+<details class="mt-3">
+    <summary class="text-muted">Show code</summary>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <!-- LEFT -->
+                <div class="col-md-6">
+                    <h6 class="text-muted">Start</h6>
+                    <pre class="bg-light p-2 rounded small mb-0"><code>
+await Client.EnqueueAsync&lt;SendEmailAction, EmailInput&gt;(
+    new EmailInput { To = "test@test.com" });
+                    </code></pre>
+                </div>
+
+                <!-- RIGHT -->
+                <div class="col-md-6">
+                    <h6 class="text-muted">Payload</h6>
+                    <pre class="bg-light p-2 rounded small mb-0"><code>
+public sealed class EmailInput
+{
+    public string? To { get; set; }
+}
+                    </code></pre>
+                </div>
+
+                <!-- FULL -->
+                <div class="col-12">
+                    <h6 class="text-muted">Action</h6>
+                    <pre class="bg-light p-2 rounded small mb-0"><code>
+public sealed class SendEmailAction : JobAction&lt;EmailInput&gt;
+{
+    private readonly SmtpSettings? _smtp;
+
+    public SendEmailAction(SmtpSettings? smtp)
+    {
+        _smtp = smtp;
+    }
+
+    public override Task&lt;ActionResult&gt; ExecuteAsync(
+        EmailInput input,
+        CancellationToken ct)
+    {
+        var host = _smtp?.Host ?? "&lt;not configured&gt;";
+        var to = input.To ?? "&lt;no recipient&gt;";
+
+        ReportProgress(100, $"SMTP: {host}, To: {to}");
+
+        return Task.FromResult(
+            ActionResults.Next(
+                JobCommands.Next&lt;LogAction&gt;(new LogInput
+                {
+                    Message = $"Email sent to {to}"
+                })
+            )
+        );
+    }
+}
+                    </code></pre>
+                </div>
+
+                <!-- NEXT ACTION -->
+                <div class="col-12">
+                    <h6 class="text-muted">Next</h6>
+                    <pre class="bg-light p-2 rounded small mb-0"><code>
+public sealed class LogInput
+{
+    public string? Message { get; set; }
+}
+
+// Executed automatically after SendEmailAction
+                    </code></pre>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</details>
+
+@code {
+    private async Task Start()
+    {
+        await Client.EnqueueAsync<SendEmailAction, EmailInput>(
+            new EmailInput
+            {
+                To = "test@test.com"
+            });
+
+        Nav.NavigateTo("/");
+    }
+}

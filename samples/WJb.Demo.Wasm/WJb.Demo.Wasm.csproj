@@ -9,9 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\Execution.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.9" PrivateAssets="all" />
-    <PackageReference Include="WJb" Version="0.101.1" />
+    <PackageReference Include="WJb" Version="0.102.0" />
   </ItemGroup>
 
   <ItemGroup>

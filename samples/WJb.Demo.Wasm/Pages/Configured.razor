@@ -1,0 +1,99 @@
+﻿@page "/configured"
+@using WJb.Demo.Wasm.Actions
+
+@inject IJobClient Client
+@inject NavigationManager Nav
+
+<h3 class="mb-3">Configured Action</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Demonstrates dependency injection via settings.
+        </p>
+
+        <button class="btn btn-success w-100 mb-3"
+                @onclick="Start">
+            <i class="bi bi-gear-fill me-1"></i>
+            Run
+        </button>
+
+        <div class="small text-muted">
+            Flow: Enqueue → Resolve Settings → Execute → Complete
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== OPTIONAL DETAILS ===== -->
+<details class="mt-3">
+    <summary class="text-muted">Show code</summary>
+
+    <div class="mt-3">
+
+        <pre class="bg-light p-2 rounded small"><code>
+await Client.EnqueueAsync&lt;ConfiguredAction, EmailInput&gt;(
+    new EmailInput { To = "test@test.com" });
+        </code></pre>
+
+        <pre class="bg-light p-2 rounded small"><code>
+public sealed class EmailInput
+{
+    public string? To { get; set; }
+}
+        </code></pre>
+
+        <pre class="bg-light p-2 rounded small"><code>
+public sealed class SmtpSettings
+{
+    public string Host { get; set; } = default!;
+}
+        </code></pre>
+
+        <pre class="bg-light p-2 rounded small"><code>
+public sealed class ConfiguredAction : JobAction&lt;EmailInput&gt;
+{
+    private readonly SmtpSettings? _smtp;
+
+    public ConfiguredAction(SmtpSettings? smtp)
+    {
+        _smtp = smtp;
+    }
+
+    public override Task&lt;ActionResult&gt; ExecuteAsync(
+        EmailInput input,
+        CancellationToken ct = default)
+    {
+        var host = _smtp?.Host ?? "&lt;not configured&gt;";
+        var to = input.To ?? "&lt;no recipient&gt;";
+
+        ReportProgress(100, $"SMTP: {host}, To: {to}");
+
+        return Task.FromResult(ActionResults.None());
+    }
+}
+        </code></pre>
+
+        <pre class="bg-light p-2 rounded small"><code>
+builder.Services.AddSingleton(new SmtpSettings
+{
+    Host = "smtp.local"
+});
+        </code></pre>
+
+    </div>
+</details>
+
+@code {
+    private async Task Start()
+    {
+        await Client.EnqueueAsync<ConfiguredAction, EmailInput>(
+            new EmailInput
+            {
+                To = "test@test.com"
+            });
+
+        Nav.NavigateTo("/");
+    }
+}

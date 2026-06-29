@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using WJb.Demo.Wasm.Actions
 
 @inject IJobClient Client
 @inject IJobQuery Query
@@ -6,10 +7,17 @@
 
 <h3 class="mb-3">WJb Demo (WASM)</h3>
 
-<button class="btn btn-success w-100 mb-4"
-        @onclick="Start">
-    🚀 Run Demo Job
-</button>
+<div class="d-flex gap-2 mb-4">
+@*     <button class="btn btn-success flex-fill"
+            @onclick="Start">
+        🚀 Run Demo Job
+    </button> *@
+
+    <button class="btn btn-outline-secondary"
+            @onclick="Clean">
+        🧹 Clean Jobs
+    </button>
+</div>
 
 <h5>Active Jobs</h5>
 
@@ -60,14 +68,12 @@
 
                     <td class="d-none d-md-table-cell">@t.Message</td>
 
-                    <td>
-                        @if (t.Status is JobStatus.Pending or JobStatus.Processing)
-                        {
-                            <button class="btn btn-sm btn-danger"
-                                    @onclick="() => Cancel(t.Id)">
-                                ❌
-                            </button>
-                        }
+                    <td style="width: 50px;">
+                        <button class="btn btn-sm btn-danger"
+                                disabled="@(t.Status is not (JobStatus.Pending or JobStatus.Processing))"
+                                @onclick="() => Cancel(t.Id)">
+                            ❌
+                        </button>
                     </td>
 
                 </tr>
@@ -97,15 +103,19 @@
     private async Task Load()
         => queue = await Query.GetJobs();
 
-    private async Task Start()
-    {
-        await Client.EnqueueAsync<DemoAction, DemoPayload>(
-            new DemoPayload
-            {
-                DelayMs = 5000,
-                Text = "Done ✅"
-            });
-    }
+    // private async Task Start()
+    // {
+    //     await Client.EnqueueAsync<ProgressAction, DemoPayload>(
+    //         new DemoPayload
+    //         {
+    //             DelayMs = 5000,
+    //             Text = "Done ✅"
+    //         });
+    // }
+
+    
+    private Task Clean()
+        => Client.CleanAsync();
 
     private Task Cancel(string id)
         => Client.CancelAsync(id);

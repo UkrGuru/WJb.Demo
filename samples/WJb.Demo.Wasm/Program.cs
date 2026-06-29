@@ -4,6 +4,7 @@ using WJb;
 using WJb.Contracts;
 using WJb.Core;
 using WJb.Demo.Wasm;
+using WJb.Demo.Wasm.Actions;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -12,12 +13,27 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services.AddSingleton<IStore, InMemoryStore>();
-
-builder.Services.AddSingleton<IActionFactory>(sp =>
+builder.Services.AddSingleton<IActionFactory>(_ =>
 {
     return WJbConfig.Create(cfg =>
     {
-        cfg.AddAction<DemoAction>();
+        // Basic demos
+        cfg.AddAction<HelloAction>();
+        cfg.AddAction<ProgressAction>();
+
+        // Configured
+        cfg.AddAction<ConfiguredAction>();
+
+        // Chained
+        cfg.AddAction<SendEmailAction>();
+        cfg.AddAction<LogAction>();
+        cfg.AddAction<ErrorLogAction>();
+
+        // Settings
+        cfg.AddSetting(new SmtpSettings
+        {
+            Host = "smtp.local"
+        });
     });
 });
 

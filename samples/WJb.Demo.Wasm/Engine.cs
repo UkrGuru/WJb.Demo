@@ -6,9 +6,12 @@ namespace WJb.Demo.Wasm;
 public interface IJobClient
 {
     Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload);
-
     Task CancelAsync(string jobId);
+
+    Task DeleteAsync(string jobId);
+    Task CleanAsync();
 }
+
 public interface IJobQuery
 {
     Task<IReadOnlyList<JobInfo>> GetJobs();
@@ -22,7 +25,8 @@ public interface IJobNotifier
 public sealed class JobEngineLite :
     IJobClient,
     IJobQuery,
-    IJobNotifier
+    IJobNotifier,
+    IDisposable
 {
     private readonly IStore _store;
     private readonly JobExecutor _executor;
@@ -43,23 +47,54 @@ public sealed class JobEngineLite :
 
     public Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload)
     {
-        // ✅ НЕ обходить executor
+        // ✅ Всегда через executor
         return _executor.EnqueueAsync<TAction>(payload);
     }
 
-    public async Task CancelAsync(string jobId)
+    public Task CancelAsync(string jobId)
     {
-        await _store.TrySetStateAsync(jobId, JobStatus.Failed);
+        // ✅ КЛЮЧ: не трогаем store
+        // ✅ сигналим executor'у (через CancellationToken)
 
-        Notify(); // ✅ тут оставить
+        _executor.TryCancel(jobId);
+
+        Notify();
+
+        return Task.CompletedTask;
+    }
+
+    // ✅ Delete single job
+    public async Task DeleteAsync(string jobId)
+    {
+        await _store.DeleteJobAsync(jobId);
+
+        Notify();
+    }
+
+    // ✅ Clean completed/failed jobs
+    public async Task CleanAsync()
+    {
+        var jobs = await _store.GetJobsAsync(new JobQueryInfo());
+
+        var toDelete = jobs
+            .Where(x => x.Status is JobStatus.Completed or JobStatus.Failed)
+            .Select(x => x.Id)
+            .ToList();
+
+        foreach (var id in toDelete)
+        {
+            await _store.DeleteJobAsync(id);
+        }
+
+        Notify();
     }
 
     // ------------------------
     // Query
     // ------------------------
 
-    public async Task<IReadOnlyList<JobInfo>> GetJobs()
-        => await _store.GetJobsAsync(new JobQueryInfo());
+    public Task<IReadOnlyList<JobInfo>> GetJobs()
+        => _store.GetJobsAsync(new JobQueryInfo());
 
     // ------------------------
     // Execution loop
@@ -72,12 +107,23 @@ public sealed class JobEngineLite :
             var executed = await _executor.ExecuteOnceAsync(ct);
 
             if (!executed)
+            {
+                // ✅ небольшой backoff
                 await Task.Delay(50, ct);
+            }
         }
     }
 
+    // ------------------------
+    // Notify
+    // ------------------------
+
     private void Notify()
         => Changed?.Invoke();
+
+    // ------------------------
+    // Dispose
+    // ------------------------
 
     public void Dispose()
     {

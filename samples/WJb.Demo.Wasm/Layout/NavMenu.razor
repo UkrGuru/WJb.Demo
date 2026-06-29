@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">WJb.Demo.Wasm</a>
+        <a class="navbar-brand" href="">WJb Demo</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -9,11 +9,48 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
+
+        <!-- DASHBOARD -->
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            <NavLink class="nav-link d-flex w-100" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-speedometer2 me-2"></span>
+                Dashboard
             </NavLink>
         </div>
+
+        <!-- CORE -->
+        <div class="nav-item px-3 mt-3 text-white-50 small">
+            CORE (Free)
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link d-flex w-100" href="hello">
+                <span class="bi bi-play-fill me-2"></span>
+                Hello Action
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link d-flex w-100" href="configured">
+                <span class="bi bi-gear-fill me-2"></span>
+                Configured Action
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link d-flex w-100" href="progress">
+                <span class="bi bi-bar-chart-line-fill me-2"></span>
+                Progress Action
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link d-flex w-100" href="chain">
+                <span class="bi bi-link-45deg me-2"></span>
+                Chained Actions
+            </NavLink>
+        </div>
+
     </nav>
 </div>
 
