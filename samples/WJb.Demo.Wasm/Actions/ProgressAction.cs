@@ -10,8 +10,7 @@ public sealed class ProgressPayload
 public sealed class ProgressAction : JobAction<ProgressPayload>
 {
     public override async Task<ActionResult> ExecuteAsync(
-        ProgressPayload input,
-        CancellationToken ct = default)
+        ProgressPayload input, CancellationToken ct = default)
     {
         for (int i = 0; i <= 100; i += 25)
         {
@@ -22,7 +21,6 @@ public sealed class ProgressAction : JobAction<ProgressPayload>
             await Task.Delay(input.DelayMs, ct);
         }
 
-        // Final message (already 100 but for clarity)
         ReportProgress(100, "Completed ✅");
 
         return ActionResults.None();

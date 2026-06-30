@@ -31,19 +31,21 @@
     <summary class="text-muted">Show code</summary>
 
     <div class="mt-3">
-
+        <h6 class="text-muted">Start</h6>
         <pre class="bg-light p-2 rounded small"><code>
 await Client.EnqueueAsync&lt;ProgressAction, ProgressPayload&gt;(
     new ProgressPayload { DelayMs = 300 });
         </code></pre>
 
+        <h6 class="text-muted">Payload</h6>
         <pre class="bg-light p-2 rounded small"><code>
 public sealed class ProgressPayload
 {
     public int DelayMs { get; set; } = 300;
 }
         </code></pre>
-
+        
+        <h6 class="text-muted">Action</h6>
         <pre class="bg-light p-2 rounded small"><code>
 public sealed class ProgressAction : JobAction&lt;ProgressPayload&gt;
 {

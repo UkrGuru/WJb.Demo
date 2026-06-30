@@ -8,8 +8,7 @@ public sealed class LogInput
 public sealed class LogAction : JobAction<LogInput>
 {
     public override async Task<ActionResult> ExecuteAsync(
-        LogInput input,
-        CancellationToken ct)
+        LogInput input, CancellationToken ct)
     {
         var message = input.Message ?? "<empty>";
 
@@ -33,8 +32,7 @@ public sealed class ErrorLogInput
 public sealed class ErrorLogAction : JobAction<ErrorLogInput>
 {
     public override async Task<ActionResult> ExecuteAsync(
-        ErrorLogInput input,
-        CancellationToken ct)
+        ErrorLogInput input, CancellationToken ct)
     {
         var message = input.Message ?? "<no message>";
 

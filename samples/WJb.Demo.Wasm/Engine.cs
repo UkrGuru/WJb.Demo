@@ -47,15 +47,11 @@ public sealed class JobEngineLite :
 
     public Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload)
     {
-        // ✅ Всегда через executor
         return _executor.EnqueueAsync<TAction>(payload);
     }
 
     public Task CancelAsync(string jobId)
     {
-        // ✅ КЛЮЧ: не трогаем store
-        // ✅ сигналим executor'у (через CancellationToken)
-
         _executor.TryCancel(jobId);
 
         Notify();
@@ -108,7 +104,6 @@ public sealed class JobEngineLite :
 
             if (!executed)
             {
-                // ✅ небольшой backoff
                 await Task.Delay(50, ct);
             }
         }

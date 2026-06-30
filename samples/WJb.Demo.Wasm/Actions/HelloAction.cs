@@ -10,8 +10,7 @@ public sealed class HelloPayload
 public sealed class HelloAction : JobAction<HelloPayload>
 {
     public override Task<ActionResult> ExecuteAsync(
-        HelloPayload input,
-        CancellationToken ct = default)
+        HelloPayload input, CancellationToken ct = default)
     {
         var message = input.Text ?? "Hello from WJb ✅";
 

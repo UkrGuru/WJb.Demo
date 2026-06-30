@@ -12,18 +12,11 @@ public sealed class SmtpSettings
     public string Host { get; set; } = default!;
 }
 
-public sealed class ConfiguredAction : JobAction<EmailInput>
+public sealed class ConfiguredAction(SmtpSettings? smtp) : JobAction<EmailInput>
 {
-    private readonly SmtpSettings? _smtp;
+    private readonly SmtpSettings? _smtp = smtp;
 
-    public ConfiguredAction(SmtpSettings? smtp)
-    {
-        _smtp = smtp;
-    }
-
-    public override Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct = default)
+    public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct = default)
     {
         var host = _smtp?.Host ?? "<not configured>";
         var to = input.To ?? "<no recipient>";

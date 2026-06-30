@@ -2,18 +2,12 @@
 using WJb.Contracts;
 using WJb.Demo.Wasm.Actions;
 
-public sealed class SendEmailAction : JobAction<EmailInput>
+public sealed class SendEmailAction(SmtpSettings? smtp) : JobAction<EmailInput>
 {
-    private readonly SmtpSettings? _smtp;
-
-    public SendEmailAction(SmtpSettings? smtp)
-    {
-        _smtp = smtp;
-    }
+    private readonly SmtpSettings? _smtp = smtp;
 
     public override async Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+        EmailInput input, CancellationToken ct)
     {
         var host = _smtp?.Host ?? "<not configured>";
         var to = input.To ?? "<no recipient>";
@@ -29,7 +23,6 @@ public sealed class SendEmailAction : JobAction<EmailInput>
             ReportProgress(70, "Sending email...");
             await Task.Delay(400, ct);
 
-            // ❗ проверка после delay
             ct.ThrowIfCancellationRequested();
 
             ReportProgress(100, $"SMTP: {host}, To: {to}");
@@ -43,7 +36,6 @@ public sealed class SendEmailAction : JobAction<EmailInput>
         }
         catch (OperationCanceledException)
         {
-            // ✅ ВАЖНО: не пробрасывать дальше!
             return ActionResults.Next(
                 JobCommands.Next<ErrorLogAction>(new ErrorLogInput
                 {
