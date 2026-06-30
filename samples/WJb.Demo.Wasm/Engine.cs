@@ -1,14 +1,18 @@
 ﻿using WJb.Contracts;
 using WJb.Core;
+using WJb.Extensions;
 
 namespace WJb.Demo.Wasm;
 
 public interface IJobClient
 {
     Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload);
+    Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload, JobOptions options);
+
     Task CancelAsync(string jobId);
 
     Task DeleteAsync(string jobId);
+
     Task CleanAsync();
 }
 
@@ -47,8 +51,19 @@ public sealed class JobEngineLite :
 
     public Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload)
     {
-        return _executor.EnqueueAsync<TAction>(payload);
+        return _executor.EnqueueAsync(
+            ActionMapBuilder.GetDefaultKey(typeof(TAction)),
+            payload);
     }
+
+    public Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload, JobOptions options)
+    {
+        return _executor.EnqueueAsync(
+            ActionMapBuilder.GetDefaultKey(typeof(TAction)),
+            payload,
+            options);
+    }
+
 
     public Task CancelAsync(string jobId)
     {

@@ -29,6 +29,15 @@ builder.Services.AddSingleton<IActionFactory>(_ =>
         cfg.AddAction<LogAction>();
         cfg.AddAction<ErrorLogAction>();
 
+        // Retry Workflow
+        cfg.AddAction<RetryEmailAction>();
+
+        // Order Workflow
+        cfg.AddAction<CreateOrderAction>();
+        cfg.AddAction<ReserveStockAction>();
+        cfg.AddAction<ChargePaymentAction>();
+        cfg.AddAction<SendConfirmationAction>();
+
         // Settings
         cfg.AddSetting(new SmtpSettings
         {
@@ -58,35 +67,3 @@ _ = Task.Run(() => engine.RunAsync());
 
 await app.RunAsync();
 
-public sealed class DemoPayload
-{
-    public int DelayMs { get; set; } = 1000;
-
-    public string? Text { get; set; }
-}
-
-public sealed class DemoAction : JobAction<DemoPayload>
-{
-    public override async Task<ActionResult> ExecuteAsync(
-        DemoPayload input,
-        CancellationToken ct = default)
-    {
-        var totalDelay = Math.Max(input.DelayMs, 1);
-        var stepDelay = totalDelay / 10;
-
-        for (int i = 0; i <= 100; i += 10)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            ReportProgress(i, $"Progress {i}%");
-
-            await Task.Delay(stepDelay, ct);
-        }
-
-        return ActionResults.Result(new
-        {
-            message = input.Text,
-            completedAt = DateTime.UtcNow
-        });
-    }
-}

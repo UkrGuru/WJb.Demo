@@ -1,0 +1,168 @@
+﻿@page "/workflow"
+
+@using WJb.Demo.Wasm.Actions
+
+@inject IJobClient Client
+@inject NavigationManager Nav
+
+<h3 class="mb-3">Order Workflow</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Demonstrates multi-step workflow execution.
+        </p>
+
+        <button class="btn btn-primary w-100 mb-3"
+                @onclick="Start">
+            <i class="bi bi-diagram-3 me-1"></i>
+            Run
+        </button>
+
+        <div class="small text-muted">
+            Create Order →
+            Reserve Stock →
+            Charge Payment →
+            Send Confirmation
+        </div>
+
+        <!-- ===== CODE ===== -->
+        <details class="mt-3">
+            <summary class="text-muted">Show code</summary>
+
+            <div class="card mt-3">
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-12">
+                            <h6 class="text-muted">Start</h6>
+                            <pre class="bg-light p-2 rounded small mb-0"><code>
+await Client.EnqueueAsync&lt;CreateOrderAction, OrderInput&gt;(
+    new OrderInput
+    {
+        OrderId = 1001
+    });
+                    </code></pre>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Workflow</h6>
+                            <pre class="bg-light p-2 rounded small mb-0"><code>
+CreateOrderAction
+    -> ReserveStockAction
+        -> ChargePaymentAction
+            -> SendConfirmationAction
+                -> LogAction
+                    </code></pre>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Payload</h6>
+                            <pre class="bg-light p-2 rounded small mb-0"><code>
+public sealed class OrderInput
+{
+    public int OrderId { get; set; }
+}
+                    </code></pre>
+                        </div>
+
+                        <div class="col-md-12">
+                            <h6 class="text-muted">Action</h6>
+                            <pre class="bg-light p-2 rounded small mb-0"><code>
+public sealed class CreateOrderAction
+    : JobAction&lt;OrderInput&gt;
+{
+    public override async Task&lt;ActionResult&gt; ExecuteAsync(
+        OrderInput input,
+        CancellationToken ct)
+    {
+        ReportProgress(25, "Order created");
+
+        await Task.Delay(300, ct);
+
+        return ActionResults.Next(
+            JobCommands.Next&lt;ReserveStockAction&gt;(input));
+    }
+}
+
+public sealed class ReserveStockAction
+    : JobAction&lt;OrderInput&gt;
+{
+    public override async Task&lt;ActionResult&gt; ExecuteAsync(
+        OrderInput input,
+        CancellationToken ct)
+    {
+        ReportProgress(50, "Stock reserved");
+
+        await Task.Delay(300, ct);
+
+        return ActionResults.Next(
+            JobCommands.Next&lt;ChargePaymentAction&gt;(input));
+    }
+}
+
+public sealed class ChargePaymentAction
+    : JobAction&lt;OrderInput&gt;
+{
+    public override async Task&lt;ActionResult&gt; ExecuteAsync(
+        OrderInput input,
+        CancellationToken ct)
+    {
+        ReportProgress(75, "Payment charged");
+
+        await Task.Delay(300, ct);
+
+        return ActionResults.Next(
+            JobCommands.Next&lt;SendConfirmationAction&gt;(input));
+    }
+}
+
+public sealed class SendConfirmationAction
+    : JobAction&lt;OrderInput&gt;
+{
+    public override async Task&lt;ActionResult&gt; ExecuteAsync(
+        OrderInput input,
+        CancellationToken ct)
+    {
+        ReportProgress(
+            100,
+            $"Order #{input.OrderId} completed");
+
+        await Task.Delay(300, ct);
+
+        return ActionResults.Next(
+            JobCommands.Next&lt;LogAction&gt;(
+                new LogInput
+                {
+                    Message =
+                        $"Workflow completed for order #{input.OrderId}"
+                }));
+    }
+}
+                    </code></pre>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </details>
+    </div>
+</div>
+
+@code {
+
+    private async Task Start()
+    {
+        await Client.EnqueueAsync<CreateOrderAction, OrderInput>(
+            new OrderInput
+            {
+                OrderId = 1001
+            });
+
+        Nav.NavigateTo("/");
+    }
+
+}

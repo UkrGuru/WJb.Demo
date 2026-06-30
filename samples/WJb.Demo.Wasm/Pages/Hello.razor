@@ -44,19 +44,7 @@ await Client.EnqueueAsync&lt;HelloAction, HelloPayload&gt;(
                     </code></pre>
                 </div>
 
-                <!-- RIGHT -->
-                <div class="col-md-6">
-                    <h6 class="text-muted">Payload</h6>
-                    <pre class="bg-light p-2 rounded small mb-0"><code>
-public sealed class HelloPayload
-{
-    public string? Text { get; set; }
-}
-                    </code></pre>
-                </div>
-
-                <!-- FULL -->
-                <div class="col-12">
+                <div class="col-6">
                     <h6 class="text-muted">Action</h6>
                     <pre class="bg-light p-2 rounded small mb-0"><code>
 public sealed class HelloAction : JobAction&lt;HelloPayload&gt;
@@ -72,6 +60,16 @@ public sealed class HelloAction : JobAction&lt;HelloPayload&gt;
 }
                     </code></pre>
                 </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted">Payload</h6>
+                    <pre class="bg-light p-2 rounded small mb-0"><code>
+public sealed class HelloPayload
+{
+    public string? Text { get; set; }
+}
+                    </code></pre>
+                </div>
+
 
             </div>
 

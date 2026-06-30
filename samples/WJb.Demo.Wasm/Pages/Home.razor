@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using WJb.Demo.Wasm.Actions
 
 @inject IJobClient Client
 @inject IJobQuery Query
@@ -120,8 +119,18 @@
     private Task Cancel(string id)
         => Client.CancelAsync(id);
 
+
     private static string Short(string id)
-        => id[..Math.Min(6, id.Length)];
+    {
+        if (string.IsNullOrEmpty(id))
+            return string.Empty;
+
+        if (id.Length <= 10)
+            return id;
+
+        return $"{id[^5..]}";
+    }
+
 
     public void Dispose()
         => Notifier.Changed -= HandleChanged;

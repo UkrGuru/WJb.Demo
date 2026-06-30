@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WJb" Version="0.101.1" />
+    <PackageReference Include="WJb" Version="0.103.0" />
   </ItemGroup>
 
 </Project>
