@@ -1,86 +1,80 @@
 ﻿using System.Text;
 using WJb;
-using WJb.Contracts;
-using WJb.Core;
 
 Console.OutputEncoding = Encoding.UTF8;
 
-Console.WriteLine("=== WJb QuickStart ===\n");
+Console.WriteLine("=== WJb Quick Start ===\n");
 
-Console.WriteLine("""
-Flow:
-SendEmail → Log → Done
+Console.WriteLine($"""
+Workflow:
+{SendEmailAction.Key} → {LogAction.Key} → done
 
 """);
 
-// store + factory
 var store = new InMemoryStore();
 
-var factory = WJbConfig.Create(cfg =>
+var wjb = WJbBuilder.Create(cfg =>
 {
-    cfg.AddAction<SendEmailAction>();
-    cfg.AddAction<LogAction>();
+    cfg.AddAction<SendEmailAction>(SendEmailAction.Key);
+    cfg.AddAction<LogAction>(LogAction.Key);
+
+    cfg.UseStore(store);
 });
 
-var executor = new JobExecutor(store, factory);
-
 // enqueue first job
-Console.WriteLine("[App] Enqueue: SendEmail");
+Console.WriteLine($"[App] Enqueue: {SendEmailAction.Key}");
 
-await executor.EnqueueAsync<SendEmailAction>(
-    new EmailInput { To = "user@test.com" }
-);
+await wjb.Executor.EnqueueAsync(SendEmailAction.Key, new EmailInput { To = "user@test.com" });
 
 // run loop (controlled)
 Console.WriteLine("[App] Start execution...\n");
 
-await executor.ExecuteLoopAsync();
+await wjb.Executor.ExecuteLoopAsync();
 
-Console.WriteLine("\n=== Done ===");
-Console.WriteLine("All steps were explicitly defined.");
+Console.WriteLine("\n=== Completed ===");
 
 // Action: SendEmailAction
-public class SendEmailAction : JobAction<EmailInput>
+public sealed class SendEmailAction : JobAction<EmailInput>
 {
-    public override Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public const string Key = "send-email";
+
+    public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
     {
-        Console.WriteLine($"[Action] SendEmail → {input.To}");
+        Console.WriteLine($"[Action] {Key} → {input.To}");
 
         return Task.FromResult(
-            ActionResults.Next(
-                JobCommands.Next<LogAction>(
-                    new LogInput
-                    {
-                        Message = $"Email sent to {input.To}"
-                    })
+            ActionResults.Next(new JobCommand(LogAction.Key,
+                new LogInput
+                {
+                    Message = $"Email sent to {input.To}"
+                })
             )
         );
+
     }
 }
 
 // Action: LogAction
-public class LogAction : JobAction<LogInput>
+public sealed class LogAction : JobAction<LogInput>
 {
-    public override Task<ActionResult> ExecuteAsync(
-        LogInput input,
-        CancellationToken ct)
+    public const string Key = "log";
+
+    public override Task<ActionResult> ExecuteAsync(LogInput input, CancellationToken ct)
     {
-        Console.WriteLine($"[Action] Log → {input.Message}");
+        Console.WriteLine($"[Action] {Key} → {input.Message}");
 
         return Task.FromResult(ActionResults.None());
     }
 }
 
 // Input: EmailInput
-public class EmailInput
+public sealed class EmailInput
 {
     public string? To { get; set; }
 }
 
 // Input: LogInput
-public class LogInput
+public sealed class LogInput
 {
     public string? Message { get; set; }
 }

@@ -1,108 +1,77 @@
 using WJb;
-using WJb.Contracts;
-using WJb.Core;
-using WJb.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =======================
-// ✅ setup
-// =======================
+builder.Services.AddSingleton<IStore, InMemoryStore>();
 
-// Один инстанс
-builder.Services.AddSingleton<InMemoryStore>();
+builder.Services.AddSingleton<IWJb>(_ =>
+    WJbBuilder.Create(cfg =>
+    {
+        cfg.AddAction<DemoAction>(DemoAction.Key);
+        cfg.UseStore(new InMemoryStore());
+    }));
 
-// Разные интерфейсы на один store
-builder.Services.AddSingleton<IStore>(sp => sp.GetRequiredService<InMemoryStore>());
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IWJb>().Executor!);
 
-builder.Services.AddSingleton<IActionFactory>(sp =>
-    WJbConfig.Create(cfg =>
-{
-cfg.AddAction<DemoAction>();
-}));
-
-builder.Services.AddSingleton<IJobExecutor>(sp =>
-    new JobExecutor(
-        sp.GetRequiredService<IStore>(),
-        sp.GetRequiredService<IActionFactory>()));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IWJb>().Store!);
 
 builder.Services.AddHostedService<JobWorker>();
 
 var app = builder.Build();
 
-
-// =======================
-// ✅ POST /jobs
-// =======================
-
 app.MapPost("/jobs", async (IJobExecutor executor) =>
 {
-var jobId = await executor.EnqueueAsync(
-    ActionMapBuilder.GetDefaultKey(typeof(DemoAction)),
-    new
+    var jobId = await executor.EnqueueAsync(
+        DemoAction.Key,
+        new DemoPayload
+        {
+            DelayMs = 5000,
+            Text = "Done ✅"
+        });
+
+    return Results.Ok(new { jobId });
+});
+
+app.MapGet("/jobs", async (IStore store) =>
 {
-delayMs = 5000,
-text = "Done ✅"
+    var jobs = await store.GetJobsAsync();
+    return Results.Ok(jobs);
 });
 
-return Results.Ok(new { jobId });
-});
-
-
-// =======================
-// ✅ GET /jobs
-// =======================
-
-app.MapGet("/jobs", async (IStore story) =>
+app.MapGet("/jobs/{id}", async (string id, IStore store) =>
 {
-var jobs = await story.GetJobsAsync();
-return Results.Ok(jobs);
+    var job = await store.GetJobAsync(id);
+    return job is null
+        ? Results.NotFound()
+        : Results.Ok(job);
 });
 
-
-// ✅ GET /jobs/{id}
-app.MapGet("/jobs/{id}", async (string id, IStore story) =>
+app.MapDelete("/jobs/{id}", async (string id, IStore store) =>
 {
-var job = await story.GetJobAsync(id);
-return job is null ? Results.NotFound() : Results.Ok(job);
+    var ok = await store.DeleteJobAsync(id);
+    return ok
+        ? Results.Ok()
+        : Results.NotFound();
 });
-
-
-// ✅ DELETE /jobs/{id}
-app.MapDelete("/jobs/{id}", async (string id, IStore story) =>
-{
-var ok = await story.DeleteJobAsync(id);
-return ok ? Results.Ok() : Results.NotFound();
-});
-
 
 app.Run();
 
-
-// =======================
-// Demo payload
-// =======================
-
-public class DemoPayload
+public sealed class DemoPayload
 {
     public int DelayMs { get; set; }
+
     public string Text { get; set; } = "";
 }
 
-
-// =======================
-// Demo action
-// =======================
-
-public class DemoAction : JobAction<DemoPayload>, IProgressAction
+public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 {
+    public const string Key = "demo";
+
     public event Action<JobProgress>? OnProgress;
 
-    public override async Task<ActionResult> ExecuteAsync(
-        DemoPayload input,
-        CancellationToken ct = default)
+    public override async Task<ActionResult> ExecuteAsync(DemoPayload input, CancellationToken ct)
     {
-        for (int i = 0; i <= 100; i += 10)
+        for (var i = 0; i <= 100; i += 10)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -123,16 +92,8 @@ public class DemoAction : JobAction<DemoPayload>, IProgressAction
     }
 }
 
-
-// =======================
-// Worker
-// =======================
-
-public class JobWorker(IJobExecutor executor) : BackgroundService
+public sealed class JobWorker(IJobExecutor executor) : BackgroundService
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        await executor.ExecuteLoopAsync(stoppingToken);
-    }
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        => executor.ExecuteLoopAsync(stoppingToken);
 }
-

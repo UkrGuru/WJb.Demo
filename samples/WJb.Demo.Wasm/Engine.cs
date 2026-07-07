@@ -1,13 +1,11 @@
-﻿using WJb.Contracts;
-using WJb.Core;
-using WJb.Extensions;
-
-namespace WJb.Demo.Wasm;
+﻿namespace WJb.Demo.Wasm;
 
 public interface IJobClient
 {
-    Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload);
-    Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload, JobOptions options);
+    Task<string> EnqueueAsync(
+        string action,
+        object? payload = null,
+        JobOptions? options = null);
 
     Task CancelAsync(string jobId);
 
@@ -33,11 +31,13 @@ public sealed class JobEngineLite :
     IDisposable
 {
     private readonly IStore _store;
-    private readonly JobExecutor _executor;
+    private readonly IJobExecutor _executor;
 
     public event Action? Changed;
 
-    public JobEngineLite(IStore store, JobExecutor executor)
+    public JobEngineLite(
+        IStore store,
+        IJobExecutor executor)
     {
         _store = store;
         _executor = executor;
@@ -49,21 +49,16 @@ public sealed class JobEngineLite :
     // Client
     // ------------------------
 
-    public Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload)
+    public Task<string> EnqueueAsync(
+        string action,
+        object? payload = null,
+        JobOptions? options = null)
     {
         return _executor.EnqueueAsync(
-            ActionMapBuilder.GetDefaultKey(typeof(TAction)),
-            payload);
-    }
-
-    public Task<string> EnqueueAsync<TAction, TPayload>(TPayload payload, JobOptions options)
-    {
-        return _executor.EnqueueAsync(
-            ActionMapBuilder.GetDefaultKey(typeof(TAction)),
+            action,
             payload,
             options);
     }
-
 
     public Task CancelAsync(string jobId)
     {
@@ -74,7 +69,6 @@ public sealed class JobEngineLite :
         return Task.CompletedTask;
     }
 
-    // ✅ Delete single job
     public async Task DeleteAsync(string jobId)
     {
         await _store.DeleteJobAsync(jobId);
@@ -82,17 +76,17 @@ public sealed class JobEngineLite :
         Notify();
     }
 
-    // ✅ Clean completed/failed jobs
     public async Task CleanAsync()
     {
-        var jobs = await _store.GetJobsAsync(new JobQueryInfo());
+        var jobs = await _store.GetJobsAsync(
+            new JobQueryInfo());
 
-        var toDelete = jobs
+        var ids = jobs
             .Where(x => x.Status is JobStatus.Completed or JobStatus.Failed)
             .Select(x => x.Id)
             .ToList();
 
-        foreach (var id in toDelete)
+        foreach (var id in ids)
         {
             await _store.DeleteJobAsync(id);
         }
@@ -115,7 +109,8 @@ public sealed class JobEngineLite :
     {
         while (!ct.IsCancellationRequested)
         {
-            var executed = await _executor.ExecuteOnceAsync(ct);
+            var executed =
+                await _executor.ExecuteOnceAsync(ct);
 
             if (!executed)
             {
@@ -125,7 +120,7 @@ public sealed class JobEngineLite :
     }
 
     // ------------------------
-    // Notify
+    // Notification
     // ------------------------
 
     private void Notify()

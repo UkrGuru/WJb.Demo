@@ -1,6 +1,4 @@
-﻿using WJb.Contracts;
-
-namespace WJb.Demo.Wasm.Actions;
+﻿namespace WJb.Demo.Wasm.Actions;
 
 public sealed class EmailInput
 {
@@ -14,6 +12,8 @@ public sealed class SmtpSettings
 
 public sealed class ConfiguredAction(SmtpSettings? smtp) : JobAction<EmailInput>
 {
+    public const string Key = "configured";
+
     private readonly SmtpSettings? _smtp = smtp;
 
     public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct = default)

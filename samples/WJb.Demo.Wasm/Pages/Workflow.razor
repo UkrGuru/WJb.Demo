@@ -153,16 +153,11 @@ public sealed class SendConfirmationAction
 </div>
 
 @code {
-
     private async Task Start()
     {
-        await Client.EnqueueAsync<CreateOrderAction, OrderInput>(
-            new OrderInput
-            {
-                OrderId = 1001
-            });
+        await Client.EnqueueAsync(CreateOrderAction.Key,
+            new OrderInput { OrderId = 1001 });
 
         Nav.NavigateTo("/");
     }
-
 }

@@ -1,4 +1,4 @@
-# ⚡ WJb QuickStart
+# ⚡ WJb Quick Start
 
 This is the fastest way to understand how WJb works.
 
@@ -6,21 +6,19 @@ This is the fastest way to understand how WJb works.
 
 ## 🧠 What you will see
 
+```text
+send-email → log → done
 ```
 
-SendEmail → Log → Done
+A simple workflow where:
 
-```
+* one action runs
+* explicitly enqueues the next action
+* and then completes
 
-A simple job flow where:
+👉 No hidden behavior. No magic.
 
-- one job runs  
-- then explicitly enqueues the next  
-- and completes  
-
-👉 no hidden behavior
-
----
+***
 
 ## 🚀 Run
 
@@ -32,20 +30,19 @@ dotnet run
 
 ## ✅ Output
 
-```
-=== WJb QuickStart ===
+```text
+=== WJb Quick Start ===
 
-Flow:
-SendEmail → Log → Done
+Workflow:
+send-email → log → done
 
-[App] Enqueue: SendEmail
+[App] Enqueue: send-email
 [App] Start execution...
 
-[Action] SendEmail → user@test.com
-[Action] Log → Email sent to user@test.com
+[Action] send-email → user@test.com
+[Action] log → Email sent to user@test.com
 
-=== Done ===
-All steps were explicitly defined.
+=== Completed ===
 ```
 
 ***
@@ -53,10 +50,11 @@ All steps were explicitly defined.
 ## 💡 What this demonstrates
 
 * Actions contain business logic
-* Each action **explicitly defines next step**
-* Execution is **deterministic and visible**
+* Each action explicitly defines the next step
+* Workflow transitions are visible in code
+* Execution is deterministic and easy to reason about
 
-👉 You always know what happens and why
+👉 You always know what happens and why.
 
 ***
 
@@ -64,15 +62,63 @@ All steps were explicitly defined.
 
 ```csharp
 return ActionResults.Next(
-    JobCommands.Next<LogAction>(...)
+    new JobCommand(
+        LogAction.Key,
+        new LogInput
+        {
+            Message = $"Email sent to {input.To}"
+        })
 );
 ```
 
-👉 The workflow is defined in code, not hidden in the framework.
+👉 The workflow is defined in your code, not hidden inside the framework.
 
 ***
 
-## ⚡ Learn more
+## 📄 Full Example
+
+```csharp
+public sealed class SendEmailAction : JobAction<EmailInput>
+{
+    public const string Key = "send-email";
+
+    public override Task<ActionResult> ExecuteAsync(
+        EmailInput input,
+        CancellationToken ct)
+    {
+        Console.WriteLine($"[Action] {Key} → {input.To}");
+
+        return Task.FromResult(
+            ActionResults.Next(
+                new JobCommand(
+                    LogAction.Key,
+                    new LogInput
+                    {
+                        Message = $"Email sent to {input.To}"
+                    })
+            )
+        );
+    }
+}
+
+public sealed class LogAction : JobAction<LogInput>
+{
+    public const string Key = "log";
+
+    public override Task<ActionResult> ExecuteAsync(
+        LogInput input,
+        CancellationToken ct)
+    {
+        Console.WriteLine($"[Action] {Key} → {input.Message}");
+
+        return Task.FromResult(ActionResults.None());
+    }
+}
+```
+
+***
+
+## ⚡ Learn More
 
 ➡️ <https://www.nuget.org/packages?q=WJb>  
 ➡️ <https://github.com/UkrGuru/WJb.Demo>
@@ -81,7 +127,7 @@ return ActionResults.Next(
 
 ## 🎁 Support WJb
 
-If you like this idea:
+If you like this project:
 
 👉 <https://ko-fi.com/ukrguru>
 

@@ -1,18 +1,19 @@
-﻿using WJb.Contracts;
-
-namespace WJb.Demo.Wasm.Actions;
+﻿using WJb;
 
 public sealed class ProgressPayload
 {
     public int DelayMs { get; set; } = 300;
 }
 
-public sealed class ProgressAction : JobAction<ProgressPayload>
+public sealed class ProgressAction 
+    : JobAction<ProgressPayload>, IProgressAction
 {
+    public const string Key = "progress";
+
     public override async Task<ActionResult> ExecuteAsync(
-        ProgressPayload input, CancellationToken ct = default)
+        ProgressPayload input, CancellationToken ct)
     {
-        for (int i = 0; i <= 100; i += 25)
+        for (var i = 0; i <= 100; i += 25)
         {
             ct.ThrowIfCancellationRequested();
 

@@ -1,6 +1,4 @@
-﻿using WJb.Contracts;
-
-namespace WJb.Demo.Wasm.Actions;
+﻿namespace WJb.Demo.Wasm.Actions;
 
 public sealed class HelloPayload
 {
@@ -9,6 +7,8 @@ public sealed class HelloPayload
 
 public sealed class HelloAction : JobAction<HelloPayload>
 {
+    public const string Key = "hello";
+
     public override Task<ActionResult> ExecuteAsync(
         HelloPayload input, CancellationToken ct = default)
     {

@@ -36,21 +36,19 @@
             <div class="col-md-12">
                 <h6 class="text-muted">Start</h6>
                 <pre class="bg-light p-2 rounded small"><code>
-await Client.EnqueueAsync&lt;ConfiguredAction, EmailInput&gt;(
+await Client.EnqueueAsync(ConfiguredAction.Key,
     new EmailInput { To = "test@test.com" });
         </code></pre>
             </div>
             <div class="col-md-6">
                 <h6 class="text-muted">Action</h6>
                 <pre class="bg-light p-2 rounded small"><code>
-public sealed class ConfiguredAction : JobAction&lt;EmailInput&gt;
+public sealed class ConfiguredAction(SmtpSettings? smtp)
+    : JobAction&lt;EmailInput&gt;
 {
-    private readonly SmtpSettings? _smtp;
+    public const string Key = "configured";
 
-    public ConfiguredAction(SmtpSettings? smtp)
-    {
-        _smtp = smtp;
-    }
+    private readonly SmtpSettings? _smtp = smtp;
 
     public override Task&lt;ActionResult&gt; ExecuteAsync(
         EmailInput input,
@@ -59,12 +57,14 @@ public sealed class ConfiguredAction : JobAction&lt;EmailInput&gt;
         var host = _smtp?.Host ?? "&lt;not configured&gt;";
         var to = input.To ?? "&lt;no recipient&gt;";
 
-        ReportProgress(100, $"SMTP: {host}, To: {to}");
+        var message = $"SMTP: {host}, To: {to}";
+
+        ReportProgress(100, message);
 
         return Task.FromResult(ActionResults.None());
     }
 }
-        </code></pre>
+</code></pre>
             </div>
             <div class="col-md-6">
                 <h6 class="text-muted">Payload</h6>
@@ -98,11 +98,8 @@ builder.Services.AddSingleton(new SmtpSettings
 @code {
     private async Task Start()
     {
-        await Client.EnqueueAsync<ConfiguredAction, EmailInput>(
-            new EmailInput
-            {
-                To = "test@test.com"
-            });
+        await Client.EnqueueAsync(ConfiguredAction.Key,
+            new EmailInput { To = "test@test.com" });
 
         Nav.NavigateTo("/");
     }

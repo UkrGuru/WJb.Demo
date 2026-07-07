@@ -1,0 +1,9 @@
+{
+  "Download Time1": {
+    "type": "DownloadTimeAction, BlazorWJb",
+    "more": {
+      "cron": "* * * * *",
+      "url": "https://time.now/developer/api/ip"
+    }
+  }
+}

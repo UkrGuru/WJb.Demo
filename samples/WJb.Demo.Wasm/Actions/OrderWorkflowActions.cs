@@ -1,15 +1,14 @@
-﻿using WJb.Contracts;
-
-namespace WJb.Demo.Wasm.Actions;
+﻿namespace WJb.Demo.Wasm.Actions;
 
 public sealed class OrderInput
 {
     public int OrderId { get; set; }
 }
 
-public sealed class CreateOrderAction
-    : JobAction<OrderInput>
+public sealed class CreateOrderAction : JobAction<OrderInput>
 {
+    public const string Key = "create-order";
+
     public override async Task<ActionResult> ExecuteAsync(
         OrderInput input,
         CancellationToken ct)
@@ -19,14 +18,16 @@ public sealed class CreateOrderAction
         await Task.Delay(300, ct);
 
         return ActionResults.Next(
-            JobCommands.Next<ReserveStockAction>(
+            new JobCommand(
+                ReserveStockAction.Key,
                 input));
     }
 }
 
-public sealed class ReserveStockAction
-    : JobAction<OrderInput>
+public sealed class ReserveStockAction : JobAction<OrderInput>
 {
+    public const string Key = "reserve-stock";
+
     public override async Task<ActionResult> ExecuteAsync(
         OrderInput input,
         CancellationToken ct)
@@ -36,14 +37,17 @@ public sealed class ReserveStockAction
         await Task.Delay(300, ct);
 
         return ActionResults.Next(
-            JobCommands.Next<ChargePaymentAction>(
+            new JobCommand(
+                ChargePaymentAction.Key,
                 input));
     }
 }
 
-public sealed class ChargePaymentAction
-    : JobAction<OrderInput>
+
+public sealed class ChargePaymentAction : JobAction<OrderInput>
 {
+    public const string Key = "charge-payment";
+
     public override async Task<ActionResult> ExecuteAsync(
         OrderInput input,
         CancellationToken ct)
@@ -53,14 +57,16 @@ public sealed class ChargePaymentAction
         await Task.Delay(300, ct);
 
         return ActionResults.Next(
-            JobCommands.Next<SendConfirmationAction>(
+            new JobCommand(
+                SendConfirmationAction.Key,
                 input));
     }
 }
 
-public sealed class SendConfirmationAction
-    : JobAction<OrderInput>
+public sealed class SendConfirmationAction : JobAction<OrderInput>
 {
+    public const string Key = "send-confirmation";
+
     public override async Task<ActionResult> ExecuteAsync(
         OrderInput input,
         CancellationToken ct)
@@ -72,10 +78,12 @@ public sealed class SendConfirmationAction
         await Task.Delay(300, ct);
 
         return ActionResults.Next(
-            JobCommands.Next<LogAction>(
+            new JobCommand(
+                LogAction.Key,
                 new LogInput
                 {
-                    Message = $"Workflow completed for order #{input.OrderId}"
+                    Message =
+                        $"Workflow completed for order #{input.OrderId}"
                 }));
     }
 }

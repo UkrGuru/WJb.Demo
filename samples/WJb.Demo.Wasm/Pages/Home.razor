@@ -84,17 +84,18 @@
 @code {
     private IReadOnlyList<JobInfo> queue = Array.Empty<JobInfo>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Notifier.Changed += HandleChanged;
-        Load();
+        await Load();
+
     }
 
     private void HandleChanged()
     {
-        InvokeAsync(() =>
+        _ = InvokeAsync(async () =>
         {
-            Load();
+            await Load();
             StateHasChanged();
         });
     }
@@ -119,18 +120,8 @@
     private Task Cancel(string id)
         => Client.CancelAsync(id);
 
-
     private static string Short(string id)
-    {
-        if (string.IsNullOrEmpty(id))
-            return string.Empty;
-
-        if (id.Length <= 10)
-            return id;
-
-        return $"{id[^5..]}";
-    }
-
+        => id[..Math.Min(6, id.Length)];
 
     public void Dispose()
         => Notifier.Changed -= HandleChanged;
