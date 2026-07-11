@@ -15,10 +15,14 @@ builder.Services.AddScoped(_ =>
         BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
     });
 
-builder.Services.AddSingleton<IWJb>(_ =>
-    WJbBuilder.Create(cfg =>
-    {
+builder.Services.AddSingleton<IStore, InMemoryStore>();
 
+builder.Services.AddSingleton<IWJbExecutor>(sp =>
+{
+    var store = sp.GetRequiredService<IStore>();
+
+    var wjb = WJbBuilder.Create(store, cfg =>
+    {
         // Basic demos
         cfg.AddAction<HelloAction>(HelloAction.Key);
         cfg.AddAction<ProgressAction>(ProgressAction.Key);
@@ -40,23 +44,23 @@ builder.Services.AddSingleton<IWJb>(_ =>
         cfg.AddAction<ChargePaymentAction>(ChargePaymentAction.Key);
         cfg.AddAction<SendConfirmationAction>(SendConfirmationAction.Key);
 
-
         // Demo
         cfg.AddAction<DemoAction>(DemoAction.Key);
 
-        cfg.AddSetting(new SmtpSettings
+        cfg.AddService(new SmtpSettings
         {
             Host = "smtp.local"
         });
+    });
 
-        cfg.UseStore(new InMemoryStore());
-    }));
+    return wjb;
+});
 
-builder.Services.AddSingleton(sp =>
-    sp.GetRequiredService<IWJb>().Executor!);
+builder.Services.AddSingleton<IJobExecutor>(sp =>
+    sp.GetRequiredService<IWJbExecutor>());
 
-builder.Services.AddSingleton(sp =>
-    sp.GetRequiredService<IWJb>().Store!);
+builder.Services.AddSingleton<IWJb>(sp =>
+    sp.GetRequiredService<IWJbExecutor>());
 
 builder.Services.AddSingleton<JobEngineLite>();
 
@@ -79,7 +83,6 @@ for (var i = 0; i < 3; i++)
 }
 
 await app.RunAsync();
-
 
 public sealed class DemoPayload
 {

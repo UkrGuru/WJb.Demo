@@ -4,16 +4,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IStore, InMemoryStore>();
 
-builder.Services.AddSingleton<IWJb>(_ =>
-    WJbBuilder.Create(cfg =>
+builder.Services.AddSingleton<IWJbExecutor>(sp =>
+{
+    var store = sp.GetRequiredService<IStore>();
+
+    var wjb = WJbBuilder.Create(store, cfg =>
     {
         cfg.AddAction<DemoAction>(DemoAction.Key);
-        cfg.UseStore(new InMemoryStore());
-    }));
+    });
 
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IWJb>().Executor!);
+    return wjb;
+});
 
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IWJb>().Store!);
+builder.Services.AddSingleton<IJobExecutor>(
+    sp => sp.GetRequiredService<IWJbExecutor>());
 
 builder.Services.AddHostedService<JobWorker>();
 
@@ -35,12 +39,14 @@ app.MapPost("/jobs", async (IJobExecutor executor) =>
 app.MapGet("/jobs", async (IStore store) =>
 {
     var jobs = await store.GetJobsAsync();
+
     return Results.Ok(jobs);
 });
 
 app.MapGet("/jobs/{id}", async (string id, IStore store) =>
 {
     var job = await store.GetJobAsync(id);
+
     return job is null
         ? Results.NotFound()
         : Results.Ok(job);
@@ -49,6 +55,7 @@ app.MapGet("/jobs/{id}", async (string id, IStore store) =>
 app.MapDelete("/jobs/{id}", async (string id, IStore store) =>
 {
     var ok = await store.DeleteJobAsync(id);
+
     return ok
         ? Results.Ok()
         : Results.NotFound();
@@ -69,7 +76,9 @@ public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 
     public event Action<JobProgress>? OnProgress;
 
-    public override async Task<ActionResult> ExecuteAsync(DemoPayload input, CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(
+        DemoPayload input,
+        CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 10)
         {
@@ -94,6 +103,7 @@ public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 
 public sealed class JobWorker(IJobExecutor executor) : BackgroundService
 {
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(
+        CancellationToken stoppingToken)
         => executor.ExecuteLoopAsync(stoppingToken);
 }

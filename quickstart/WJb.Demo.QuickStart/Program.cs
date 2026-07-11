@@ -1,67 +1,68 @@
-﻿using System.Text;
-using WJb;
+﻿using WJb;
 
-Console.OutputEncoding = Encoding.UTF8;
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 Console.WriteLine("=== WJb Quick Start ===\n");
 
 Console.WriteLine($"""
 Workflow:
-{SendEmailAction.Key} → {LogAction.Key} → done
+{Actions.SendEmail} → {Actions.Log} → done
 
 """);
 
 var store = new InMemoryStore();
 
-var wjb = WJbBuilder.Create(cfg =>
+// Configure actions and services
+var wjb = WJbBuilder.Create(store, cfg =>
 {
-    cfg.AddAction<SendEmailAction>(SendEmailAction.Key);
-    cfg.AddAction<LogAction>(LogAction.Key);
+    cfg.AddAction<SendEmailAction>(Actions.SendEmail);
+    cfg.AddAction<LogAction>(Actions.Log);
 
-    cfg.UseStore(store);
+    cfg.AddService(new SmtpSettings { Host = "smtp.local" });
 });
 
-// enqueue first job
-Console.WriteLine($"[App] Enqueue: {SendEmailAction.Key}");
+// Enqueue first job
+Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
 
-await wjb.Executor.EnqueueAsync(SendEmailAction.Key, new EmailInput { To = "user@test.com" });
+await wjb.EnqueueAsync(
+    Actions.SendEmail, 
+    new EmailInput { To = "user@test.com" });
 
-// run loop (controlled)
+// Execute all pending jobs
 Console.WriteLine("[App] Start execution...\n");
 
-await wjb.Executor.ExecuteLoopAsync();
+await wjb.ExecuteLoopAsync();
 
 Console.WriteLine("\n=== Completed ===");
 
-// Action: SendEmailAction
-public sealed class SendEmailAction : JobAction<EmailInput>
+public static class Actions
 {
-    public const string Key = "send-email";
+    public const string SendEmail = "send-email";
+    public const string Log = "log";
+}
+
+// Action: SendEmailAction
+public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
+{
+    private readonly SmtpSettings _smtp = smtp;
 
     public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
     {
-        Console.WriteLine($"[Action] {Key} → {input.To}");
+        Console.WriteLine($"[Action] {Actions.SendEmail} → {input.To} via {_smtp.Host}");
 
         return Task.FromResult(
-            ActionResults.Next(new JobCommand(LogAction.Key,
-                new LogInput
-                {
-                    Message = $"Email sent to {input.To}"
-                })
-            )
-        );
-
+            ActionResults.Next(new JobCommand(
+                Actions.Log,
+                new LogInput { Message = $"Email sent to {input.To}" })));
     }
 }
 
 // Action: LogAction
 public sealed class LogAction : JobAction<LogInput>
 {
-    public const string Key = "log";
-
     public override Task<ActionResult> ExecuteAsync(LogInput input, CancellationToken ct)
     {
-        Console.WriteLine($"[Action] {Key} → {input.Message}");
+        Console.WriteLine($"[Action] {Actions.Log} → {input.Message}");
 
         return Task.FromResult(ActionResults.None());
     }
@@ -77,4 +78,10 @@ public sealed class EmailInput
 public sealed class LogInput
 {
     public string? Message { get; set; }
+}
+
+// Service: SmtpSettings
+public class SmtpSettings
+{
+    public string Host { get; set; } = default!;
 }
