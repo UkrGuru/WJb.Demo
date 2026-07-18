@@ -11,6 +11,6 @@
     <Compile Remove="Program.FromStore.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\!!WJb0622\src\WJb\WJb.csproj" />
+    <PackageReference Include="WJb" Version="0.107.0" />
   </ItemGroup>
 </Project>

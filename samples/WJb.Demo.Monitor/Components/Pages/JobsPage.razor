@@ -5,8 +5,7 @@
 @inject IWJbExecutor Wjb
 
 <div class="text-center mb-3">
-    <button class="btn btn-success"
-            @onclick="RunDemoAsync">
+    <button class="btn btn-success" @onclick="RunDemoAsync">
         ▶ Run Demo Workflow
     </button>
 
@@ -15,22 +14,11 @@
     </div>
 </div>
 
-<JobsTab />
+<JobsTab RefreshInterval="@(TimeSpan.FromSeconds(1))" />
 
 @code {
-
-
-    private async Task RunDemoAsync()
-    {
-        Console.WriteLine($"Enqueue via {Wjb.GetHashCode()}");
-
-        await Wjb.EnqueueAsync(
+    private Task RunDemoAsync()
+        => Wjb.EnqueueAsync(
             ImportCustomersAction.Key,
-            new ImportCustomersInput
-            {
-                Source = "CRM"
-            });
-    }
-
-
+            new ImportCustomersInput { Source = "CRM" });
 }

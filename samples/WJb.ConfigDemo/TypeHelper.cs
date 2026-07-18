@@ -1,4 +1,4 @@
-﻿static class TypeHelper
+﻿internal static class TypeHelper
 {
     public static string GetDefaultKey(Type type)
     {
@@ -14,15 +14,4 @@
 
     public static string GetName(Type type)
         => $"{type.FullName}, {type.Assembly.GetName().Name}";
-
-    public static Type? Resolve(string typeName)
-    {
-        var fullName = typeName.Split(',')[0].Trim();
-
-        return Type.GetType(typeName)
-            ?? AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Select(x => x.GetType(fullName, throwOnError: false))
-                .FirstOrDefault(x => x != null);
-    }
 }

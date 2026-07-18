@@ -20,21 +20,6 @@ builder.Services.AddSingleton<IStore>(_ =>
     store.LoadActionsFromJson(
         File.ReadAllText("App_Data/actions.json"));
 
-
-    var actions =
-        store.GetListAsync(DefinitionType.Actions)
-             .GetAwaiter()
-             .GetResult();
-
-    Console.WriteLine("ACTIONS:");
-
-    foreach (var action in actions)
-    {
-        Console.WriteLine($"{action.Key}");
-        Console.WriteLine(action.Value);
-    }
-
-
     store.LoadServicesFromJson(
         File.ReadAllText("App_Data/services.json"));
 
@@ -44,8 +29,6 @@ builder.Services.AddSingleton<IStore>(_ =>
 
 builder.Services.AddSingleton<IWJbExecutor>(sp =>
 {
-    Console.WriteLine("IWJbExecutor created");
-
     var store = sp.GetRequiredService<IStore>();
 
     return WJbBuilder.CreateAsync(store)
@@ -76,16 +59,5 @@ app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-//var wjb = app.Services.GetRequiredService<IWJbExecutor>();
-
-//_ = Task.Run(async () =>
-//{
-//    await wjb.EnqueueAsync(
-//        ImportCustomersAction.Key,
-//        new ImportCustomersInput());
-
-//    await wjb.ExecuteLoopAsync();
-//});
 
 app.Run();

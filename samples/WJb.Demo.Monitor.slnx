@@ -1,5 +1,3 @@
 <Solution>
-  <Project Path="../../!!WJb0622/src/WJb.UI.Blazor/WJb.UI.Blazor.csproj" />
-  <Project Path="../../!!WJb0622/src/WJb/WJb.csproj" />
   <Project Path="WJb.Demo.Monitor/WJb.Demo.Monitor.csproj" />
 </Solution>

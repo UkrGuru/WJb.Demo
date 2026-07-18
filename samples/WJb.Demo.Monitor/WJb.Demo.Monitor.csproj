@@ -12,8 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\!!WJb0622\src\WJb.UI.Blazor\WJb.UI.Blazor.csproj" />
-      <ProjectReference Include="..\..\..\!!WJb0622\src\WJb\WJb.csproj" />
+      <PackageReference Include="WJb.UI.Blazor" Version="0.107.1" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

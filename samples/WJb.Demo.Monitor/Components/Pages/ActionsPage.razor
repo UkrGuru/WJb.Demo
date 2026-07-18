@@ -1,32 +1,22 @@
 ﻿@page "/actions"
 
-@using Microsoft.AspNetCore.Hosting
-@using WJb
-
 @inject IStore Store
-@inject IWebHostEnvironment Environment
 
-<DefinitionsTab DefinitionType="@DefinitionType.Actions" />
+<ActionsTab />
 
 <div class="fixed-bottom text-center mb-3">
-    <button class="btn btn-warning btn-lg"
-            @onclick="SaveAsync">
-        Save File
+    <button class="btn btn-warning btn-lg" @onclick="SaveAsync">
+        💾 Save File
     </button>
 </div>
 
 @code {
-
-    private async Task SaveAsync()
+    private Task SaveAsync()
     {
-        var path = Path.Combine(
-            Environment.ContentRootPath,
-            "App_Data",
-            "actions.json");
+        var json = ((IDefinitionStore)Store).GetActionsJson();
 
-        await File.WriteAllTextAsync(
-            path,
-            Store.GetActionsJson());
+        File.WriteAllText("App_Data/actions.json", json);
+
+        return Task.CompletedTask;
     }
-
 }
