@@ -71,22 +71,20 @@ No XML.
 
 No complex configuration.
 
-Just C#.
+Just C# actions connected through explicit workflow transitions.
 
 ## Sample
 
 🔗 https://github.com/UkrGuru/WJb.Demo/tree/main/samples/WJb.Demo.Monitor
 
-## Getting Started
+The sample includes:
 
-```csharp
-builder.Services.AddWJb();
-```
+- Workflow execution
+- Action chaining
+- Progress reporting
+- Live monitoring
+- Payload inspection
+- Actions explorer
+- Services explorer
 
-Create actions.  
-Chain actions.  
-Monitor jobs.
-
-That's it.
-
-#dotnet #csharp #blazor #aspnetcore #backgroundjobs #workflow #opensource #ukrguru #wjb
+Perfect for understanding how WJb workflows behave in a real application.
