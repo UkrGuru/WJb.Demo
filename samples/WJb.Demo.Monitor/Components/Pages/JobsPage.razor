@@ -1,0 +1,36 @@
+﻿@page "/jobs"
+
+@using WJb
+
+@inject IWJbExecutor Wjb
+
+<div class="text-center mb-3">
+    <button class="btn btn-success"
+            @onclick="RunDemoAsync">
+        ▶ Run Demo Workflow
+    </button>
+
+    <div class="small text-secondary mt-2">
+        Import Customers → Generate Report → Send Email
+    </div>
+</div>
+
+<JobsTab />
+
+@code {
+
+
+    private async Task RunDemoAsync()
+    {
+        Console.WriteLine($"Enqueue via {Wjb.GetHashCode()}");
+
+        await Wjb.EnqueueAsync(
+            ImportCustomersAction.Key,
+            new ImportCustomersInput
+            {
+                Source = "CRM"
+            });
+    }
+
+
+}
