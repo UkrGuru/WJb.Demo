@@ -52,8 +52,7 @@ public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
 
         return Task.FromResult(
             ActionResults.Next(new JobCommand(
-                Actions.Log,
-                new LogInput { Message = $"Email sent to {input.To}" })));
+                Actions.Log, new LogInput { Message = $"Email sent to {input.To}" })));
     }
 }
 

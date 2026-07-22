@@ -5,13 +5,9 @@ public sealed class LogInput
     public string? Message { get; set; }
 }
 
-public sealed class LogAction :
-    JobAction<LogInput>,
-    IProgressAction
+public sealed class LogAction : JobAction<LogInput>
 {
     public const string Key = "log";
-
-    public event Action<JobProgress>? OnProgress;
 
     public override async Task<ActionResult> ExecuteAsync(
         LogInput input,
@@ -19,27 +15,15 @@ public sealed class LogAction :
     {
         var message = input.Message ?? "<empty>";
 
-        OnProgress?.Invoke(new JobProgress
-        {
-            Progress = 30,
-            Message = "Preparing log..."
-        });
+        ReportProgress(30, "Preparing log...");
 
         await Task.Delay(200, ct);
 
-        OnProgress?.Invoke(new JobProgress
-        {
-            Progress = 70,
-            Message = "Writing log..."
-        });
+        ReportProgress(70, "Writing log...");
 
         await Task.Delay(300, ct);
 
-        OnProgress?.Invoke(new JobProgress
-        {
-            Progress = 100,
-            Message = message
-        });
+        ReportProgress(100, message);
 
         return ActionResults.None();
     }
@@ -50,13 +34,9 @@ public sealed class ErrorLogInput
     public string? Message { get; set; }
 }
 
-public sealed class ErrorLogAction :
-    JobAction<ErrorLogInput>,
-    IProgressAction
+public sealed class ErrorLogAction : JobAction<ErrorLogInput>
 {
     public const string Key = "error-log";
-
-    public event Action<JobProgress>? OnProgress;
 
     public override async Task<ActionResult> ExecuteAsync(
         ErrorLogInput input,
@@ -64,27 +44,15 @@ public sealed class ErrorLogAction :
     {
         var message = input.Message ?? "<no message>";
 
-        OnProgress?.Invoke(new JobProgress
-        {
-            Progress = 30,
-            Message = "Preparing error log..."
-        });
+        ReportProgress(30, "Preparing error log...");
 
         await Task.Delay(200, ct);
 
-        OnProgress?.Invoke(new JobProgress
-        {
-            Progress = 70,
-            Message = "Writing error log..."
-        });
+        ReportProgress(70, "Writing error log...");
 
         await Task.Delay(300, ct);
 
-        OnProgress?.Invoke(new JobProgress
-        {
-            Progress = 100,
-            Message = $"❌ {message}"
-        });
+        ReportProgress(100, $"❌ {message}");
 
         return ActionResults.None();
     }

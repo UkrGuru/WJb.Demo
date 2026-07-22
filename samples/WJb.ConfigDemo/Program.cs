@@ -1,5 +1,6 @@
 using WJb;
 using WJb.ConfigDemo;
+using WJb.Helpers;
 
 // ====================================
 // Configuration API
@@ -10,7 +11,7 @@ var store1 = new InMemoryStore();
 var wjb1 = WJbBuilder.Create(store1, cfg =>
 {
     cfg.AddAction<SendEmailAction>(
-        SendEmailAction.Key,
+        Actions.SendEmail,
         more: new
         {
             smtpCode = SmtpSettings.Key
@@ -49,7 +50,7 @@ await RunAsync(wjb2);
 
 var store3 = new InMemoryStore();
 
-await store3.SetAsync(DefinitionType.Actions, SendEmailAction.Key,
+await store3.SetAsync(DefinitionType.Actions, Actions.SendEmail,
     new
     {
         type = TypeHelper.GetName(typeof(SendEmailAction)),
@@ -72,10 +73,10 @@ await RunAsync(wjb3);
 // Helpers
 // ====================================
 
-static async Task RunAsync(IWJbExecutor wjb)
+static async Task RunAsync(IWJb wjb)
 {
     await wjb.EnqueueAsync(
-        SendEmailAction.Key,
+        Actions.SendEmail,
         new EmailInput
         {
             To = "test@test.com"
@@ -90,7 +91,7 @@ static string CreateActionsJson()
 {
     return $$"""
     {
-      "{{SendEmailAction.Key}}":
+      "{{Actions.SendEmail}}":
       {
         "type": "{{TypeHelper.GetName(typeof(SendEmailAction))}}",
         "smtpCode": "{{SmtpSettings.Key}}"
@@ -116,12 +117,15 @@ static string CreateServicesJson()
 // Demo Types
 // ====================================
 
+public static class Actions
+{
+    public const string SendEmail = "send-email";
+}
+
 namespace WJb.ConfigDemo
 {
     public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
     {
-        public const string Key = "send-email";
-
         private readonly SmtpSettings _smtp = smtp;
 
         public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct = default)

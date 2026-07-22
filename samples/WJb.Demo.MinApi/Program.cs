@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IStore, InMemoryStore>();
 
-builder.Services.AddSingleton<IWJbExecutor>(sp =>
+builder.Services.AddSingleton<IWJb>(sp =>
 {
     var store = sp.GetRequiredService<IStore>();
 
@@ -17,7 +17,7 @@ builder.Services.AddSingleton<IWJbExecutor>(sp =>
 });
 
 builder.Services.AddSingleton<IJobExecutor>(
-    sp => sp.GetRequiredService<IWJbExecutor>());
+    sp => sp.GetRequiredService<IWJb>());
 
 builder.Services.AddHostedService<JobWorker>();
 
@@ -47,18 +47,14 @@ app.MapGet("/jobs/{id}", async (string id, IStore store) =>
 {
     var job = await store.GetJobAsync(id);
 
-    return job is null
-        ? Results.NotFound()
-        : Results.Ok(job);
+    return job is null ? Results.NotFound() : Results.Ok(job);
 });
 
 app.MapDelete("/jobs/{id}", async (string id, IStore store) =>
 {
     var ok = await store.DeleteJobAsync(id);
 
-    return ok
-        ? Results.Ok()
-        : Results.NotFound();
+    return ok ? Results.Ok() : Results.NotFound();
 });
 
 app.Run();
@@ -70,11 +66,9 @@ public sealed class DemoPayload
     public string Text { get; set; } = "";
 }
 
-public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
+public sealed class DemoAction : JobAction<DemoPayload>
 {
     public const string Key = "demo";
-
-    public event Action<JobProgress>? OnProgress;
 
     public override async Task<ActionResult> ExecuteAsync(
         DemoPayload input,
@@ -86,11 +80,9 @@ public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 
             await Task.Delay(input.DelayMs / 10, ct);
 
-            OnProgress?.Invoke(new JobProgress
-            {
-                Progress = i,
-                Message = $"Progress {i}%"
-            });
+            ReportProgress(
+                i,
+                $"Progress {i}%");
         }
 
         return ActionResults.Result(new
@@ -103,7 +95,6 @@ public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 
 public sealed class JobWorker(IJobExecutor executor) : BackgroundService
 {
-    protected override Task ExecuteAsync(
-        CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
         => executor.ExecuteLoopAsync(stoppingToken);
 }

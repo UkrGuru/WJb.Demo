@@ -61,12 +61,7 @@ var wjb = WJbBuilder.Create(store, cfg =>
 // Enqueue first job
 Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
 
-await wjb.EnqueueAsync(
-    Actions.SendEmail,
-    new EmailInput
-    {
-        To = "user@test.com"
-    });
+await wjb.EnqueueAsync(Actions.SendEmail, new EmailInput { To = "user@test.com" });
 
 // Execute all pending jobs
 Console.WriteLine("[App] Start execution...\n");
@@ -87,33 +82,21 @@ public sealed class SendEmailAction(SmtpSettings smtp)
 {
     private readonly SmtpSettings _smtp = smtp;
 
-    public override Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
     {
-        Console.WriteLine(
-            $"[Action] {Actions.SendEmail} → {input.To} via {_smtp.Host}");
+        Console.WriteLine($"[Action] {Actions.SendEmail} → {input.To} via {_smtp.Host}");
 
-        return Task.FromResult(
-            ActionResults.Next(
-                new JobCommand(
-                    Actions.Log,
-                    new LogInput
-                    {
-                        Message = $"Email sent to {input.To}"
-                    })));
+        return Task.FromResult(ActionResults.Next(new JobCommand(
+            Actions.Log, new LogInput { Message = $"Email sent to {input.To}" })));
     }
 }
 
 // Action: LogAction
 public sealed class LogAction : JobAction<LogInput>
 {
-    public override Task<ActionResult> ExecuteAsync(
-        LogInput input,
-        CancellationToken ct)
+    public override Task<ActionResult> ExecuteAsync(LogInput input, CancellationToken ct)
     {
-        Console.WriteLine(
-            $"[Action] {Actions.Log} → {input.Message}");
+        Console.WriteLine($"[Action] {Actions.Log} → {input.Message}");
 
         return Task.FromResult(ActionResults.None());
     }
@@ -175,13 +158,8 @@ send-email → log → done
 ## 🔥 Key idea
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        Actions.Log,
-        new LogInput
-        {
-            Message = $"Email sent to {input.To}"
-        }));
+return ActionResults.Next(new JobCommand(
+    Actions.Log, new LogInput { Message = $"Email sent to {input.To}" }));
 ```
 
 👉 The workflow is defined in code, not hidden in the framework.
@@ -190,7 +168,7 @@ return ActionResults.Next(
 
 ## ⚡ Learn more
 
-➡️ https://www.nuget.org/packages/WJb
+➡️ https://www.nuget.org/packages?q=wjb
 
 ➡️ https://github.com/UkrGuru/WJb.Demo
 

@@ -1,6 +1,6 @@
 ﻿namespace WJb.Demo.Monitor;
 
-public sealed class WJbWorker(IWJbExecutor executor): BackgroundService
+public sealed class WJbWorker(IWJb executor): BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

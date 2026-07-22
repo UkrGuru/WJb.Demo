@@ -27,7 +27,7 @@ builder.Services.AddSingleton<IStore>(_ =>
 });
 
 
-builder.Services.AddSingleton<IWJbExecutor>(sp =>
+builder.Services.AddSingleton<IWJb>(sp =>
 {
     var store = sp.GetRequiredService<IStore>();
 

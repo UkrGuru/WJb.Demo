@@ -17,7 +17,7 @@ builder.Services.AddScoped(_ =>
 
 builder.Services.AddSingleton<IStore, InMemoryStore>();
 
-builder.Services.AddSingleton<IWJbExecutor>(sp =>
+builder.Services.AddSingleton<IWJb>(sp =>
 {
     var store = sp.GetRequiredService<IStore>();
 
@@ -57,10 +57,10 @@ builder.Services.AddSingleton<IWJbExecutor>(sp =>
 });
 
 builder.Services.AddSingleton<IJobExecutor>(sp =>
-    sp.GetRequiredService<IWJbExecutor>());
+    sp.GetRequiredService<IWJb>());
 
-builder.Services.AddSingleton<IWJb>(sp =>
-    sp.GetRequiredService<IWJbExecutor>());
+builder.Services.AddSingleton<IActionFactory>(sp =>
+    sp.GetRequiredService<IWJb>());
 
 builder.Services.AddSingleton<JobEngineLite>();
 
@@ -91,13 +91,9 @@ public sealed class DemoPayload
     public string? Text { get; set; }
 }
 
-public sealed class DemoAction :
-    JobAction<DemoPayload>,
-    IProgressAction
+public sealed class DemoAction : JobAction<DemoPayload>
 {
     public const string Key = "demo";
-
-    public event Action<JobProgress>? OnProgress;
 
     public override async Task<ActionResult> ExecuteAsync(
         DemoPayload input,
@@ -110,11 +106,9 @@ public sealed class DemoAction :
         {
             ct.ThrowIfCancellationRequested();
 
-            OnProgress?.Invoke(new JobProgress
-            {
-                Progress = i,
-                Message = $"Progress {i}%"
-            });
+            ReportProgress(
+                i,
+                $"Progress {i}%");
 
             await Task.Delay(stepDelay, ct);
         }

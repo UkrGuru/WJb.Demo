@@ -9,8 +9,9 @@
     <Compile Remove="Program - Bak.cs" />
     <Compile Remove="Program.FromJson.cs" />
     <Compile Remove="Program.FromStore.cs" />
+    <Compile Remove="TypeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="WJb" Version="0.107.0" />
+    <PackageReference Include="WJb" Version="0.108.0" />
   </ItemGroup>
 </Project>
