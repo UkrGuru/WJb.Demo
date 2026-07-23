@@ -243,12 +243,15 @@ Example payload:
 Jobs are processed continuously by a background service.
 
 ```csharp
-public sealed class JobWorker : BackgroundService
+public sealed class JobWorker(IJobExecutor executor) : BackgroundService
 {
-    protected override Task ExecuteAsync(
-        CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return executor.ExecuteLoopAsync(stoppingToken);
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await executor.ExecuteLoopAsync(stoppingToken);
+            await Task.Delay(1000, stoppingToken);
+        }
     }
 }
 ```

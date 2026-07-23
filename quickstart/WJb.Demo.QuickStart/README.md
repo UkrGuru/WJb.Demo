@@ -36,14 +36,6 @@ using WJb;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-Console.WriteLine("=== WJb Quick Start ===\n");
-
-Console.WriteLine($"""
-Workflow:
-{Actions.SendEmail} → {Actions.Log} → done
-
-""");
-
 var store = new InMemoryStore();
 
 // Configure actions and services
@@ -57,6 +49,14 @@ var wjb = WJbBuilder.Create(store, cfg =>
         Host = "smtp.local"
     });
 });
+
+Console.WriteLine("=== WJb Quick Start ===\n");
+
+Console.WriteLine($"""
+Workflow:
+{Actions.SendEmail} → {Actions.Log} → done
+
+""");
 
 // Enqueue first job
 Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
@@ -77,8 +77,7 @@ public static class Actions
 }
 
 // Action: SendEmailAction
-public sealed class SendEmailAction(SmtpSettings smtp)
-    : JobAction<EmailInput>
+public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
 {
     private readonly SmtpSettings _smtp = smtp;
 
@@ -86,8 +85,9 @@ public sealed class SendEmailAction(SmtpSettings smtp)
     {
         Console.WriteLine($"[Action] {Actions.SendEmail} → {input.To} via {_smtp.Host}");
 
-        return Task.FromResult(ActionResults.Next(new JobCommand(
-            Actions.Log, new LogInput { Message = $"Email sent to {input.To}" })));
+        return Task.FromResult(
+            ActionResults.Next(new JobCommand(
+                Actions.Log, new LogInput { Message = $"Email sent to {input.To}" })));
     }
 }
 

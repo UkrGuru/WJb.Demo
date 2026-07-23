@@ -2,14 +2,6 @@
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-Console.WriteLine("=== WJb Quick Start ===\n");
-
-Console.WriteLine($"""
-Workflow:
-{Actions.SendEmail} → {Actions.Log} → done
-
-""");
-
 var store = new InMemoryStore();
 
 // Configure actions and services
@@ -21,12 +13,18 @@ var wjb = WJbBuilder.Create(store, cfg =>
     cfg.AddService(new SmtpSettings { Host = "smtp.local" });
 });
 
+Console.WriteLine("=== WJb Quick Start ===\n");
+
+Console.WriteLine($"""
+Workflow:
+{Actions.SendEmail} → {Actions.Log} → done
+
+""");
+
 // Enqueue first job
 Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
 
-await wjb.EnqueueAsync(
-    Actions.SendEmail, 
-    new EmailInput { To = "user@test.com" });
+await wjb.EnqueueAsync(Actions.SendEmail, new EmailInput { To = "user@test.com" });
 
 // Execute all pending jobs
 Console.WriteLine("[App] Start execution...\n");

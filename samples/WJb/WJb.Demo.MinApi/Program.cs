@@ -70,9 +70,7 @@ public sealed class DemoAction : JobAction<DemoPayload>
 {
     public const string Key = "demo";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        DemoPayload input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(DemoPayload input, CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 10)
         {
@@ -95,6 +93,12 @@ public sealed class DemoAction : JobAction<DemoPayload>
 
 public sealed class JobWorker(IJobExecutor executor) : BackgroundService
 {
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        => executor.ExecuteLoopAsync(stoppingToken);
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await executor.ExecuteLoopAsync(stoppingToken);
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
 }
