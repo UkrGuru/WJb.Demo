@@ -5,13 +5,11 @@ public sealed class ProgressPayload
     public int DelayMs { get; set; } = 300;
 }
 
-public sealed class ProgressAction 
-    : JobAction<ProgressPayload>, IProgressAction
+public sealed class ProgressAction : JobAction<ProgressPayload>, IProgressAction
 {
     public const string Key = "progress";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        ProgressPayload input, CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(ProgressPayload input, CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 25)
         {

@@ -11,9 +11,7 @@ public sealed class RetryEmailAction : JobAction<RetryEmailInput>
 
     private static int _attempts;
 
-    public override async Task<ActionResult> ExecuteAsync(
-        RetryEmailInput input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(RetryEmailInput input, CancellationToken ct)
     {
         _attempts++;
 
@@ -22,19 +20,17 @@ public sealed class RetryEmailAction : JobAction<RetryEmailInput>
         await Task.Delay(500, ct);
 
         if (_attempts == 1)
-            throw new InvalidOperationException(
-                "SMTP temporarily unavailable.");
+            throw new InvalidOperationException("SMTP temporarily unavailable.");
 
         ReportProgress(100, "Email delivered.");
 
         _attempts = 0;
 
-        return ActionResults.Next(
-            new JobCommand(
-                LogAction.Key,
-                new LogInput
-                {
-                    Message = $"Email sent to {input.To}"
-                }));
+        return ActionResults.Next(new JobCommand(
+            LogAction.Key,
+            new LogInput
+            {
+                Message = $"Email sent to {input.To}"
+            }));
     }
 }

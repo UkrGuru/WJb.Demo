@@ -5,21 +5,17 @@ public sealed class SendEmailAction : JobAction<EmailInput>
 {
     public const string Key = "send-email";
 
-    public override Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
     {
-        ReportProgress(
-            100,
-            "Email delivered.");
+        ReportProgress(100, "Email delivered.");
 
-        return Task.FromResult(
-            ActionResults.Next(
-                new JobCommand(
-                    LogAction.Key,
-                    new LogInput
-                    {
-                        Message = $"Email sent to {input.To}"
-                    })));
+        await Task.Delay(300, ct);
+
+        return ActionResults.Next(new JobCommand(
+            LogAction.Key,
+            new LogInput
+            {
+                Message = $"Email sent to {input.To}"
+            }));
     }
 }

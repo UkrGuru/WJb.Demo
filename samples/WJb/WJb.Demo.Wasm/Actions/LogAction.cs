@@ -9,9 +9,7 @@ public sealed class LogAction : JobAction<LogInput>
 {
     public const string Key = "log";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        LogInput input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(LogInput input, CancellationToken ct)
     {
         var message = input.Message ?? "<empty>";
 
@@ -38,9 +36,7 @@ public sealed class ErrorLogAction : JobAction<ErrorLogInput>
 {
     public const string Key = "error-log";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        ErrorLogInput input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(ErrorLogInput input, CancellationToken ct)
     {
         var message = input.Message ?? "<no message>";
 
