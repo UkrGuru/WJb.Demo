@@ -6,6 +6,8 @@ BenchmarkDotNet benchmarks comparing:
 - Hangfire
 - Quartz
 
+![WJb Benchmarks](https://github.com/UkrGuru/WJb.Demo/blob/assets/wJb-benchmarks.gif)
+
 ## Repositories
 
 ```text
@@ -49,6 +51,17 @@ dotnet run -c Release
 ## Notes
 
 - BenchmarkDotNet ShortRun.
-- In-memory storage.
+- In-memory storage implementations.
 - No-op jobs/actions.
 - Results are environment-specific.
+- Full source code is included.
+
+## Status
+
+Current benchmark suite:
+
+- Enqueue
+- EnqueueMany
+- ParallelEnqueue
+
+New benchmarks will be added only when equivalent scenarios can be implemented for all compared libraries.
