@@ -6,7 +6,7 @@ BenchmarkDotNet benchmarks comparing:
 - Hangfire
 - Quartz
 
-![WJb Benchmarks](https://github.com/UkrGuru/WJb.Demo/blob/assets/wJb-benchmarks.gif)
+![WJb Benchmarks](assets/wJb-benchmarks.gif)
 
 ## Repositories
 
