@@ -16,8 +16,6 @@ So I built a small BenchmarkDotNet suite and compared:
 - Hangfire
 - Quartz
 
-using equivalent enqueue scenarios.
-
 The source code is public:
 
 https://github.com/UkrGuru/WJb.Demo/tree/main/benchmark
