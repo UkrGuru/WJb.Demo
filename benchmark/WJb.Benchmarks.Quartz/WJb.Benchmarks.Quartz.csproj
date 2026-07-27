@@ -17,15 +17,33 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Core\**" />
+      <Compile Remove="Enqueue\**" />
+      <EmbeddedResource Remove="Core\**" />
+      <EmbeddedResource Remove="Enqueue\**" />
+      <None Remove="Core\**" />
+      <None Remove="Enqueue\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Compile Remove="BenchConfig.cs" />
       <Compile Remove="CoreBenchmarks.cs" />
+      <Compile Remove="EnqueueBenchmarks.cs" />
+      <Compile Remove="EnqueueManyBenchmarks.cs" />
       <Compile Remove="ExecutionBenchmarks.cs" />
       <Compile Remove="MemoryBenchmarks.cs" />
       <Compile Remove="NoOpAction.cs" />
+      <Compile Remove="NoOpJob.cs" />
       <Compile Remove="ParallelBenchmarks.cs" />
       <Compile Remove="ProcessMemoryBenchmarks.cs" />
       <Compile Remove="ScaleBenchmarks.cs" />
       <Compile Remove="StartupBenchmarks.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="Enqueue\EnqueueBenchmarks.cs" />
+      <Compile Include="Enqueue\EnqueueManyBenchmarks.cs" />
+      <Compile Include="Enqueue\ParallelBenchmarks.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -39,11 +57,9 @@
         <!-- <PackageReference Include="Hangfire.Core" Version="1.8.24" /> -->
         
         <!-- Quartz -->
-        <PackageReference Include="Quartz" Version="3.18.2" />
+        <PackageReference Include="Quartz" Version="3.19.1" />
 
         <!-- DI -->
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.*" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.*" />
     </ItemGroup>
 
 </Project>

@@ -17,8 +17,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Core\**" />
       <Compile Remove="Sql\**" />
+      <EmbeddedResource Remove="Core\**" />
       <EmbeddedResource Remove="Sql\**" />
+      <None Remove="Core\**" />
       <None Remove="Sql\**" />
     </ItemGroup>
 
@@ -33,6 +36,10 @@
       <Compile Remove="ProcessMemoryBenchmarks.cs" />
       <Compile Remove="ScaleBenchmarks.cs" />
       <Compile Remove="StartupBenchmarks.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="Core\CoreBenchmarks.cs" />
     </ItemGroup>
 
     <ItemGroup>

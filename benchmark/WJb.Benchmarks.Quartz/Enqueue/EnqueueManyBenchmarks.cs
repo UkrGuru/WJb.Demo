@@ -1,14 +1,18 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿// Benchmark scenario drafted with AI assistance and reviewed by the WJb author.
+// Validate results independently before using them for performance claims.
+
+using BenchmarkDotNet.Attributes;
 using Quartz;
 using Quartz.Impl;
+using WJb.Benchmarks.Infrastructure;
 
-namespace WJb.Benchmarks.Quartz;
+namespace WJb.Benchmarks.Enqueue;
 
-[ShortRunJob]
 [MemoryDiagnoser]
+[ShortRunJob]
 public class EnqueueManyBenchmarks
 {
-    [Params(1000, 10000, 100000)]
+    [Params(1_000, 10_000, 100_000)]
     public int Count;
 
     private IScheduler _scheduler = null!;
@@ -24,7 +28,7 @@ public class EnqueueManyBenchmarks
     }
 
     [Benchmark]
-    public async Task Quartz_EnqueueMany()
+    public async Task EnqueueMany()
     {
         for (var i = 0; i < Count; i++)
         {
@@ -40,19 +44,5 @@ public class EnqueueManyBenchmarks
 
             await _scheduler.ScheduleJob(job, trigger);
         }
-    }
-
-    [GlobalCleanup]
-    public async Task Cleanup()
-    {
-        await _scheduler.Shutdown();
-    }
-}
-
-public sealed class NoOpJob : IJob
-{
-    public Task Execute(IJobExecutionContext context)
-    {
-        return Task.CompletedTask;
     }
 }

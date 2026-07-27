@@ -1,6 +1,7 @@
 
 using BenchmarkDotNet.Running;
-using WJb.Benchmarks.Hangfire;
+using WJb.Benchmarks.Core;
+using WJb.Benchmarks.Enqueue;
 
-//BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
-BenchmarkRunner.Run<EnqueueManyBenchmarks>();
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+//BenchmarkRunner.Run<ParallelBenchmarks>();

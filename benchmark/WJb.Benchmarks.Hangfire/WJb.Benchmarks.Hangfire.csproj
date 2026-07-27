@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
+        <RootNamespace>WJb.Benchmarks</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -17,15 +18,34 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Core\**" />
+      <Compile Remove="Enqueue\**" />
+      <EmbeddedResource Remove="Core\**" />
+      <EmbeddedResource Remove="Enqueue\**" />
+      <None Remove="Core\**" />
+      <None Remove="Enqueue\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Compile Remove="BenchConfig.cs" />
       <Compile Remove="CoreBenchmarks.cs" />
+      <Compile Remove="EnqueueBenchmarks.cs" />
+      <Compile Remove="EnqueueManyBenchmarks.cs" />
       <Compile Remove="ExecutionBenchmarks.cs" />
       <Compile Remove="MemoryBenchmarks.cs" />
       <Compile Remove="NoOpAction.cs" />
+      <Compile Remove="NoOpJob.cs" />
       <Compile Remove="ParallelBenchmarks.cs" />
       <Compile Remove="ProcessMemoryBenchmarks.cs" />
       <Compile Remove="ScaleBenchmarks.cs" />
       <Compile Remove="StartupBenchmarks.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="Core\StartupBenchmarks.cs" />
+      <Compile Include="Enqueue\EnqueueBenchmarks.cs" />
+      <Compile Include="Enqueue\EnqueueManyBenchmarks.cs" />
+      <Compile Include="Enqueue\ParallelBenchmarks.cs" />
     </ItemGroup>
 
     <ItemGroup>
