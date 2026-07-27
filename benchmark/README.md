@@ -52,3 +52,13 @@ dotnet run -c Release
 - In-memory storage.
 - No-op jobs/actions.
 - Results are environment-specific.
+
+## Status
+
+Current benchmark suite:
+
+- Enqueue
+- EnqueueMany
+- ParallelEnqueue
+
+Planned benchmarks will be added only when equivalent scenarios can be implemented for all compared libraries.
