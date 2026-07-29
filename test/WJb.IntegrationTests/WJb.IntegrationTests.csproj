@@ -16,7 +16,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.*" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.*" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.*" />
-        <PackageReference Include="WJb" Version="0.108.1" />
+        <PackageReference Include="WJb" Version="0.109.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
