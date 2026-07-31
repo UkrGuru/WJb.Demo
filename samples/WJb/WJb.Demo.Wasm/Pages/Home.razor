@@ -34,7 +34,7 @@
         <tbody>
             @foreach (var t in queue)
             {
-                <tr class="@(t.Status == JobStatus.Processing ? "table-primary" : "")">
+                <tr class="@(t.Status == JobStatus.Running ? "table-primary" : "")">
 
                     <td><code>@Short(t.Id)</code></td>
 
@@ -42,7 +42,7 @@
                         <span class="badge
                             @(t.Status switch
                               {
-                                  JobStatus.Processing => "bg-primary",
+                                  JobStatus.Running => "bg-primary",
                                   JobStatus.Completed => "bg-success",
                                   JobStatus.Failed => "bg-danger",
                                   _ => "bg-secondary"
@@ -54,7 +54,7 @@
                     <td style="min-width:120px;">
                         <div class="progress" style="height:20px;">
                             <div class="progress-bar
-                                @(t.Status == JobStatus.Processing
+                                @(t.Status == JobStatus.Running
                                       ? "progress-bar-striped progress-bar-animated"
                                       : "")
                                 d-flex align-items-center justify-content-center"
@@ -69,7 +69,7 @@
 
                     <td style="width: 50px;">
                         <button class="btn btn-sm btn-danger"
-                                disabled="@(t.Status is not (JobStatus.Pending or JobStatus.Processing))"
+                                disabled="@(t.Status is not (JobStatus.Pending or JobStatus.Running))"
                                 @onclick="() => Cancel(t.Id)">
                             ❌
                         </button>

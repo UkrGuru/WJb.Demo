@@ -79,7 +79,7 @@ public sealed class JobEngineLite :
     public async Task CleanAsync()
     {
         var jobs = await _store.GetJobsAsync(
-            new JobQueryInfo());
+            new JobQuery());
 
         var ids = jobs
             .Where(x => x.Status is JobStatus.Completed or JobStatus.Failed)
@@ -99,7 +99,7 @@ public sealed class JobEngineLite :
     // ------------------------
 
     public Task<IReadOnlyList<JobInfo>> GetJobs()
-        => _store.GetJobsAsync(new JobQueryInfo());
+        => _store.GetJobsAsync(new JobQuery());
 
     // ------------------------
     // Execution loop

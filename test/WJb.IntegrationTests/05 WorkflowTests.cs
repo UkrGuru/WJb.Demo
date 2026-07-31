@@ -1,7 +1,4 @@
-﻿using WJb;
-using Xunit;
-
-namespace WJb.IntegrationTests;
+﻿namespace WJb.IntegrationTests;
 
 /// <summary>
 /// Demonstrates a multi-step workflow.
@@ -22,52 +19,65 @@ public class _05_WorkflowTests
             cfg.AddAction<ArchiveReportAction>("archive-report");
         });
 
-        await runtime.EnqueueAsync("create-report", new CreateReportInput());
+        await runtime.EnqueueAsync(
+            "create-report",
+            new CreateReportInput());
 
         await runtime.ExecuteLoopAsync();
 
         Assert.Equal(
             [
                 "CreateReport",
-                "SendReport",
-                "ArchiveReport"
+            "SendReport",
+            "ArchiveReport"
             ],
             WorkflowState.Executed);
 
-        var completed = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Completed
-            });
+        var jobs = await store.GetJobsAsync();
 
-        Assert.Equal(3, completed.Count);
+        Assert.Equal(
+            3,
+            jobs.Count(x => x.Status == JobStatus.Completed));
     }
 
     public sealed class CreateReportInput;
 
-    public sealed class CreateReportAction : JobAction<CreateReportInput>
+    public sealed class CreateReportAction
+        : JobAction<CreateReportInput>
     {
-        public override Task<ActionResult> ExecuteAsync(CreateReportInput input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            CreateReportInput input,
+            CancellationToken ct = default)
         {
             WorkflowState.Executed.Add("CreateReport");
 
-            return Task.FromResult(ActionResults.Next(new JobCommand("send-report")));
+            return Task.FromResult(
+                ActionResults.Next(
+                    new JobCommand("send-report")));
         }
     }
 
-    public sealed class SendReportAction : JobAction<object>
+    public sealed class SendReportAction
+        : JobAction<object>
     {
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             WorkflowState.Executed.Add("SendReport");
 
-            return Task.FromResult(ActionResults.Next(new JobCommand("archive-report")));
+            return Task.FromResult(
+                ActionResults.Next(
+                    new JobCommand("archive-report")));
         }
     }
 
-    public sealed class ArchiveReportAction : JobAction<object>
+    public sealed class ArchiveReportAction
+        : JobAction<object>
     {
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             WorkflowState.Executed.Add("ArchiveReport");
 

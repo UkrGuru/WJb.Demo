@@ -176,10 +176,8 @@ return ActionResults.Next(new JobCommand(
 
 ## 🎁 Support WJb
 
-If you like this idea:
+📧 ukrguru@gmail.com
 
 👉 https://ko-fi.com/ukrguru
 
-Early supporters (before August 1, 2026):
-
-👉 🎁 **FREE Solo License**
+---

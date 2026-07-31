@@ -8,13 +8,17 @@ public class _07_DynamicRoutingTests
     [Fact]
     public async Task Should_Route_To_Ship_When_Approved()
     {
-        await ExecuteAsync(approved: true, expected: "Ship");
+        await ExecuteAsync(
+            approved: true,
+            expected: "Ship");
     }
 
     [Fact]
     public async Task Should_Route_To_Cancel_When_Rejected()
     {
-        await ExecuteAsync(approved: false, expected: "Cancel");
+        await ExecuteAsync(
+            approved: false,
+            expected: "Cancel");
     }
 
     private static async Task ExecuteAsync(
@@ -32,7 +36,8 @@ public class _07_DynamicRoutingTests
             cfg.AddAction<CancelAction>("cancel");
         });
 
-        await runtime.EnqueueAsync("order",
+        await runtime.EnqueueAsync(
+            "order",
             new OrderInput
             {
                 Approved = approved
@@ -45,13 +50,11 @@ public class _07_DynamicRoutingTests
 
         Assert.Equal(2, RoutingState.Executed.Count);
 
-        var completed = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Completed
-            });
+        var jobs = await store.GetJobsAsync();
 
-        Assert.Equal(2, completed.Count);
+        Assert.Equal(
+            2,
+            jobs.Count(x => x.Status == JobStatus.Completed));
     }
 
     public sealed class OrderInput
@@ -59,21 +62,32 @@ public class _07_DynamicRoutingTests
         public bool Approved { get; set; }
     }
 
-    public sealed class OrderAction : JobAction<OrderInput>
+    public sealed class OrderAction
+        : JobAction<OrderInput>
     {
-        public override Task<ActionResult> ExecuteAsync(OrderInput input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            OrderInput input,
+            CancellationToken ct = default)
         {
             RoutingState.Executed.Add("Order");
 
-            var next = input.Approved ? "ship" : "cancel";
+            var next =
+                input.Approved
+                    ? "ship"
+                    : "cancel";
 
-            return Task.FromResult(ActionResults.Next(new JobCommand(next)));
+            return Task.FromResult(
+                ActionResults.Next(
+                    new JobCommand(next)));
         }
     }
 
-    public sealed class ShipAction : JobAction<object>
+    public sealed class ShipAction
+        : JobAction<object>
     {
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             RoutingState.Executed.Add("Ship");
 
@@ -81,9 +95,12 @@ public class _07_DynamicRoutingTests
         }
     }
 
-    public sealed class CancelAction : JobAction<object>
+    public sealed class CancelAction
+        : JobAction<object>
     {
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             RoutingState.Executed.Add("Cancel");
 

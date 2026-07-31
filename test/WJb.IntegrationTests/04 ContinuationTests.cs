@@ -1,6 +1,4 @@
-﻿using WJb;
-using Xunit;
-
+﻿
 namespace WJb.IntegrationTests;
 
 /// <summary>
@@ -23,33 +21,31 @@ public class _04_ContinuationTests
             cfg.AddAction<ActionB>("action-b");
         });
 
-        await runtime.EnqueueAsync("action-a", new ActionAInput());
+        await runtime.EnqueueAsync(
+            "action-a",
+            new ActionAInput());
 
         await runtime.ExecuteOnceAsync();
 
         Assert.True(ActionA.Executed);
         Assert.False(ActionB.Executed);
 
-        var pending = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Pending
-            });
+        var jobs = await store.GetJobsAsync();
 
-        Assert.Single(pending);
-        Assert.Equal("action-b", pending[0].Action);
+        var pending =
+            jobs.Single(x => x.Status == JobStatus.Pending);
+
+        Assert.Equal("action-b", pending.Action);
 
         await runtime.ExecuteOnceAsync();
 
         Assert.True(ActionB.Executed);
 
-        var completed = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Completed
-            });
+        jobs = await store.GetJobsAsync();
 
-        Assert.Equal(2, completed.Count);
+        Assert.Equal(
+            2,
+            jobs.Count(x => x.Status == JobStatus.Completed));
     }
 
     public sealed class ActionAInput
@@ -60,11 +56,15 @@ public class _04_ContinuationTests
     {
         public static bool Executed { get; set; }
 
-        public override Task<ActionResult> ExecuteAsync(ActionAInput input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            ActionAInput input,
+            CancellationToken ct = default)
         {
             Executed = true;
 
-            return Task.FromResult(ActionResults.Next(new JobCommand("action-b")));
+            return Task.FromResult(
+                ActionResults.Next(
+                    new JobCommand("action-b")));
         }
     }
 
@@ -72,7 +72,9 @@ public class _04_ContinuationTests
     {
         public static bool Executed { get; set; }
 
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             Executed = true;
 

@@ -37,25 +37,21 @@ public class _08_RetryTests
 
         Assert.Equal(3, RetryAction.Attempts);
 
-        var completed = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Completed
-            });
+        var jobs = await store.GetJobsAsync();
 
-        Assert.Single(completed);
+        var completed =
+            jobs.Count(x => x.Status == JobStatus.Completed);
 
-        var failed = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Failed
-            });
+        var failed =
+            jobs.Count(x => x.Status == JobStatus.Failed);
 
-        Assert.Equal(2, failed.Count);
+        Assert.Equal(1, completed);
+
+        Assert.Equal(2, failed);
 
         Assert.Equal(
             3,
-            completed.Count + failed.Count);
+            completed + failed);
     }
 
     public sealed class RetryInput
