@@ -23,7 +23,8 @@ public class _02_DelayedJobTests
 
         TestAction.Executed = () => executed = true;
 
-        await runtime.EnqueueAsync("test",
+        await runtime.EnqueueAsync(
+            "test",
             new TestInput(),
             new JobOptions
             {
@@ -34,21 +35,13 @@ public class _02_DelayedJobTests
 
         Assert.False(executed);
 
-        var pending = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Pending
-            });
+        var jobs = await store.GetJobsAsync();
 
-        Assert.Single(pending);
+        Assert.Empty(
+            jobs.Where(x => x.Status == JobStatus.Completed));
 
-        var completed = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Completed
-            });
-
-        Assert.Empty(completed);
+        Assert.Single(
+            jobs.Where(x => x.Status == JobStatus.Pending));
     }
 
     public sealed class TestInput
@@ -59,7 +52,9 @@ public class _02_DelayedJobTests
     {
         public static Action? Executed;
 
-        public override Task<ActionResult> ExecuteAsync(TestInput input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            TestInput input,
+            CancellationToken ct = default)
         {
             Executed?.Invoke();
 

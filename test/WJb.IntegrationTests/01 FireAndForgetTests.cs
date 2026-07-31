@@ -1,5 +1,5 @@
 ﻿
-[assembly: CollectionBehavior(DisableTestParallelization = false)]
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace WJb.IntegrationTests;
 
@@ -23,13 +23,16 @@ public class _01_FireAndForgetTests
 
         TestAction.Executed = () => executed++;
 
-        var jobId = await runtime.EnqueueAsync("test", new TestInput());
+        var jobId = await runtime.EnqueueAsync(
+            "test",
+            new TestInput());
 
         await runtime.ExecuteOnceAsync();
 
         Assert.Equal(1, executed);
 
-        var executedAgain = await runtime.ExecuteOnceAsync();
+        var executedAgain =
+            await runtime.ExecuteOnceAsync();
 
         Assert.False(executedAgain);
 
@@ -43,11 +46,14 @@ public class _01_FireAndForgetTests
     {
     }
 
-    public sealed class TestAction : JobAction<TestInput>
+    public sealed class TestAction
+        : JobAction<TestInput>
     {
         public static Action? Executed;
 
-        public override Task<ActionResult> ExecuteAsync(TestInput input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            TestInput input,
+            CancellationToken ct = default)
         {
             Executed?.Invoke();
 

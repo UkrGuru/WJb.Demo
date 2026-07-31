@@ -20,7 +20,9 @@ public class _06_FanOutTests
             cfg.AddAction<AuditAction>("audit");
         });
 
-        await runtime.EnqueueAsync("import", new ImportInput());
+        await runtime.EnqueueAsync(
+            "import",
+            new ImportInput());
 
         await runtime.ExecuteLoopAsync();
 
@@ -29,13 +31,11 @@ public class _06_FanOutTests
         Assert.Contains("Notify", FanOutState.Executed);
         Assert.Contains("Audit", FanOutState.Executed);
 
-        var completed = await store.GetJobsAsync(
-            new JobQueryInfo
-            {
-                Status = JobStatus.Completed
-            });
+        var jobs = await store.GetJobsAsync();
 
-        Assert.Equal(4, completed.Count);
+        Assert.Equal(
+            4,
+            jobs.Count(x => x.Status == JobStatus.Completed));
     }
 
     public sealed class ImportInput;
@@ -43,7 +43,9 @@ public class _06_FanOutTests
     public sealed class ImportAction
         : JobAction<ImportInput>
     {
-        public override Task<ActionResult> ExecuteAsync(ImportInput input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            ImportInput input,
+            CancellationToken ct = default)
         {
             FanOutState.Executed.Add("Import");
 
@@ -58,7 +60,9 @@ public class _06_FanOutTests
     public sealed class ValidateAction
         : JobAction<object>
     {
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             FanOutState.Executed.Add("Validate");
 
@@ -66,9 +70,12 @@ public class _06_FanOutTests
         }
     }
 
-    public sealed class NotifyAction : JobAction<object>
+    public sealed class NotifyAction
+        : JobAction<object>
     {
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             FanOutState.Executed.Add("Notify");
 
@@ -76,9 +83,12 @@ public class _06_FanOutTests
         }
     }
 
-    public sealed class AuditAction : JobAction<object>
+    public sealed class AuditAction
+        : JobAction<object>
     {
-        public override Task<ActionResult> ExecuteAsync(object input, CancellationToken ct = default)
+        public override Task<ActionResult> ExecuteAsync(
+            object input,
+            CancellationToken ct = default)
         {
             FanOutState.Executed.Add("Audit");
 
