@@ -46,7 +46,7 @@
         <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
         
         <!-- WJb -->
-        <PackageReference Include="WJb" Version="0.110.0" />
+        <PackageReference Include="WJb" Version="0.111.0" />
 
         <!-- Hangfire -->
         <!-- <PackageReference Include="Hangfire.AspNetCore" Version="1.8.*" /> -->
