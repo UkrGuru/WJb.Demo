@@ -19,10 +19,13 @@
 
     <ItemGroup>
       <Compile Remove="Core\**" />
+      <Compile Remove="Dequeue\**" />
       <Compile Remove="Enqueue\**" />
       <EmbeddedResource Remove="Core\**" />
+      <EmbeddedResource Remove="Dequeue\**" />
       <EmbeddedResource Remove="Enqueue\**" />
       <None Remove="Core\**" />
+      <None Remove="Dequeue\**" />
       <None Remove="Enqueue\**" />
     </ItemGroup>
 
