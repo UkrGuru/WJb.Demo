@@ -1,7 +1,6 @@
 # WJb Documentation
 
-WJb is an explicit background job engine for .NET.
-
+WJb is an explicit background job engine for .NET where workflow transitions are defined in code and never hidden behind pipelines or middleware.
 ```text
 Job
  ↓
@@ -10,6 +9,8 @@ Action
 ActionResult
  ↓
 JobCommand
+ ↓
+Next Job
 ```
 
 Every workflow is visible.
@@ -26,8 +27,8 @@ Start here if you are new to WJb.
 
 ### Core Concepts
 
-- actions.md
-- action-result.md
+- [Actions](actions.md)
+- [ActionResult](action-result.md)
 - [JobCommand](job-command.md)
 - [JobOptions](job-options.md)
 
@@ -37,11 +38,11 @@ Start here if you are new to WJb.
 
 Learn how jobs run.
 
-- Executor
-- progress.md
-- [etry
-- scheduling.md
-- queues.md
+- [Executor](executor.md)
+- [Progress](progress.md)
+- [Retry](retry.md)
+- [Scheduling](scheduling.md)
+- [Queues](queues.md)
 
 ---
 
@@ -49,8 +50,13 @@ Learn how jobs run.
 
 Learn how jobs are persisted.
 
-- store.md
-- [Custom Stores](custom
+- [Store](store.md)
+- [Custom Stores](custom-stores.md)
+
+---
+
+## Packages
+
 ## Packages
 
 ### Core
@@ -62,44 +68,15 @@ Explicit background job engine.
 ### Commercial
 
 - **WJb.Sql**
-- **WJb.Pro**
+- **WJb.Pro** (coming soon)
 
 Documentation:
 
-- [WJbsql.md
+- [WJb.Sql](wjb-sql.md)
 
 ### UI
 
-- [WJ-ui-blazor.md
-
----
-
-## Common Reading Paths
-
-### I Want To Learn WJb
-
-Read in this order:
-
-1. [Actionsmd
-2. [ActionResult](action-result.nd.md
-4. [JobOptions.md
-5. [Executor](executor## I Want Production Deployment
-
-Read:
-
-1. store.md
-2. [Queues3. scheduling.md
-4. retry.md
-5. [WJbsql.md
-
----
-
-### I Want To Build Extensions
-
-Read:
-
-1. store.md
-2. [Custom Stores](customtor.md
+- [WJb.UI.Blazor](wjb-ui-blazor.md)
 
 ---
 
@@ -148,7 +125,7 @@ That is the core idea behind WJb.
 
 Common questions:
 
-- faq.md
+- [FAQ](faq.md)
 
 ---
 
