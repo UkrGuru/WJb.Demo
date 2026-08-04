@@ -1,27 +1,65 @@
-# WJb Samples
+# WJb Demos
 
-This folder contains sample applications built with WJb.
+This repository contains demonstration projects for WJb.
 
-## Projects
+## Community Edition
 
 ### [WJb.Demo.MinApi](./WJb.Demo.MinApi)
 
-Minimal API sample demonstrating WJb integration with ASP.NET Core.
+A minimal ASP.NET Core API demonstrating:
 
-### [WJb.Demo.Monitor](./WJb.Demo.Monitor)
+- Job creation
+- Background execution
+- Progress reporting
+- Result retrieval
+- In-memory storage
 
-Complete WJb and WJb.UI.Blazor demonstration application.
+### [WJb.Demo.Blazor](./WJb.Demo.Blazor)
 
-Demonstrates:
+A Blazor Server application demonstrating:
 
-- Action management
-- Service management
-- Workflow execution
-- Job monitoring
-- Progress tracking
-- Result inspection
-- WJb.UI.Blazor components
+- Workflow monitoring
+- Real-time progress visualization
+- Job payload inspection
+- Action discovery
+- Service discovery
+- Integration with WJb services
+
+This sample demonstrates a complete monitoring dashboard for WJb workflows and background job execution.
 
 ### [WJb.Demo.Wasm](./WJb.Demo.Wasm)
 
-Blazor WebAssembly sample demonstrating WJb integration in a client application.
+A Blazor WebAssembly application demonstrating:
+
+- Client-side job execution
+- Progress reporting
+- Result inspection
+- Browser-based processing
+- Zero server-side workers
+
+This sample demonstrates running WJb entirely in the browser without background services or server-side job execution.
+
+## Commercial Edition
+
+### WJb.Sql.Demo
+
+Demonstrates SQL Server integration using WJb.Sql.
+
+Features include:
+
+- Persistent job storage
+- Durable execution
+- Multi-instance processing
+- Production-oriented configuration
+
+> Available only in the commercial edition.
+
+### WJb.Pro.Demo
+
+Demonstrates advanced capabilities available in WJb.Pro.
+
+> Available only in the commercial edition.
+
+## Getting Started
+
+Start with the Community Edition demos to learn the core WJb concepts and workflow.
