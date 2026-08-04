@@ -90,18 +90,6 @@ public sealed class SendEmailAction(SmtpSettings smtp)
         EmailInput input,
         CancellationToken ct)
     {
-        Console.WriteLine(
-            $"SMTP: {smtp.Host}:{smtp.Port}");
-
-        Console.WriteLine(
-            $"From: {smtp.From}");
-
-        Console.WriteLine(
-            $"To: {input.To}");
-
-        Console.WriteLine(
-            $"Subject: {input.Subject}");
-
         return Task.FromResult(
             ActionResults.None());
     }
