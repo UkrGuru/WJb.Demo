@@ -416,3 +416,13 @@ Next Job
 If the workflow is visible, it is easier to maintain.
 
 That is the core idea behind WJb.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/13 FaqTests.cs](../test/WJb.DocTests/13%20FaqTests.cs)

@@ -325,3 +325,13 @@ If you can read an action and immediately answer:
 then the workflow is explicit.
 
 That is the core idea behind WJb.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/01 ActionsTests.cs](../test/WJb.DocTests/01%20ActionsTests.cs)

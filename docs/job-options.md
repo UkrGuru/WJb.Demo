@@ -210,3 +210,13 @@ JobOptions = When / How
 `JobOptions` does not change business logic.
 
 `JobOptions` only controls scheduling and retry behavior.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/04 JobOptionsTests.cs](../test/WJb.DocTests/04%20JobOptionsTests.cs)

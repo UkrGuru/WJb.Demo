@@ -317,3 +317,13 @@ An action does not directly execute another action.
 An action returns an `ActionResult`.
 
 The `ActionResult` describes what happens next.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/02 ActionResultTests.cs](../test/WJb.DocTests/02%20ActionResultTests.cs)

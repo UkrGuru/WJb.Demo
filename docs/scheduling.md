@@ -202,3 +202,13 @@ Queue = Where
 Scheduling answers a single question:
 
 > When should this job become available for execution?
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/08 SchedulingTests.cs](../test/WJb.DocTests/08%20SchedulingTests.cs)

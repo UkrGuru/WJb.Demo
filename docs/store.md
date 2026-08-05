@@ -281,3 +281,13 @@ The store is persistence.
 Nothing more.
 
 Nothing less.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/10 StoreTests.cs](../test/WJb.DocTests/10%20StoreTests.cs)

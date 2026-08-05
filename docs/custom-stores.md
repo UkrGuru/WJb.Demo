@@ -320,3 +320,13 @@ A store should answer one question:
 > How are jobs persisted?
 
 Nothing else should influence its design.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/11 CustomStoresTests.cs](../test/WJb.DocTests/11%20CustomStoresTests.cs)
