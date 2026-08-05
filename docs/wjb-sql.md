@@ -2,6 +2,8 @@
 
 WJb.Sql is the SQL Server storage provider for WJb.
 
+> // Available only in the commercial edition.
+
 ```text
 WJb
  ↓

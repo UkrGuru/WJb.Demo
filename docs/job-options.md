@@ -1,6 +1,6 @@
 # JobOptions
 
-`JobOptions` controls when and where a job executes.
+`JobOptions` controls how a job is scheduled and retried.
 
 ```text
 Job
@@ -8,8 +8,8 @@ Job
 JobOptions
  ↓
 Queue
-Schedule
 Delay
+Retry
 ```
 
 Job options are optional.
@@ -54,23 +54,7 @@ Wait 5 Minutes
 send-email
 ```
 
----
-
-## Schedule
-
-Use a specific timestamp.
-
-```csharp
-await wjb.EnqueueAsync(
-    "send-email",
-    payload,
-    new JobOptions
-    {
-        RunAt = DateTime.UtcNow.AddHours(1)
-    });
-```
-
-The job will not execute before the specified time.
+A delay of `TimeSpan.Zero` means immediate execution.
 
 ---
 
@@ -99,29 +83,96 @@ Only jobs from that queue will execute.
 
 ---
 
-## From JobCommand
+## Retries
 
-Options can also be used inside workflow commands.
+Configure how many times a failed job may be retried.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "email",
-        payload,
-        new JobOptions
-        {
-            Delay = TimeSpan.FromMinutes(30)
-        }));
+await wjb.EnqueueAsync(
+    "send-email",
+    payload,
+    new JobOptions
+    {
+        MaxRetries = 3
+    });
 ```
 
 Workflow:
 
 ```text
-Action
- ↓
-Wait 30 Minutes
- ↓
-email
+Attempt 1
+   ↓
+Failure
+   ↓
+Attempt 2
+   ↓
+Failure
+   ↓
+Attempt 3
+```
+
+---
+
+## Retry Delay
+
+Use a fixed delay between retry attempts.
+
+```csharp
+await wjb.EnqueueAsync(
+    "send-email",
+    payload,
+    new JobOptions
+    {
+        MaxRetries = 3,
+        RetryDelay = TimeSpan.FromSeconds(10)
+    });
+```
+
+Each retry waits 10 seconds.
+
+---
+
+## Exponential Backoff
+
+Retry delays can grow automatically after each failure.
+
+```csharp
+await wjb.EnqueueAsync(
+    "send-email",
+    payload,
+    new JobOptions
+    {
+        MaxRetries = 5,
+        RetryDelay = TimeSpan.FromSeconds(5),
+        ExponentialBackoff = true
+    });
+```
+
+Retry schedule:
+
+```text
+Attempt 1 → 5s
+Attempt 2 → 10s
+Attempt 3 → 20s
+Attempt 4 → 40s
+```
+
+---
+
+## Default Values
+
+```csharp
+new JobOptions()
+```
+
+Defaults:
+
+```text
+Queue = null
+Delay = 00:00:00
+MaxRetries = 0
+RetryDelay = 00:00:05
+ExponentialBackoff = false
 ```
 
 ---
@@ -132,13 +183,17 @@ email
 
 ✅ Use delays for future work
 
-✅ Use explicit scheduling
+✅ Configure retries intentionally
+
+✅ Use exponential backoff for transient failures
 
 ✅ Keep queue names simple
 
 ❌ Use queues as business rules
 
 ❌ Create excessive queue counts
+
+❌ Retry non-transient failures forever
 
 ---
 
@@ -149,5 +204,9 @@ Action     = What
 
 Payload    = Data
 
-JobOptions = When / Where
+JobOptions = When / How
 ```
+
+`JobOptions` does not change business logic.
+
+`JobOptions` only controls scheduling and retry behavior.

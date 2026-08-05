@@ -71,7 +71,30 @@ This is the most common production configuration.
 
 ---
 
+## Running Continuously
+
+Run jobs in a loop.
+
+```csharp
+await wjb.ExecuteLoopAsync();
+```
+
+The executor continuously:
+
+```text
+Dequeue
+Execute
+Complete
+Repeat
+```
+
+This is the most common production configuration.
+
+---
+
 ## Queue Execution
+
+> // Available only in the commercial edition.
 
 Execute jobs from a specific queue.
 

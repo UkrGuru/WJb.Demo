@@ -1,5 +1,7 @@
 # Queues
 
+> // Available only in the commercial edition.
+
 Queues allow jobs to be separated by workload.
 
 Instead of processing everything through a single worker, jobs can be routed to dedicated queues.
@@ -54,8 +56,6 @@ The job is stored in the specified queue.
 
 ## Processing a Queue
 
-Workers can execute jobs from a specific queue.
-
 ```csharp
 await wjb.ExecuteLoopAsync(
     queue: "email");
@@ -84,31 +84,6 @@ import queue │ ImportWorker │
 ```
 
 Each worker focuses on a single type of workload.
-
----
-
-## Queue From JobCommand
-
-Queues can also be specified for workflow transitions.
-
-```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "send-email",
-        payload,
-        new JobOptions
-        {
-            Queue = "email"
-        }));
-```
-
-Workflow:
-
-```text
-process-order
-      ↓
-send-email (email queue)
-```
 
 ---
 

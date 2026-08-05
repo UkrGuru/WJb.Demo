@@ -35,7 +35,7 @@ The command specifies:
 
 - Action key
 - Payload
-- Optional execution options
+- Execution condition
 
 ---
 
@@ -124,55 +124,97 @@ new JobCommand(
     });
 ```
 
+Payloads are automatically serialized and stored with the command.
+
 ---
 
-## Delayed Execution
+## Command Conditions
 
-Use `JobOptions` to schedule a command in the future.
+### Success (Default)
 
 ```csharp
 new JobCommand(
     "send-email",
-    new EmailInput
-    {
-        To = "user@test.com"
-    },
-    new JobOptions
-    {
-        Delay = TimeSpan.FromMinutes(5)
-    });
+    email);
 ```
 
-Workflow:
-
-```text
-Action
-   ↓
-Wait 5 minutes
-   ↓
-send-email
-```
-
----
-
-## Queues
-
-Use queues to route work.
+Equivalent:
 
 ```csharp
 new JobCommand(
     "send-email",
-    new EmailInput
-    {
-        To = "user@test.com"
-    },
-    new JobOptions
-    {
-        Queue = "email"
-    });
+    email,
+    JobCommandCondition.Success);
 ```
 
-The job will be scheduled into the specified queue.
+The command runs when the action completes successfully.
+
+### Failure
+
+```csharp
+new JobCommand(
+    "notify-admin",
+    notification,
+    JobCommandCondition.Failure);
+```
+
+The command runs when the action fails.
+
+---
+
+## Helper Methods
+
+WJb provides helper methods for common scenarios.
+
+### JobCommands.Next
+
+```csharp
+JobCommands.Next(
+    "send-email",
+    email);
+```
+
+Produces:
+
+```csharp
+new JobCommand(
+    "send-email",
+    email,
+    JobCommandCondition.Success);
+```
+
+### JobCommands.OnFailure
+
+```csharp
+JobCommands.OnFailure(
+    "notify-admin",
+    notification);
+```
+
+Produces:
+
+```csharp
+new JobCommand(
+    "notify-admin",
+    notification,
+    JobCommandCondition.Failure);
+```
+
+---
+
+## Accessing Payloads
+
+Payloads can be converted back into strongly typed models.
+
+```csharp
+var email = command.GetPayload<EmailInput>();
+```
+
+For object payloads:
+
+```csharp
+var payload = command.AsObject();
+```
 
 ---
 
@@ -218,9 +260,9 @@ The workflow is defined directly in code.
 
 ✅ Keep commands focused
 
-✅ Use queues intentionally
+✅ Use command conditions intentionally
 
-✅ Use delays only when needed
+✅ Keep workflow transitions visible
 
 ❌ Hidden transitions
 

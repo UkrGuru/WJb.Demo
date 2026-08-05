@@ -60,119 +60,22 @@ send-email
 
 ---
 
-## Scheduled Time
+## How Scheduling Works
 
-Use a specific timestamp.
+WJb calculates the execution time from the current time and the configured delay.
 
 ```csharp
-await wjb.EnqueueAsync(
-    "send-email",
-    payload,
-    new JobOptions
-    {
-        RunAt = DateTime.UtcNow.AddHours(1)
-    });
+var options = new JobOptions
+{
+    Delay = TimeSpan.FromHours(1)
+};
 ```
 
-Workflow:
-
-```text
-Now
- ↓
-13:00 UTC
- ↓
-send-email
-```
-
-The job will not be dequeued before its scheduled time.
+The job becomes available one hour later.
 
 ---
 
-## Scheduling From Actions
-
-Actions can schedule future work.
-
-```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "send-reminder",
-        payload,
-        new JobOptions
-        {
-            Delay = TimeSpan.FromDays(1)
-        }));
-```
-
-Workflow:
-
-```text
-create-account
-       ↓
-Wait 1 Day
-       ↓
-send-reminder
-```
-
----
-
-## Reminder Workflow
-
-```text
-register-user
-       ↓
-welcome-email
-       ↓
-wait 7 days
-       ↓
-follow-up-email
-```
-
-```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "follow-up-email",
-        input,
-        new JobOptions
-        {
-            Delay = TimeSpan.FromDays(7)
-        }));
-```
-
----
-
-## Multiple Scheduled Jobs
-
-An action may schedule several future jobs.
-
-```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "email",
-        payload,
-        new JobOptions
-        {
-            Delay = TimeSpan.FromMinutes(5)
-        }),
-    new JobCommand(
-        "audit",
-        payload,
-        new JobOptions
-        {
-            Delay = TimeSpan.FromHours(1)
-        }));
-```
-
-Workflow:
-
-```text
-              ┌─→ email (5 min)
-current-job
-              └─→ audit (1 hour)
-```
-
----
-
-## Scheduling vs Queues
+## Scheduling and Queues
 
 Scheduling determines:
 
@@ -202,6 +105,30 @@ Meaning:
 Wait 30 Minutes
        ↓
 Email Queue
+```
+
+---
+
+## Reminder Workflow
+
+```text
+register-user
+       ↓
+wait 7 days
+       ↓
+follow-up-email
+```
+
+Enqueue:
+
+```csharp
+await wjb.EnqueueAsync(
+    "follow-up-email",
+    payload,
+    new JobOptions
+    {
+        Delay = TimeSpan.FromDays(7)
+    });
 ```
 
 ---
@@ -252,7 +179,7 @@ Delete Temporary Files
 
 ✅ Keep scheduling logic visible
 
-✅ Store schedule information inside workflows
+✅ Keep delay values close to workflow code
 
 ❌ Hide scheduling in infrastructure
 
