@@ -241,3 +241,13 @@ WJb.Sql = Persistence
 WJb.Sql is responsible for storing jobs.
 
 Nothing else changes.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/12 WjbSqlTests.cs](../test/WJb.DocTests/12%20WjbSqlTests.cs)

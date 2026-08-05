@@ -466,3 +466,13 @@ Job     = Next Attempt
 A retry is not magic.
 
 A retry is simply another job.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/07 RetryTests.cs](../test/WJb.DocTests/07%20RetryTests.cs)

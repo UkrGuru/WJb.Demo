@@ -153,3 +153,13 @@ if the current value is lower.
 ## Failure
 
 If a job fails, the last progress value remains available for diagnostics.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/06 ProgressTests.cs](../test/WJb.DocTests/06%20ProgressTests.cs)

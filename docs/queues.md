@@ -241,3 +241,13 @@ Queue = Where It Runs
 Queues help organize execution.
 
 They should not define behavior.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/09 QueueTests.cs](../test/WJb.DocTests/09%20QueueTests.cs)

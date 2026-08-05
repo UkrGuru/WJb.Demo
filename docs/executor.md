@@ -381,3 +381,13 @@ JobCommand
 The executor runs the workflow.
 
 The action defines the workflow.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/05 ExecutorTests.cs](../test/WJb.DocTests/05%20ExecutorTests.cs)

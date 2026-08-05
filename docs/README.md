@@ -127,6 +127,16 @@ Common questions:
 
 ---
 
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+[../test/WJb.DocTests](../test/WJb.DocTests/README.md)
+
+---
+
 ## Support
 
 📧 ukrguru@gmail.com
@@ -136,3 +146,6 @@ Common questions:
 ---
 
 > Background jobs shouldn't be magic.
+
+---
+

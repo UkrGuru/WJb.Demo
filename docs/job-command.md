@@ -289,3 +289,13 @@ A `JobCommand` does not execute anything.
 A `JobCommand` only describes what should run next.
 
 That explicit transition is what makes workflows easy to understand, debug, and maintain.
+
+---
+
+## Source Code
+
+Documentation examples are verified by automated documentation tests.
+
+Tests:
+
+-[../test/WJb.DocTests/03 JobCommandTests.cs](../test/WJb.DocTests/03%20JobCommandTests.cs)
