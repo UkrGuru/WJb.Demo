@@ -102,16 +102,16 @@ await wjb.EnqueueAsync(
     });
 ```
 
-Or:
+You can also calculate the execution time:
 
 ```csharp
-await wjb.EnqueueAsync(
-    "send-email",
-    payload,
-    new JobOptions
-    {
-        RunAt = DateTime.UtcNow.AddHours(1)
-    });
+var options = new JobOptions
+{
+    Delay = TimeSpan.FromHours(1)
+};
+
+var runAt =
+    options.GetRunAt(DateTime.UtcNow);
 ```
 
 ---
@@ -119,6 +119,8 @@ await wjb.EnqueueAsync(
 ## Does WJb Support Queues?
 
 Yes.
+
+> // Available only in the commercial edition.
 
 ```csharp
 await wjb.EnqueueAsync(
@@ -193,24 +195,30 @@ WJb stores the failure information and marks the job as failed.
 
 ## Does WJb Retry Automatically?
 
-No.
+Yes.
 
-Retries are explicit.
-
-Example:
+Retries can be configured using `JobOptions`.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "send-email",
-        input,
-        new JobOptions
-        {
-            Delay = TimeSpan.FromMinutes(5)
-        }));
+new JobOptions
+{
+    MaxRetries = 3,
+    RetryDelay = TimeSpan.FromMinutes(1)
+}
 ```
 
-The retry is visible in code.
+Exponential backoff is also supported.
+
+```csharp
+new JobOptions
+{
+    MaxRetries = 5,
+    RetryDelay = TimeSpan.FromSeconds(5),
+    ExponentialBackoff = true
+}
+```
+
+Retry behavior remains explicit because it is configured directly in application code.
 
 ---
 
@@ -343,7 +351,7 @@ await wjb.EnqueueAsync(
 Yes.
 
 ```csharp
-await Context.UpdateProgressAsync(
+ReportProgress(
     50,
     "Processing records");
 ```

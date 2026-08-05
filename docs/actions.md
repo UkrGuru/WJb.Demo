@@ -23,17 +23,12 @@ Inherit from `JobAction<TInput>`:
 ```csharp
 public sealed class SendEmailAction : JobAction<EmailInput>
 {
-    public override async Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override Task<ActionResult> ExecuteAsync(
+        EmailInput input, CancellationToken ct)
     {
-        await _email.SendAsync(
-            input.To,
-            input.Subject,
-            input.Body,
-            ct);
+        Input = input;
 
-        return ActionResults.None();
+        return Task.FromResult(ActionResults.None());
     }
 }
 ```

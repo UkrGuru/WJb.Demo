@@ -52,17 +52,150 @@ You can see where and why the retry was created.
 
 ---
 
-## Simple Retry
+## Configuring Retries
+
+Retries are configured using `JobOptions`.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "send-email",
-        input,
-        new JobOptions
-        {
-            Delay = TimeSpan.FromMinutes(1)
-        }));
+await wjb.EnqueueAsync(
+    "send-email",
+    payload,
+    new JobOptions
+    {
+        MaxRetries = 3
+    });
+```
+
+Workflow:
+
+```text
+Attempt 1
+   ↓
+Failure
+   ↓
+Attempt 2
+   ↓
+Failure
+   ↓
+Attempt 3
+```
+
+---
+
+## Retry Delay
+
+Use a delay between retry attempts.
+
+```csharp
+await wjb.EnqueueAsync(
+    "send-email",
+    payload,
+    new JobOptions
+    {
+        MaxRetries = 3,
+        RetryDelay = TimeSpan.FromMinutes(1)
+    });
+```
+
+Each retry waits one minute before the next attempt.
+
+---
+
+## Exponential Backoff
+
+Retry delays can increase automatically after each failure.
+
+```csharp
+await wjb.EnqueueAsync(
+    "send-email",
+    payload,
+    new JobOptions
+    {
+        MaxRetries = 5,
+        RetryDelay = TimeSpan.FromMinutes(2),
+        ExponentialBackoff = true
+    });
+```
+
+Produces:
+
+```text
+Attempt 1 → 2 min
+
+Attempt 2 → 4 min
+
+Attempt 3 → 8 min
+
+Attempt 4 → 16 min
+```
+
+---
+
+## Retry Counter
+
+Applications can still track attempts in the payload when needed.
+
+Example payload:
+
+```csharp
+public sealed class EmailInput
+{
+    public string To { get; init; } = "";
+
+    public int Attempt { get; init; }
+}
+```
+
+Example:
+
+```csharp
+var next = input with
+{
+    Attempt = input.Attempt + 1
+};
+```
+
+---
+
+## Maximum Attempts
+
+Prevent infinite retries.
+
+```csharp
+new JobOptions
+{
+    MaxRetries = 5
+}
+```
+
+Example workflow:
+
+```text
+Attempt 1
+    ↓
+Attempt 2
+    ↓
+Attempt 3
+    ↓
+Attempt 4
+    ↓
+Attempt 5
+    ↓
+Stop
+```
+
+---
+
+## Failure Processing
+
+Retries are not the only option.
+
+A failed action can trigger follow-up work.
+
+```csharp
+JobCommands.OnFailure(
+    "notify-admin",
+    input);
 ```
 
 Workflow:
@@ -70,12 +203,36 @@ Workflow:
 ```text
 send-email
       ↓
-wait 1 minute
+failure
       ↓
-send-email
+notify-admin
 ```
 
 ---
+
+## Hidden Retry vs Explicit Retry
+
+Hidden:
+
+```text
+Fail
+ ↓
+Infrastructure
+ ↓
+Retry
+```
+
+WJb:
+
+```text
+Fail
+ ↓
+JobOptions
+ ↓
+Retry
+```
+
+Retry behavior is configured explicitly and remains visible in code.
 
 ## Retry After Failure
 
