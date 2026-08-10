@@ -1,0 +1,20 @@
+{
+  "sections": [
+    {
+      "title": "Start",
+      "code": "await Store.EnqueueAsync(\n    CreateOrderAction.Key,\n    new OrderInput\n    {\n        OrderId = 1001\n    });"
+    },
+    {
+      "title": "Workflow",
+      "code": "CreateOrderAction\n    -> ReserveStockAction\n        -> ChargePaymentAction\n            -> SendConfirmationAction\n                -> LogAction"
+    },
+    {
+      "title": "Payload",
+      "code": "public sealed class OrderInput\n{\n    public int OrderId { get; set; }\n}"
+    },
+    {
+      "title": "Action",
+      "code": "public sealed class CreateOrderAction : JobAction<OrderInput>\n{\n    public override async Task<ActionResult> ExecuteAsync(\n        OrderInput input,\n        CancellationToken ct)\n    {\n        ReportProgress(25, \"Order created\");\n\n        await Task.Delay(300, ct);\n\n        return ActionResults.Next(\n            JobCommands.Next<ReserveStockAction>(input));\n    }\n}\n\npublic sealed class ReserveStockAction : JobAction<OrderInput>\n{\n    public override async Task<ActionResult> ExecuteAsync(\n        OrderInput input,\n        CancellationToken ct)\n    {\n        ReportProgress(50, \"Stock reserved\");\n\n        await Task.Delay(300, ct);\n\n        return ActionResults.Next(\n            JobCommands.Next<ChargePaymentAction>(input));\n    }\n}\n\npublic sealed class ChargePaymentAction : JobAction<OrderInput>\n{\n    public override async Task<ActionResult> ExecuteAsync(\n        OrderInput input,\n        CancellationToken ct)\n    {\n        ReportProgress(75, \"Payment charged\");\n\n        await Task.Delay(300, ct);\n\n        return ActionResults.Next(\n            JobCommands.Next<SendConfirmationAction>(input));\n    }\n}\n\npublic sealed class SendConfirmationAction : JobAction<OrderInput>\n{\n    public override async Task<ActionResult> ExecuteAsync(\n        OrderInput input,\n        CancellationToken ct)\n    {\n        ReportProgress(\n            100,\n            $\"Order #{input.OrderId} completed\");\n\n        await Task.Delay(300, ct);\n\n        return ActionResults.Next(\n            JobCommands.Next<LogAction>(\n                new LogInput\n                {\n                    Message = $\"Workflow completed for order #{input.OrderId}\"\n                }));\n    }\n}"
+    }
+  ]
+}

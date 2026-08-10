@@ -1,0 +1,16 @@
+{
+  "sections": [
+    {
+      "title": "Start",
+      "code": "await Store.EnqueueAsync(\n    ProgressAction.Key,\n    new ProgressPayload\n    {\n        DelayMs = 300\n    });"
+    },
+    {
+      "title": "Payload",
+      "code": "public sealed class ProgressPayload\n{\n    public int DelayMs { get; set; } = 300;\n}"
+    },
+    {
+      "title": "Action",
+      "code": "public sealed class ProgressAction : JobAction<ProgressPayload>, IProgressAction\n{\n    public const string Key = \"progress\";\n\n    public override async Task<ActionResult> ExecuteAsync(\n        ProgressPayload input,\n        CancellationToken ct = default)\n    {\n        for (int i = 0; i <= 100; i += 25)\n        {\n            ct.ThrowIfCancellationRequested();\n\n            ReportProgress(i, $\"Processing {i}%\");\n\n            await Task.Delay(input.DelayMs, ct);\n        }\n\n        ReportProgress(100, \"Completed ✅\");\n\n        return ActionResults.None();\n    }\n}"
+    }
+  ]
+}

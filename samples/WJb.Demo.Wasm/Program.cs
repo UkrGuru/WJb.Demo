@@ -44,9 +44,6 @@ builder.Services.AddSingleton<IWJb>(sp =>
         cfg.AddAction<ChargePaymentAction>(ChargePaymentAction.Key);
         cfg.AddAction<SendConfirmationAction>(SendConfirmationAction.Key);
 
-        // Demo
-        cfg.AddAction<DemoAction>(DemoAction.Key);
-
         cfg.AddService(new SmtpSettings
         {
             Host = "smtp.local"
@@ -56,67 +53,10 @@ builder.Services.AddSingleton<IWJb>(sp =>
     return wjb;
 });
 
-builder.Services.AddSingleton<IJobExecutor>(sp =>
-    sp.GetRequiredService<IWJb>());
-
-builder.Services.AddSingleton<IActionFactory>(sp =>
-    sp.GetRequiredService<IWJb>());
-
-builder.Services.AddSingleton<JobEngineLite>();
-
-builder.Services.AddSingleton<IJobClient>(sp =>
-    sp.GetRequiredService<JobEngineLite>());
-
-builder.Services.AddSingleton<IJobQuery>(sp =>
-    sp.GetRequiredService<JobEngineLite>());
-
-builder.Services.AddSingleton<IJobNotifier>(sp =>
-    sp.GetRequiredService<JobEngineLite>());
+builder.Services.AddSingleton<WasmWorker>();
 
 var app = builder.Build();
 
-var engine = app.Services.GetRequiredService<JobEngineLite>();
-
-for (var i = 0; i < 3; i++)
-{
-    _ = Task.Run(() => engine.RunAsync());
-}
+app.Services.GetRequiredService<WasmWorker>().Start();
 
 await app.RunAsync();
-
-public sealed class DemoPayload
-{
-    public int DelayMs { get; set; } = 1000;
-
-    public string? Text { get; set; }
-}
-
-public sealed class DemoAction : JobAction<DemoPayload>
-{
-    public const string Key = "demo";
-
-    public override async Task<ActionResult> ExecuteAsync(
-        DemoPayload input,
-        CancellationToken ct)
-    {
-        var totalDelay = Math.Max(input.DelayMs, 1);
-        var stepDelay = Math.Max(totalDelay / 10, 1);
-
-        for (var i = 0; i <= 100; i += 10)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            ReportProgress(
-                i,
-                $"Progress {i}%");
-
-            await Task.Delay(stepDelay, ct);
-        }
-
-        return ActionResults.Result(new
-        {
-            message = input.Text,
-            completedAt = DateTime.UtcNow
-        });
-    }
-}

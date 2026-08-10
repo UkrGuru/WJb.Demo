@@ -1,0 +1,20 @@
+{
+  "sections": [
+    {
+      "title": "Start",
+      "code": "await Client.EnqueueAsync(\n    ConfiguredAction.Key,\n    new EmailInput\n    {\n        To = \"test@test.com\"\n    });"
+    },
+    {
+      "title": "Action",
+      "code": "public sealed class ConfiguredAction(SmtpSettings? smtp)\n    : JobAction<EmailInput>\n{\n}"
+    },
+    {
+      "title": "Payload",
+      "code": "public sealed class EmailInput\n{\n    public string? To { get; set; }\n}"
+    },
+    {
+      "title": "Settings",
+      "code": "public sealed class SmtpSettings\n{\n    public string Host { get; set; } = \"\";\n}"
+    }
+  ]
+}

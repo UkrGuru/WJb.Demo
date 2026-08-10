@@ -10,14 +10,11 @@ public sealed class ReportInput
     public int ImportedCustomers { get; set; }
 }
 
-public sealed class ImportCustomersAction
-    : JobAction<ImportCustomersInput>, IProgressAction
+public sealed class ImportCustomersAction : JobAction<ImportCustomersInput>, IProgressAction
 {
     public const string Key = "import-customers";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        ImportCustomersInput input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(ImportCustomersInput input, CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 25)
         {
@@ -27,8 +24,7 @@ public sealed class ImportCustomersAction
         }
 
         return ActionResults.Next(
-            new JobCommand(
-                GenerateReportAction.Key,
+            new JobCommand(GenerateReportAction.Key,
                 new ReportInput
                 {
                     ImportedCustomers = 1250
@@ -42,14 +38,11 @@ public sealed class EmailInput
     public string Subject { get; set; } = "";
 }
 
-public sealed class GenerateReportAction
-    : JobAction<ReportInput>, IProgressAction
+public sealed class GenerateReportAction : JobAction<ReportInput>, IProgressAction
 {
     public const string Key = "generate-report";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        ReportInput input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(ReportInput input, CancellationToken ct)
     {
         ReportProgress(25, "Preparing report");
 
@@ -62,8 +55,7 @@ public sealed class GenerateReportAction
         ReportProgress(100, "Report generated");
 
         return ActionResults.Next(
-            new JobCommand(
-                SendEmailAction.Key,
+            new JobCommand(SendEmailAction.Key,
                 new EmailInput
                 {
                     To = "admin@demo.local",
@@ -81,16 +73,14 @@ public sealed class SmtpSettings
     public string From { get; set; } = "";
 }
 
-public sealed class SendEmailAction(SmtpSettings smtp)
-    : JobAction<EmailInput>
+public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
 {
     public const string Key = "send-email";
 
-    public override Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override async Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
     {
-        return Task.FromResult(
-            ActionResults.None());
+        ReportProgress(100, "Email sent");
+
+        return ActionResults.None();
     }
 }

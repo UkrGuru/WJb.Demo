@@ -1,0 +1,53 @@
+﻿@inject HttpClient Http
+
+@if (Document != null)
+{
+    <details class="mt-3">
+        <summary class="text-muted">
+            Show code
+        </summary>
+
+        <div class="card mt-3">
+            <div class="card-body">
+
+                @foreach (var section in Document.Sections)
+                {
+                    <div class="mb-4">
+
+                        <h6 class="text-muted">
+                            @section.Title
+                        </h6>
+
+                        <pre class="bg-light p-2 rounded small mb-0"><code>@section.Code</code></pre>
+
+                    </div>
+                }
+
+            </div>
+        </div>
+    </details>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Source { get; set; } = default!;
+
+    public sealed class SourceDocument
+    {
+        public List<SourceSection> Sections { get; set; } = [];
+    }
+
+    public sealed class SourceSection
+    {
+        public string Title { get; set; } = "";
+        public string Code { get; set; } = "";
+    }
+
+    private SourceDocument? Document;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Document = await Http.GetFromJsonAsync<SourceDocument>(
+            $"sources/{Source}");
+    }
+}

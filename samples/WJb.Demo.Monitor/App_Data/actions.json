@@ -1,8 +1,1 @@
-{
-  "import-customers": { "type": "ImportCustomersAction, WJb.Demo.Monitor" },
-  "generate-report": { "type": "GenerateReportAction, WJb.Demo.Monitor" },
-  "send-email": {
-    "type": "SendEmailAction, WJb.Demo.Monitor",
-    "smtpCode": "smtp"
-  }
-}
+{"import-customers":{"type":"ImportCustomersAction, WJb.Demo.Monitor"},"generate-report":{"type":"GenerateReportAction, WJb.Demo.Monitor"},"send-email":{"type":"SendEmailAction, WJb.Demo.Monitor","smtpCode":"smtp"}}

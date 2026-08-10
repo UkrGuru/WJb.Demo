@@ -1,0 +1,8 @@
+{
+  "hello": {
+    "type": "WJb.Demo.Wasm.Actions.HelloAction, WJb.Demo.Wasm"
+  },
+  "configured": {
+    "type": "WJb.Demo.Wasm.Actions.ConfiguredAction, WJb.Demo.Wasm"
+  }
+}

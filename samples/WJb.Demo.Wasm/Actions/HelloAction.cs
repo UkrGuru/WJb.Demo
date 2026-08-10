@@ -1,4 +1,4 @@
-﻿namespace WJb.Demo.Wasm.Actions;
+﻿using WJb;
 
 public sealed class HelloPayload
 {
@@ -9,12 +9,12 @@ public sealed class HelloAction : JobAction<HelloPayload>
 {
     public const string Key = "hello";
 
-    public override Task<ActionResult> ExecuteAsync(HelloPayload input, CancellationToken ct = default)
+    public override async Task<ActionResult> ExecuteAsync(HelloPayload input, CancellationToken ct = default)
     {
         var message = input.Text ?? "Hello from WJb ✅";
 
         ReportProgress(100, message);
 
-        return Task.FromResult(ActionResults.None());
+        return ActionResults.None();
     }
 }

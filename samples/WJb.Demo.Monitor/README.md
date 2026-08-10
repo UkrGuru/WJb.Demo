@@ -2,7 +2,7 @@
 
 Want to see what a complete workflow looks like in WJb?
 
-The new **WJb.Demo.Monitor** sample demonstrates an end-to-end job pipeline with a live monitoring UI.
+The new **WJb.Demo.Monitor** sample demonstrates an end-to-end workflow with live monitoring, action management, service configuration, and job inspection.
 
 ![WJb Monitor](https://raw.githubusercontent.com/UkrGuru/WJb.Demo/main/assets/wjb-monitor.png)
 
@@ -11,7 +11,7 @@ The new **WJb.Demo.Monitor** sample demonstrates an end-to-end job pipeline with
 ✅ Send Email  
 ✅ Monitor execution in real time
 
-Run a single action:
+Run a workflow:
 
 ```csharp
 await wjb.EnqueueAsync(
@@ -22,7 +22,7 @@ await wjb.EnqueueAsync(
     });
 ```
 
-WJb automatically chains the workflow:
+WJb automatically executes the workflow:
 
 ```text
 import-customers
@@ -41,21 +41,44 @@ Every step becomes visible in the monitoring dashboard.
 - Workflow chaining via `IAction.NextAsync(...)`
 - Progress reporting
 - Background job execution
-- Real-time monitoring UI
-- Job payload inspection
+- Real-time monitoring
+- Job failure handling
+- Payload inspection
 - Action discovery
 - Service discovery
 
 ## Monitor Features
 
-The built-in Blazor monitor provides:
+### Jobs
 
-- Job status tracking
+The Jobs page provides:
+
+- Status tracking
 - Progress visualization
-- Execution history
+- Retry support
+- Failure diagnostics
 - Payload inspection
-- Registered actions
-- Registered services
+- Execution history
+- Date filtering
+- Paging
+
+### Actions
+
+The Actions page provides:
+
+- Registered action discovery
+- Action metadata inspection
+- Action definition editing
+- Action testing
+- JSON configuration editing
+
+### Services
+
+The Services page provides:
+
+- Registered service discovery
+- Service configuration editing
+- JSON configuration inspection
 
 ## Why it is interesting
 
@@ -81,10 +104,13 @@ The sample includes:
 
 - Workflow execution
 - Action chaining
+- Retry handling
 - Progress reporting
 - Live monitoring
 - Payload inspection
+- Failure inspection
 - Actions explorer
 - Services explorer
+- Configuration editing
 
-Perfect for understanding how WJb workflows behave in a real application.
+Perfect for understanding how WJb workflows behave in a real application and how they can be monitored in production.

@@ -1,0 +1,16 @@
+{
+  "sections": [
+    {
+      "title": "Start",
+      "code": "await Client.EnqueueAsync(\n    HelloAction.Key,\n    new HelloPayload\n    {\n        Text = \"Hello from WJb ✅\"\n    });"
+    },
+    {
+      "title": "Payload",
+      "code": "public sealed class HelloPayload\n{\n    public string? Text { get; set; }\n}"
+    },
+    {
+      "title": "Action",
+      "code": "public sealed class HelloAction : JobAction<HelloPayload>\n{\n    public const string Key = \"hello\";\n\n    public override Task<ActionResult> ExecuteAsync(\n        HelloPayload input,\n        CancellationToken ct = default)\n    {\n        var message = input.Text ?? \"Hello from WJb ✅\";\n\n        ReportProgress(100, message);\n\n        return Task.FromResult(ActionResults.None());\n    }\n}"
+    }
+  ]
+}
