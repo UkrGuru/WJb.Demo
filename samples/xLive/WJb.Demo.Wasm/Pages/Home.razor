@@ -1,0 +1,128 @@
+﻿@page "/"
+
+@inject IJobClient Client
+@inject IJobQuery Query
+@inject IJobNotifier Notifier
+
+<h3 class="mb-3">WJb Demo (WASM)</h3>
+
+<div class="d-flex gap-2 mb-4">
+@*     <button class="btn btn-success flex-fill"
+            @onclick="Start">
+        🚀 Run Demo Job
+    </button> *@
+
+    <button class="btn btn-outline-secondary"
+            @onclick="Clean">
+        🧹 Clean Jobs
+    </button>
+</div>
+
+<h5>Active Jobs</h5>
+
+<div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th class="d-none d-md-table-cell">Message</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in queue)
+            {
+                <tr class="@(t.Status == JobStatus.Running ? "table-primary" : "")">
+
+                    <td><code>@Short(t.Id)</code></td>
+
+                    <td>
+                        <span class="badge
+                            @(t.Status switch
+                              {
+                                  JobStatus.Running => "bg-primary",
+                                  JobStatus.Completed => "bg-success",
+                                  JobStatus.Failed => "bg-danger",
+                                  _ => "bg-secondary"
+                              })">
+                            @t.Status
+                        </span>
+                    </td>
+
+                    <td style="min-width:120px;">
+                        <div class="progress" style="height:20px;">
+                            <div class="progress-bar
+                                @(t.Status == JobStatus.Running
+                                      ? "progress-bar-striped progress-bar-animated"
+                                      : "")
+                                d-flex align-items-center justify-content-center"
+                                 role="progressbar"
+                                 style="width:@t.Progress%">
+                                <small>@t.Progress%</small>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="d-none d-md-table-cell">@t.Message</td>
+
+                    <td style="width: 50px;">
+                        <button class="btn btn-sm btn-danger"
+                                disabled="@(t.Status is not (JobStatus.Pending or JobStatus.Running))"
+                                @onclick="() => Cancel(t.Id)">
+                            ❌
+                        </button>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private IReadOnlyList<JobInfo> queue = Array.Empty<JobInfo>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Notifier.Changed += HandleChanged;
+        await Load();
+
+    }
+
+    private void HandleChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Load();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Load()
+        => queue = await Query.GetJobs();
+
+    // private async Task Start()
+    // {
+    //     await Client.EnqueueAsync<ProgressAction, DemoPayload>(
+    //         new DemoPayload
+    //         {
+    //             DelayMs = 5000,
+    //             Text = "Done ✅"
+    //         });
+    // }
+
+    
+    private Task Clean()
+        => Client.CleanAsync();
+
+    private Task Cancel(string id)
+        => Client.CancelAsync(id);
+
+    private static string Short(string id)
+        => id[..Math.Min(6, id.Length)];
+
+    public void Dispose()
+        => Notifier.Changed -= HandleChanged;
+}

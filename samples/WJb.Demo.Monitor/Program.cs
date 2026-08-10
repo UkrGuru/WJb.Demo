@@ -1,6 +1,5 @@
 // using Microsoft.Data.SqlClient;
 using WJb;
-using WJb.Demo.Monitor;
 
 // using WJb.Sql;
 using WJb.Demo.Monitor.Components;
@@ -26,18 +25,16 @@ builder.Services.AddSingleton<IStore>(_ =>
     return store;
 });
 
-
 builder.Services.AddSingleton<IWJb>(sp =>
 {
     var store = sp.GetRequiredService<IStore>();
 
     return WJbBuilder.CreateAsync(store)
-        .GetAwaiter()
-        .GetResult();
+        .GetAwaiter().GetResult();
 });
 
 
-builder.Services.AddHostedService<WJbWorker>();
+builder.Services.AddSingleton<WasmWorker>();
 
 var app = builder.Build();
 
@@ -47,9 +44,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute(
-    "/not-found",
-    createScopeForStatusCodePages: true);
+app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
 app.UseHttpsRedirection();
 
@@ -59,5 +54,7 @@ app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.Services.GetRequiredService<WasmWorker>().Start();
 
 app.Run();
