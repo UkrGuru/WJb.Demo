@@ -1,6 +1,6 @@
 ﻿@page "/retry"
 
-@inject IStore Store
+@inject IWJb WJb
 @inject NavigationManager Nav
 
 <h3 class="mb-3">Retry Action</h3>
@@ -30,21 +30,24 @@
     </div>
 </div>
 
-<SourceViewer Source="RetryAction.json" />
+<SourceViewer Source="Retry" />
 
 @code {
     private async Task Start()
     {
-        await Store.EnqueueAsync(
+        await WJb.EnqueueAsync(
             RetryEmailAction.Key,
-            new RetryEmailInput
+            payload: new
             {
-                To = "test@test.com"
-            },
-            new JobOptions
-            {
-                MaxRetries = 1,
-                RetryDelay = TimeSpan.FromSeconds(1)
+                payload = new RetryEmailInput
+                {
+                    To = "test@test.com"
+                },
+                options = new JobOptions
+                {
+                    MaxRetries = 1,
+                    RetryDelay = TimeSpan.FromSeconds(1)
+                }
             });
 
         Nav.NavigateTo("/");

@@ -1,4 +1,4 @@
-﻿using WJb;
+﻿namespace WJb.Demo.Wasm.Actions;
 
 public sealed class OrderInput
 {

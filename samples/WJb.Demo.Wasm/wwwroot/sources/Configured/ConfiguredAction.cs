@@ -10,7 +10,8 @@ public sealed class SmtpSettings
     public string Host { get; set; } = default!;
 }
 
-public sealed class ConfiguredAction(SmtpSettings? smtp) : JobAction<EmailInput>
+public sealed class ConfiguredAction(SmtpSettings? smtp) 
+    : JobAction<EmailInput>
 {
     public const string Key = "configured";
 

@@ -1,75 +1,168 @@
 # 📦 WJb.Demo (WASM)
 
-Lightweight demo application showcasing **WJb background job engine** running in a **Blazor WebAssembly (WASM)** environment.
+Interactive Blazor WebAssembly demo showcasing the **WJb background job engine** running entirely in the browser.
 
-![WJb.Demo (WASM) ](https://raw.githubusercontent.com/UkrGuru/WJb.Demo/main/assets/wjb-demo-wasm.png)
+![WJb.Demo (WASM)](https://raw.githubusercontentmo/main/assets/wjb-demo-wasm.png
+
+🔗 GitHub Repository: https://github.com/UkrGuru/WJb.Demo
 
 ***
 
 ## 🚀 Overview
 
-**WJb.Demo (WASM)** demonstrates how to:
+**WJb.Demo (WASM)** demonstrates how WJb workflows behave in a real application.
 
-* Execute background jobs in a client-side environment
-* Track job lifecycle and progress in real time
-* Use clean, decoupled job actions
-* Chain and configure actions
-* Handle success, failure, and cancellation scenarios
+The sample includes runnable action examples, workflow scenarios, progress tracking, retries, and a live monitoring dashboard.
+
+Run an action, switch to the dashboard, and observe execution in real time.
 
 ***
 
 ## 🧩 Features
 
-* ✅ Job dashboard with live updates
-* ✅ Multiple action types:
-  * Hello Action
-  * Configured Action
-  * Progress Action
-  * Chained Actions
-* ✅ Progress tracking (0–100%)
-* ✅ Status handling:
-  * Completed
-  * Failed
-* ✅ Message output per job
-* ✅ Job cleanup support
+### Dashboard
+
+- ✅ Live job monitoring
+- ✅ Progress tracking
+- ✅ Completed and failed jobs
+- ✅ Failure diagnostics
+- ✅ Retry support
+- ✅ Payload inspection
+- ✅ Result inspection
+- ✅ Date filtering
+- ✅ Paging
+
+### Action Samples
+
+- ✅ Hello Action
+- ✅ Configured Action
+- ✅ Progress Action
+- ✅ Chained Actions
+- ✅ Retry Workflow
+- ✅ Order Workflow
+
+### Source Explorer
+
+Every sample includes a built-in source viewer:
+
+- ✅ Start code
+- ✅ Payload definitions
+- ✅ Action implementations
+- ✅ Workflow examples
+
+Source files are displayed using a multi-tab viewer similar to modern component documentation sites.
 
 ***
 
-## 🖥️ UI Overview
+## 🖥️ Demo Pages
 
-The demo UI includes:
+### Hello Action
 
-* **Sidebar navigation**
-  * Dashboard
-  * Action samples
-* **Active Jobs table**
-  * ID
-  * Status
-  * Progress bar
-  * Message
-  * Remove action
+A minimal action that immediately completes.
 
-Example states:
+```text
+hello
+    ↓
+completed
+```
 
-* Completed jobs with full progress
-* Failed jobs with partial progress
-* Informational messages for each job
+### Configured Action
+
+Demonstrates dependency injection and service configuration.
+
+```text
+smtp settings
+      ↓
+configured action
+```
+
+### Progress Action
+
+Demonstrates progress reporting.
+
+```text
+0%
+25%
+50%
+75%
+100%
+```
+
+### Chained Actions
+
+Demonstrates workflow chaining through `ActionResults.Next(...)`.
+
+```text
+send-email
+      ↓
+log
+```
+
+### Retry Workflow
+
+Demonstrates automatic retries using `JobOptions`.
+
+```text
+retry-email
+      ↓
+failure
+      ↓
+retry
+      ↓
+success
+      ↓
+log
+```
+
+### Order Workflow
+
+Demonstrates a complete multi-step workflow.
+
+```text
+create-order
+      ↓
+reserve-stock
+      ↓
+charge-payment
+      ↓
+send-confirmation
+      ↓
+log
+```
 
 ***
 
 ## ⚙️ How It Works
 
-WJb separates concerns into:
+WJb separates responsibilities into:
 
-* **Execution** – runs actions
-* **Storage** – tracks job state
-* **Hosting** – coordinates lifecycle
+- **Actions** - business logic
+- **Store** - job persistence
+- **Executor** - job execution
+- **Worker** - background processing
+- **Monitor** - execution visibility
 
 In this demo:
 
-* Jobs are triggered from UI
-* Execution happens in WASM runtime
-* Progress updates are reflected immediately
+- Jobs are started from the UI
+- Actions execute inside the WASM runtime
+- Progress updates appear immediately
+- Workflows can enqueue additional actions
+- Failed jobs can be retried directly from the dashboard
+
+***
+
+## 🧪 Scenarios
+
+Try the following:
+
+- Run a simple Hello Action
+- Execute a configured SMTP action
+- Watch progress updates in real time
+- Trigger a chained workflow
+- Observe failure handling
+- Retry a failed action
+- Execute a complete order workflow
 
 ***
 
@@ -81,28 +174,20 @@ cd WJb.Demo
 dotnet run
 ```
 
-Then open:
+Open:
 
-```
+```text
 https://localhost:7268
 ```
 
 ***
 
-## 🧪 Example Scenarios
-
-* Run simple job (Hello Action)
-* Execute configured job (SMTP simulation)
-* Track progress over time
-* Trigger chained jobs
-* Observe failure handling
-
-***
-
 ## 📌 Notes
 
-* This is a **demo application** intended for showcasing WJb capabilities.
-* Behavior and APIs may evolve.
-* Some features may be simplified for demonstration purposes.
+- Runs entirely in Blazor WebAssembly.
+- Intended for learning and experimentation.
+- Demonstrates core WJb workflow capabilities.
+- Source examples are included directly inside the demo UI.
+- Additional scenarios may be added over time.
 
 ***
