@@ -6,6 +6,8 @@ Interactive Blazor WebAssembly demo showcasing the **WJb background job engine**
 
 🔗 GitHub Repository: https://github.com/UkrGuru/WJb.Demo
 
+🎥 Watch the demo:
+https://www.youtube.com/watch?v=Tu3TD2Rk37E
 ***
 
 ## 🚀 Overview
