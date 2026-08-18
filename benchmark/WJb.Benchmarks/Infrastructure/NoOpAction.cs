@@ -1,7 +1,11 @@
-﻿namespace WJb.Benchmarks.Infrastructure;
+﻿using WJb;
 
-public sealed class NoOpAction : IAction
+public sealed class NoOpInput
 {
-    public Task<ActionResult> ExecuteAsync(object? input, CancellationToken ct = default)
-        => Task.FromResult(ActionResults.None());
+}
+
+public sealed class NoOpAction : JobAction<NoOpInput>
+{
+    public override Task<IActionResult> ExecuteAsync(NoOpInput input, CancellationToken ct = default)
+        => CompleteAsync();
 }

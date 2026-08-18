@@ -27,10 +27,14 @@ public class _03_JobCommandTests
                 To = "user@test.com"
             });
 
-        var payload = command.GetPayload<EmailInput>();
+        var payload =
+            command.GetPayload<EmailInput>();
 
         Assert.NotNull(payload);
-        Assert.Equal("user@test.com", payload.To);
+
+        Assert.Equal(
+            "user@test.com",
+            payload!.To);
     }
 
     [Fact]
@@ -46,13 +50,15 @@ public class _03_JobCommandTests
         var payload = command.AsObject();
 
         Assert.NotNull(payload);
+
         Assert.Equal(
             "Completed",
-            payload["Message"]?.GetValue<string>());
+            payload!["Message"]!
+                .GetValue<string>());
     }
 
     [Fact]
-    public void ActionResults_Next_Should_Accept_Single_Command()
+    public void Results_Next_Should_Accept_Single_Command()
     {
         var command = new JobCommand(
             "send-email",
@@ -61,38 +67,50 @@ public class _03_JobCommandTests
                 To = "user@test.com"
             });
 
-        var result = ActionResults.Next(command);
+        var result =
+            Results.Next(command);
 
-        Assert.Single(result.Commands);
+        var next =
+            Assert.IsType<NextResult>(
+                result);
+
+        Assert.Single(
+            next.Commands);
     }
 
     [Fact]
-    public void ActionResults_Next_Should_Accept_Multiple_Commands()
+    public void Results_Next_Should_Accept_Multiple_Commands()
     {
-        var result = ActionResults.Next(
-            new JobCommand(
-                "email",
-                new EmailInput
-                {
-                    To = "user@test.com"
-                }),
-            new JobCommand(
-                "audit",
-                new AuditInput
-                {
-                    Event = "OrderCompleted"
-                }));
+        var result =
+            Results.Next(
+                new JobCommand(
+                    "email",
+                    new EmailInput
+                    {
+                        To = "user@test.com"
+                    }),
+                new JobCommand(
+                    "audit",
+                    new AuditInput
+                    {
+                        Event = "OrderCompleted"
+                    }));
+
+        var next =
+            Assert.IsType<NextResult>(
+                result);
 
         Assert.Equal(
             2,
-            result.Commands.Count());
+            next.Commands.Count);
     }
 
     [Fact]
     public void JobCommands_Next_Should_Create_Success_Command()
     {
-        var command = JobCommands.Next(
-            "send-email");
+        var command =
+            JobCommands.Next(
+                "send-email");
 
         Assert.Equal(
             JobCommandCondition.Success,
@@ -102,8 +120,9 @@ public class _03_JobCommandTests
     [Fact]
     public void JobCommands_OnFailure_Should_Create_Failure_Command()
     {
-        var command = JobCommands.OnFailure(
-            "audit");
+        var command =
+            JobCommands.OnFailure(
+                "audit");
 
         Assert.Equal(
             JobCommandCondition.Failure,
@@ -112,11 +131,11 @@ public class _03_JobCommandTests
 
     private sealed class EmailInput
     {
-        public string To { get; init; } = "";
+        public string To { get; init; } = string.Empty;
     }
 
     private sealed class AuditInput
     {
-        public string Event { get; init; } = "";
+        public string Event { get; init; } = string.Empty;
     }
 }

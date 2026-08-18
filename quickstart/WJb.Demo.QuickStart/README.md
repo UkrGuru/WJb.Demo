@@ -10,7 +10,7 @@ This is the fastest way to understand how WJb works.
 send-email → log → done
 ```
 
-A simple job workflow where:
+A simple workflow where:
 
 - one job is enqueued
 - the action performs work
@@ -38,7 +38,6 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 var store = new InMemoryStore();
 
-// Configure actions and services
 var wjb = WJbBuilder.Create(store, cfg =>
 {
     cfg.AddAction<SendEmailAction>(Actions.SendEmail);
@@ -58,12 +57,15 @@ Workflow:
 
 """);
 
-// Enqueue first job
 Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
 
-await wjb.EnqueueAsync(Actions.SendEmail, new EmailInput { To = "user@test.com" });
+await wjb.EnqueueAsync(
+    Actions.SendEmail,
+    new EmailInput
+    {
+        To = "user@test.com"
+    });
 
-// Execute all pending jobs
 Console.WriteLine("[App] Start execution...\n");
 
 await wjb.ExecuteLoopAsync();
@@ -76,48 +78,54 @@ public static class Actions
     public const string Log = "log";
 }
 
-// Action: SendEmailAction
-public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
+[ActionName(Actions.SendEmail)]
+public sealed class SendEmailAction(
+    SmtpSettings smtp)
+    : JobAction<EmailInput>
 {
-    private readonly SmtpSettings _smtp = smtp;
-
-    public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
+    public override Task<IActionResult> ExecuteAsync(
+        EmailInput input,
+        CancellationToken ct)
     {
-        Console.WriteLine($"[Action] {Actions.SendEmail} → {input.To} via {_smtp.Host}");
+        Console.WriteLine(
+            $"[Action] {Actions.SendEmail} -> {input.To} via {smtp.Host}");
 
-        return Task.FromResult(
-            ActionResults.Next(new JobCommand(
-                Actions.Log, new LogInput { Message = $"Email sent to {input.To}" })));
+        return NextAsync<LogAction>(
+            new LogInput
+            {
+                Message = $"Email sent to {input.To}"
+            });
     }
 }
 
-// Action: LogAction
-public sealed class LogAction : JobAction<LogInput>
+[ActionName(Actions.Log)]
+public sealed class LogAction
+    : JobAction<LogInput>
 {
-    public override Task<ActionResult> ExecuteAsync(LogInput input, CancellationToken ct)
+    public override Task<IActionResult> ExecuteAsync(
+        LogInput input,
+        CancellationToken ct)
     {
-        Console.WriteLine($"[Action] {Actions.Log} → {input.Message}");
+        Console.WriteLine(
+            $"[Action] {Actions.Log} -> {input.Message}");
 
-        return Task.FromResult(ActionResults.None());
+        return CompleteAsync();
     }
 }
 
-// Input: EmailInput
 public sealed class EmailInput
 {
-    public string? To { get; set; }
+    public string To { get; set; } = string.Empty;
 }
 
-// Input: LogInput
 public sealed class LogInput
 {
-    public string? Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 }
 
-// Service: SmtpSettings
 public sealed class SmtpSettings
 {
-    public string Host { get; set; } = default!;
+    public string Host { get; set; } = string.Empty;
 }
 ```
 
@@ -134,8 +142,8 @@ send-email → log → done
 [App] Enqueue: send-email
 [App] Start execution...
 
-[Action] send-email → user@test.com via smtp.local
-[Action] log → Email sent to user@test.com
+[Action] send-email -> user@test.com via smtp.local
+[Action] log -> Email sent to user@test.com
 
 === Completed ===
 ```
@@ -147,26 +155,30 @@ send-email → log → done
 - Actions contain business logic
 - Actions can use dependency injection
 - Services are resolved automatically
-- Each action explicitly defines the next step
+- Actions explicitly define what runs next
 - Workflows are deterministic and visible
-- Jobs can be executed through a store-backed runtime
+- Results describe workflow outcomes
+- Jobs execute through a store-backed runtime
 
 👉 You always know what happens and why.
 
 ---
 
-## 🔥 Key idea
+## 🔥 Key Idea
 
 ```csharp
-return ActionResults.Next(new JobCommand(
-    Actions.Log, new LogInput { Message = $"Email sent to {input.To}" }));
+return NextAsync<LogAction>(
+    new LogInput
+    {
+        Message = $"Email sent to {input.To}"
+    });
 ```
 
-👉 The workflow is defined in code, not hidden in the framework.
+👉 The workflow is defined in code.
 
 ---
 
-## ⚡ Learn more
+## ⚡ Learn More
 
 ➡️ https://www.nuget.org/packages?q=wjb
 
@@ -181,3 +193,7 @@ return ActionResults.Next(new JobCommand(
 👉 https://ko-fi.com/ukrguru
 
 ---
+
+> Background jobs should be explicit.
+>
+> If a workflow exists, you should be able to read it.

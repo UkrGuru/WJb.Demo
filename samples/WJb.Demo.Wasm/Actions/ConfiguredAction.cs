@@ -3,29 +3,41 @@
 public sealed class EmailInput
 {
     public string? To { get; set; }
+
+    public string? Subject { get; set; }
 }
 
 public sealed class SmtpSettings
 {
-    public string Host { get; set; } = default!;
+    public const string Key = "smtp";
+
+    public string? Host { get; set; }
+
+    public int Port { get; set; }
+
+    public string? From { get; set; }
 }
 
-public sealed class ConfiguredAction(SmtpSettings? smtp) : JobAction<EmailInput>
+public sealed class ConfiguredAction(SmtpSettings? smtp)
+    : JobAction<EmailInput>
 {
     public const string Key = "configured";
 
     private readonly SmtpSettings? _smtp = smtp;
 
-    public override Task<ActionResult> ExecuteAsync(
-        EmailInput input, CancellationToken ct = default)
+    public override Task<IActionResult> ExecuteAsync(
+        EmailInput input,
+        CancellationToken ct = default)
     {
         var host = _smtp?.Host ?? "<not configured>";
         var to = input.To ?? "<no recipient>";
 
         var message = $"SMTP: {host}, To: {to}";
 
-        ReportProgress(100, message);
+        ReportProgress(
+            100,
+            message);
 
-        return Task.FromResult(ActionResults.None());
+        return CompleteAsync();
     }
 }

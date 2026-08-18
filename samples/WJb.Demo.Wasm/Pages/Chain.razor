@@ -31,7 +31,7 @@
     private async Task Start()
     {
         await Store.EnqueueAsync(
-            SendEmailAction.Key,
+            "send-email",
             new EmailInput
             {
                 To = "test@test.com"

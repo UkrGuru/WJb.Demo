@@ -15,7 +15,7 @@ Run a workflow:
 
 ```csharp
 await wjb.EnqueueAsync(
-    ImportCustomersAction.Key,
+    "import-customers",
     new ImportCustomersInput
     {
         Source = "CRM"

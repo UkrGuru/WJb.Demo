@@ -8,7 +8,12 @@ public class _01_ActionsTests
         var action = new CaptureEmailAction();
 
         await action.ExecuteAsync(
-            new EmailInput { To = "user@test.com", Subject = "subject", Body = "body" });
+            new EmailInput
+            {
+                To = "user@test.com",
+                Subject = "subject",
+                Body = "body"
+            });
 
         Assert.Equal("user@test.com", action.Input!.To);
         Assert.Equal("subject", action.Input.Subject);
@@ -21,9 +26,14 @@ public class _01_ActionsTests
         var action = new SendEmailAction();
 
         var result = await action.ExecuteAsync(
-            new EmailInput { To = "user@test.com" });
+            new EmailInput
+            {
+                To = "user@test.com"
+            });
 
-        Assert.NotNull(result);
+        var next = Assert.IsType<NextResult>(result);
+
+        Assert.Single(next.Commands);
     }
 
     [Fact]
@@ -31,9 +41,14 @@ public class _01_ActionsTests
     {
         var action = new MultiStepAction();
 
-        var result = await action.ExecuteAsync(new EmailInput());
+        var result =
+            await action.ExecuteAsync(
+                new EmailInput());
 
-        Assert.NotNull(result);
+        var next =
+            Assert.IsType<NextResult>(result);
+
+        Assert.Equal(2, next.Commands.Count);
     }
 
     [Fact]
@@ -41,17 +56,28 @@ public class _01_ActionsTests
     {
         var emailAction = new SendEmailAction();
 
-        var firstResult = await emailAction.ExecuteAsync(
-            new EmailInput { To = "user@test.com" });
+        var firstResult =
+            await emailAction.ExecuteAsync(
+                new EmailInput
+                {
+                    To = "user@test.com"
+                });
 
-        Assert.NotNull(firstResult);
+        Assert.IsType<NextResult>(
+            firstResult);
 
         var logAction = new LogAction();
 
-        var secondResult = await logAction.ExecuteAsync(
-            new LogInput { Message = "Email sent to user@test.com" });
+        var secondResult =
+            await logAction.ExecuteAsync(
+                new LogInput
+                {
+                    Message =
+                        "Email sent to user@test.com"
+                });
 
-        Assert.NotNull(secondResult);
+        Assert.IsType<CompleteResult>(
+            secondResult);
     }
 
     [Fact]
@@ -59,81 +85,123 @@ public class _01_ActionsTests
     {
         var action = new FailingAction();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => action.ExecuteAsync(new EmailInput()));
+        await Assert.ThrowsAsync<
+            InvalidOperationException>(
+            () => action.ExecuteAsync(
+                new EmailInput()));
     }
 
-    private sealed class CaptureEmailAction : JobAction<EmailInput>
+    private sealed class CaptureEmailAction
+        : JobAction<EmailInput>
     {
         public EmailInput? Input { get; private set; }
 
-        public override Task<ActionResult> ExecuteAsync(
-            EmailInput input, CancellationToken ct = default)
+        public override async Task<IActionResult>
+            ExecuteAsync(
+                EmailInput input,
+                CancellationToken ct = default)
         {
             Input = input;
 
-            return Task.FromResult(ActionResults.None());
+            return await CompleteAsync();
         }
     }
 
-    private sealed class SendEmailAction : JobAction<EmailInput>
+    [ActionName("send-email")]
+    private sealed class SendEmailAction
+        : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
-            EmailInput input, CancellationToken ct = default)
+        public override async Task<IActionResult>
+            ExecuteAsync(
+                EmailInput input,
+                CancellationToken ct = default)
         {
-            return Task.FromResult(ActionResults.Next(
-                new JobCommand("log", new LogInput { Message = $"Email sent to {input.To}" })));
+            return await NextAsync<LogAction>(
+                new LogInput
+                {
+                    Message =
+                        $"Email sent to {input.To}"
+                });
         }
     }
 
-    private sealed class MultiStepAction : JobAction<EmailInput>
+    private sealed class MultiStepAction
+        : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
-            EmailInput input, CancellationToken ct = default)
+        public override async Task<IActionResult>
+            ExecuteAsync(
+                EmailInput input,
+                CancellationToken ct = default)
         {
-            return Task.FromResult(
-                ActionResults.Next(
-                    new JobCommand(
-                        "log", new LogInput { Message = "Email sent" }),
-                    new JobCommand(
-                        "audit", new AuditInput { Event = "email" })));
+            return Results.Next(
+                JobCommands.Next<LogAction>(
+                    new LogInput
+                    {
+                        Message = "Email sent"
+                    }),
+                JobCommands.Next<AuditAction>(
+                    new AuditInput
+                    {
+                        Event = "email"
+                    }));
         }
     }
 
-    private sealed class LogAction : JobAction<LogInput>
+    [ActionName("log")]
+    private sealed class LogAction
+        : JobAction<LogInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
-            LogInput input, CancellationToken ct = default)
+        public override async Task<IActionResult>
+            ExecuteAsync(
+                LogInput input,
+                CancellationToken ct = default)
         {
-            return Task.FromResult(ActionResults.None());
+            return await CompleteAsync();
         }
     }
 
-    private sealed class FailingAction : JobAction<EmailInput>
+    [ActionName("audit")]
+    private sealed class AuditAction
+        : JobAction<AuditInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
-            EmailInput input, CancellationToken ct = default)
+        public override async Task<IActionResult>
+            ExecuteAsync(
+                AuditInput input,
+                CancellationToken ct = default)
         {
-            throw new InvalidOperationException("SMTP server unavailable");
+            return await CompleteAsync();
+        }
+    }
+
+    private sealed class FailingAction
+        : JobAction<EmailInput>
+    {
+        public override Task<IActionResult>
+            ExecuteAsync(
+                EmailInput input,
+                CancellationToken ct = default)
+        {
+            throw new InvalidOperationException(
+                "SMTP server unavailable");
         }
     }
 
     private sealed class EmailInput
     {
-        public string To { get; init; } = "";
+        public string To { get; init; } = string.Empty;
 
-        public string Subject { get; init; } = "";
+        public string Subject { get; init; } = string.Empty;
 
-        public string Body { get; init; } = "";
+        public string Body { get; init; } = string.Empty;
     }
 
     private sealed class LogInput
     {
-        public string Message { get; init; } = "";
+        public string Message { get; init; } = string.Empty;
     }
 
     private sealed class AuditInput
     {
-        public string Event { get; init; } = "";
+        public string Event { get; init; } = string.Empty;
     }
 }

@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using WJb.Benchmarks.Infrastructure;
 
 namespace WJb.Benchmarks.Core;
 
@@ -22,22 +21,12 @@ public class CoreBenchmarks
     }
 
     [Benchmark]
-    public Task CreateOnly()
-    {
-        return _wjb.CreateAsync<NoOpAction>();
-    }
+    public Task CreateOnly() => _wjb.CreateAsync<NoOpAction>();
 
     [Benchmark]
-    public Task<ActionResult> ExecuteOnly()
-    {
-        return _action.ExecuteAsync(null);
-    }
+    public Task<IActionResult> ExecuteOnly() => _action.ExecuteAsync(null);
 
     [Benchmark]
-    public async Task<ActionResult> CreateAndExecute()
-    {
-        var action = await _wjb.CreateAsync<NoOpAction>();
-
-        return await action.ExecuteAsync(null);
-    }
+    public async Task<IActionResult> CreateAndExecute()
+        => await (await _wjb.CreateAsync<NoOpAction>()).ExecuteAsync(null);
 }

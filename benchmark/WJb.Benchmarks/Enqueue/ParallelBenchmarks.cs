@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using WJb.Benchmarks.Infrastructure;
 
 namespace WJb.Benchmarks.Enqueue;
 

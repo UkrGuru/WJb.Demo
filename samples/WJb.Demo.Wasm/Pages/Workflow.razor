@@ -34,7 +34,7 @@
     private async Task Start()
     {
         await Store.EnqueueAsync(
-            CreateOrderAction.Key,
+            "create-order",
             new OrderInput
             {
                 OrderId = 1001

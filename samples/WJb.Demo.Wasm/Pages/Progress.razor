@@ -31,7 +31,7 @@
     private async Task Start()
     {
         await Store.EnqueueAsync(
-            ProgressAction.Key,
+            "progress",
             new ProgressPayload
             {
                 DelayMs = 1000

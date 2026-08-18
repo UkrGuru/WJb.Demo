@@ -1,4 +1,3 @@
-
 using WJb;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,54 +8,53 @@ builder.Services.AddSingleton<IWJb>(sp =>
 {
     var store = sp.GetRequiredService<IStore>();
 
-    var wjb = WJbBuilder.Create(store, cfg =>
+    return WJbBuilder.Create(store, cfg =>
     {
         cfg.AddAction<DemoAction>(DemoAction.Key);
     });
-
-    return wjb;
 });
 
-builder.Services.AddSingleton<IJobExecutor>(
-    sp => sp.GetRequiredService<IWJb>());
+builder.Services.AddSingleton(sp => new WasmWorker(sp.GetRequiredService<IWJb>()));
 
-builder.Services.AddHostedService<JobWorker>();
+builder.Services.AddSingleton<IJobExecutor>(sp => sp.GetRequiredService<IWJb>());
 
 var app = builder.Build();
 
-app.MapPost("/jobs", async (IJobExecutor executor) =>
-{
-    var jobId = await executor.EnqueueAsync(
-        DemoAction.Key,
-        new DemoPayload
-        {
-            DelayMs = 5000,
-            Text = "Done ✅"
-        });
+app.MapPost("/jobs", async Task<IResult> (IJobExecutor executor) =>
+    {
+        var jobId = await executor.EnqueueAsync(
+            DemoAction.Key,
+            new DemoPayload
+            {
+                DelayMs = 5000,
+                Text = "Done ✅"
+            });
 
-    return Results.Ok(new { jobId });
-});
+        return TypedResults.Ok(new { jobId });
+    });
 
-app.MapGet("/jobs", async (IStore store) =>
-{
-    var jobs = await store.GetJobsAsync();
+app.MapGet("/jobs", async Task<IResult> (IStore store) =>
+    {
+        var jobs = await store.GetJobsAsync();
 
-    return Results.Ok(jobs);
-});
+        return TypedResults.Ok(jobs);
+    });
 
-app.MapGet("/jobs/{id}", async (string id, IStore store) =>
-{
-    var job = await store.GetJobAsync(id);
+app.MapGet("/jobs/{id}", async Task<IResult> (string id, IStore store) =>
+    {
+        var job = await store.GetJobAsync(id);
 
-    return job is null ? Results.NotFound() : Results.Ok(job);
-});
+        return job is null ? TypedResults.NotFound() : TypedResults.Ok(job);
+    });
 
-app.MapDelete("/jobs/{id}", async (string id, IStore store) =>
-{
-    var ok = await store.DeleteJobAsync(id);
+app.MapDelete("/jobs/{id}", async Task<IResult> (string id, IStore store) =>
+    {
+        var ok = await store.DeleteJobAsync(id);
 
-    return ok ? Results.Ok() : Results.NotFound();
-});
+        return ok ? TypedResults.Ok() : TypedResults.NotFound();
+    });
+
+app.Services.GetRequiredService<WasmWorker>().Start();
 
 app.Run();
 
@@ -71,7 +69,8 @@ public sealed class DemoAction : JobAction<DemoPayload>
 {
     public const string Key = "demo";
 
-    public override async Task<ActionResult> ExecuteAsync(DemoPayload input, CancellationToken ct)
+    public override async Task<IActionResult> ExecuteAsync(
+        DemoPayload input, CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 10)
         {
@@ -84,7 +83,7 @@ public sealed class DemoAction : JobAction<DemoPayload>
                 $"Progress {i}%");
         }
 
-        return ActionResults.Result(new
+        return WJb.Results.Complete(new
         {
             ok = true,
             text = input.Text
