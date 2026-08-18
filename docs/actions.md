@@ -2,14 +2,14 @@
 
 Actions contain the business logic of your application.
 
-An action receives input, performs work, and returns an `ActionResult`.
+An action receives input, performs work, and returns an `IActionResult`.
 
 ```text
 Job
  ↓
 Action
  ↓
-ActionResult
+IActionResult
  ↓
 JobCommand
 ```
@@ -21,14 +21,16 @@ JobCommand
 Inherit from `JobAction<TInput>`:
 
 ```csharp
-public sealed class SendEmailAction : JobAction<EmailInput>
+public sealed class SendEmailAction
+    : JobAction<EmailInput>
 {
-    public override Task<ActionResult> ExecuteAsync(
-        EmailInput input, CancellationToken ct)
+    public override async Task<IActionResult> ExecuteAsync(
+        EmailInput input,
+        CancellationToken ct)
     {
-        Input = input;
+        await Task.CompletedTask;
 
-        return Task.FromResult(ActionResults.None());
+        return await CompleteAsync();
     }
 }
 ```
@@ -42,7 +44,8 @@ var wjb = WJbBuilder.Create(
     store,
     cfg =>
     {
-        cfg.AddAction<SendEmailAction>("send-email");
+        cfg.AddAction<SendEmailAction>(
+            "send-email");
     });
 ```
 
@@ -59,6 +62,32 @@ await wjb.EnqueueAsync(
 
 ---
 
+## Action Names
+
+Actions may define explicit names:
+
+```csharp
+[ActionName("send-email")]
+public sealed class SendEmailAction
+    : JobAction<EmailInput>
+{
+}
+```
+
+This name is automatically used by:
+
+```csharp
+JobCommands.Next<SendEmailAction>()
+```
+
+and
+
+```csharp
+NextAsync<SendEmailAction>()
+```
+
+---
+
 ## Input Models
 
 Actions can use strongly typed input models.
@@ -66,11 +95,11 @@ Actions can use strongly typed input models.
 ```csharp
 public sealed class EmailInput
 {
-    public string To { get; init; } = "";
+    public string To { get; init; } = string.Empty;
 
-    public string Subject { get; init; } = "";
+    public string Subject { get; init; } = string.Empty;
 
-    public string Body { get; init; } = "";
+    public string Body { get; init; } = string.Empty;
 }
 ```
 
@@ -78,18 +107,18 @@ WJb automatically converts job payloads into the action input type.
 
 ---
 
-## Returning Results
+## Completing a Workflow
 
 ### No Result
 
 ```csharp
-return ActionResults.None();
+return await CompleteAsync();
 ```
 
 ### Return a Value
 
 ```csharp
-return ActionResults.Result(
+return Results.Complete(
     new
     {
         Sent = true,
@@ -102,11 +131,15 @@ The value becomes the job result.
 Scalar values are also supported:
 
 ```csharp
-return ActionResults.Result(123);
+return Results.Complete(123);
 ```
 
 ```csharp
-return ActionResults.Result("done");
+return Results.Complete("done");
+```
+
+```csharp
+return Results.Complete(true);
 ```
 
 ---
@@ -116,13 +149,11 @@ return ActionResults.Result("done");
 Actions can schedule additional jobs.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "log",
-        new LogInput
-        {
-            Message = "Email sent"
-        }));
+return await NextAsync<LogAction>(
+    new LogInput
+    {
+        Message = "Email sent"
+    });
 ```
 
 Workflow:
@@ -138,15 +169,13 @@ log
 ## Multiple Next Steps
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "log",
+return Results.Next(
+    JobCommands.Next<LogAction>(
         new LogInput
         {
             Message = "Email sent"
         }),
-    new JobCommand(
-        "audit",
+    JobCommands.Next<AuditAction>(
         new AuditInput
         {
             Event = "email"
@@ -174,33 +203,35 @@ done
 ```
 
 ```csharp
-public sealed class SendEmailAction : JobAction<EmailInput>
+[ActionName("send-email")]
+public sealed class SendEmailAction
+    : JobAction<EmailInput>
 {
-    public override Task<ActionResult> ExecuteAsync(
+    public override async Task<IActionResult> ExecuteAsync(
         EmailInput input,
         CancellationToken ct)
     {
-        return Task.FromResult(
-            ActionResults.Next(
-                new JobCommand(
-                    "log",
-                    new LogInput
-                    {
-                        Message = $"Email sent to {input.To}"
-                    })));
+        return await NextAsync<LogAction>(
+            new LogInput
+            {
+                Message =
+                    $"Email sent to {input.To}"
+            });
     }
 }
 
-public sealed class LogAction : JobAction<LogInput>
+[ActionName("log")]
+public sealed class LogAction
+    : JobAction<LogInput>
 {
-    public override Task<ActionResult> ExecuteAsync(
+    public override async Task<IActionResult> ExecuteAsync(
         LogInput input,
         CancellationToken ct)
     {
-        Console.WriteLine(input.Message);
+        Console.WriteLine(
+            input.Message);
 
-        return Task.FromResult(
-            ActionResults.None());
+        return await CompleteAsync();
     }
 }
 ```
@@ -216,26 +247,21 @@ The action decides what happens next.
 Actions support constructor injection.
 
 ```csharp
-public sealed class SendEmailAction : JobAction<EmailInput>
+public sealed class SendEmailAction(
+    IEmailService email)
+    : JobAction<EmailInput>
 {
-    private readonly IEmailService _email;
-
-    public SendEmailAction(IEmailService email)
-    {
-        _email = email;
-    }
-
-    public override async Task<ActionResult> ExecuteAsync(
+    public override async Task<IActionResult> ExecuteAsync(
         EmailInput input,
         CancellationToken ct)
     {
-        await _email.SendAsync(
+        await email.SendAsync(
             input.To,
             input.Subject,
             input.Body,
             ct);
 
-        return ActionResults.None();
+        return await CompleteAsync();
     }
 }
 ```
@@ -247,7 +273,7 @@ public sealed class SendEmailAction : JobAction<EmailInput>
 Throw an exception when the action cannot complete.
 
 ```csharp
-public override Task<ActionResult> ExecuteAsync(
+public override Task<IActionResult> ExecuteAsync(
     EmailInput input,
     CancellationToken ct)
 {
@@ -256,7 +282,7 @@ public override Task<ActionResult> ExecuteAsync(
 }
 ```
 
-WJb records the failure and stores the error information.
+WJb records the failure and stores error information.
 
 ---
 
@@ -286,6 +312,8 @@ await repository.SaveAsync(
 
 ✅ Explicit next steps
 
+✅ Prefer `NextAsync<TAction>()`
+
 ✅ Constructor injection
 
 ✅ Return meaningful results
@@ -307,13 +335,13 @@ await repository.SaveAsync(
 ## Mental Model
 
 ```text
-Action = Business Logic
+Action        = Business Logic
 
-Input  = Work To Perform
+Input         = Work To Perform
 
-Result = Outcome
+IActionResult = Outcome
 
-Command = Next Job
+JobCommand    = Next Job
 ```
 
 If you can read an action and immediately answer:
@@ -334,4 +362,6 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/01 ActionsTests.cs](../test/WJb.DocTests/01%20ActionsTests.cs)
+```text
+../test/WJb.DocTests/01_ActionsTests.cs
+```
