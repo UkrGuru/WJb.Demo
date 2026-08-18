@@ -46,27 +46,42 @@ public class _11_CustomStoresTests
     }
 
     [Fact]
-    public void ActionResults_Result_Should_Support_Integer_Value()
+    public void Complete_Should_Support_Integer_Value()
     {
-        var result = ActionResults.Result(123);
+        var result = Results.Complete(123);
 
-        Assert.Equal(123, result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.Equal(
+            123,
+            complete.Value);
     }
 
     [Fact]
-    public void ActionResults_Result_Should_Support_String_Value()
+    public void Complete_Should_Support_String_Value()
     {
-        var result = ActionResults.Result("Done");
+        var result = Results.Complete("Done");
 
-        Assert.Equal("Done", result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.Equal(
+            "Done",
+            complete.Value);
     }
 
     [Fact]
-    public void ActionResults_Result_Should_Support_Boolean_Value()
+    public void Complete_Should_Support_Boolean_Value()
     {
-        var result = ActionResults.Result(true);
+        var result = Results.Complete(true);
 
-        Assert.Equal(true, result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.Equal(
+            true,
+            complete.Value);
     }
 
     [Fact]

@@ -2,35 +2,45 @@
 
 public sealed class RetryEmailInput
 {
-    public string? To { get; set; }
+    public string To { get; set; } = string.Empty;
 }
 
-public sealed class RetryEmailAction : JobAction<RetryEmailInput>
+[ActionName("retry-email")]
+public sealed class RetryEmailAction
+    : JobAction<RetryEmailInput>
 {
-    public const string Key = "retry-email";
-
     private static int _attempts;
 
-    public override async Task<ActionResult> ExecuteAsync(RetryEmailInput input, CancellationToken ct)
+    public override async Task<IActionResult> ExecuteAsync(
+        RetryEmailInput input,
+        CancellationToken ct)
     {
         _attempts++;
 
-        ReportProgress(50, $"Attempt {_attempts}");
+        ReportProgress(
+            50,
+            $"Attempt {_attempts}");
 
-        await Task.Delay(500, ct);
+        await Task.Delay(
+            500,
+            ct);
 
         if (_attempts == 1)
-            throw new InvalidOperationException("SMTP temporarily unavailable.");
+        {
+            throw new InvalidOperationException(
+                "SMTP temporarily unavailable.");
+        }
 
-        ReportProgress(100, "Email delivered.");
+        ReportProgress(
+            100,
+            "Email delivered.");
 
         _attempts = 0;
 
-        return ActionResults.Next(new JobCommand(
-            LogAction.Key,
+        return await NextAsync<LogAction>(
             new LogInput
             {
                 Message = $"Email sent to {input.To}"
-            }));
+            });
     }
 }

@@ -16,7 +16,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.11" PrivateAssets="all" />
-        <PackageReference Include="WJb.UI.Blazor" Version="0.114.0" />
+        <PackageReference Include="WJb.UI.Blazor" Version="0.117.0" />
     </ItemGroup>
 
     <ItemGroup>

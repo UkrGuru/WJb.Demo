@@ -40,6 +40,10 @@ public class _10_StoreTests
         var payload = command.AsObject();
 
         Assert.NotNull(payload);
+
+        Assert.Equal(
+            42,
+            payload!["CustomerId"]!.GetValue<int>());
     }
 
     [Fact]
@@ -55,34 +59,52 @@ public class _10_StoreTests
         var payload = command.AsObject();
 
         Assert.NotNull(payload);
+
+        Assert.Equal(
+            "report.pdf",
+            payload!["File"]!.GetValue<string>());
     }
 
     [Fact]
-    public void ActionResults_Result_Should_Support_Integer_Result()
+    public void Complete_Should_Support_Integer_Result()
     {
-        var result = ActionResults.Result(123);
+        var result = Results.Complete(123);
 
-        Assert.Equal(123, result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.Equal(
+            123,
+            complete.Value);
     }
 
     [Fact]
-    public void ActionResults_Result_Should_Support_String_Result()
+    public void Complete_Should_Support_String_Result()
     {
-        var result = ActionResults.Result("Done");
+        var result = Results.Complete("Done");
 
-        Assert.Equal("Done", result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.Equal(
+            "Done",
+            complete.Value);
     }
 
     [Fact]
-    public void ActionResults_Result_Should_Support_Object_Result()
+    public void Complete_Should_Support_Object_Result()
     {
-        var result = ActionResults.Result(
+        var result = Results.Complete(
             new
             {
                 Sent = true
             });
 
-        Assert.NotNull(result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.NotNull(
+            complete.Value);
     }
 
     [Fact]
@@ -98,5 +120,9 @@ public class _10_StoreTests
         var payload = command.AsObject();
 
         Assert.NotNull(payload);
+
+        Assert.Equal(
+            "html-123",
+            payload!["BodyId"]!.GetValue<string>());
     }
 }

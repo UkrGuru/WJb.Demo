@@ -9,13 +9,17 @@ public sealed class HelloAction : JobAction<HelloPayload>
 {
     public const string Key = "hello";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        HelloPayload input, CancellationToken ct = default)
+    public override Task<IActionResult> ExecuteAsync(
+        HelloPayload input,
+        CancellationToken ct = default)
     {
-        var message = input.Text ?? "Hello from WJb ✅";
+        var message =
+            input.Text ?? "Hello! ✅";
 
-        ReportProgress(100, message);
+        ReportProgress(
+            100,
+            message);
 
-        return ActionResults.None();
+        return CompleteAsync();
     }
 }

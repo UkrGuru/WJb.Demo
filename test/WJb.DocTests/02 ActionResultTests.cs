@@ -3,101 +3,157 @@
 public class _02_ActionResultTests
 {
     [Fact]
-    public void None_Should_Return_ActionResult()
+    public void Complete_Should_Return_CompleteResult()
     {
-        var result = ActionResults.None();
+        var result = Results.Complete();
 
-        Assert.NotNull(result);
+        Assert.IsType<CompleteResult>(
+            result);
     }
 
     [Fact]
-    public void Result_Should_Accept_Anonymous_Object()
+    public void Complete_Should_Accept_Anonymous_Object()
     {
-        var result = ActionResults.Result(
-            new { Sent = true, Count = 1 });
+        var result = Results.Complete(
+            new
+            {
+                Sent = true,
+                Count = 1
+            });
 
-        Assert.NotNull(result);
+        var complete =
+            Assert.IsType<CompleteResult>(
+                result);
+
+        Assert.NotNull(
+            complete.Value);
     }
 
     [Fact]
-    public void Result_Should_Accept_Int()
+    public void Complete_Should_Accept_Int()
     {
-        var result = ActionResults.Result(123);
+        var result = Results.Complete(123);
 
-        Assert.NotNull(result);
+        var complete =
+            Assert.IsType<CompleteResult>(
+                result);
+
+        Assert.Equal(
+            123,
+            complete.Value);
     }
 
     [Fact]
-    public void Result_Should_Accept_String()
+    public void Complete_Should_Accept_String()
     {
-        var result = ActionResults.Result("done");
+        var result = Results.Complete("done");
 
-        Assert.NotNull(result);
+        var complete =
+            Assert.IsType<CompleteResult>(
+                result);
+
+        Assert.Equal(
+            "done",
+            complete.Value);
     }
 
     [Fact]
-    public void Result_Should_Accept_Boolean()
+    public void Complete_Should_Accept_Boolean()
     {
-        var result = ActionResults.Result(true);
+        var result = Results.Complete(true);
 
-        Assert.NotNull(result);
+        var complete =
+            Assert.IsType<CompleteResult>(
+                result);
+
+        Assert.Equal(
+            true,
+            complete.Value);
     }
 
     [Fact]
     public void Next_Should_Accept_Single_Command()
     {
-        var result = ActionResults.Next(
+        var result = Results.Next(
             new JobCommand(
-                "log", new LogInput { Message = "Completed" }));
+                "log",
+                new LogInput
+                {
+                    Message = "Completed"
+                }));
 
-        Assert.NotNull(result);
+        var next =
+            Assert.IsType<NextResult>(
+                result);
+
+        Assert.Single(
+            next.Commands);
     }
 
     [Fact]
     public void Next_Should_Accept_Multiple_Commands()
     {
-        var result = ActionResults.Next(
+        var result = Results.Next(
             new JobCommand(
-                "email", new EmailInput { To = "user@test.com" }),
+                "email",
+                new EmailInput
+                {
+                    To = "user@test.com"
+                }),
             new JobCommand(
                 "audit",
-                new AuditInput { Event = "OrderCompleted" }));
+                new AuditInput
+                {
+                    Event = "OrderCompleted"
+                }));
 
-        Assert.NotNull(result);
+        var next =
+            Assert.IsType<NextResult>(
+                result);
+
+        Assert.Equal(
+            2,
+            next.Commands.Count);
     }
 
     [Fact]
-    public void ActionResult_Should_Support_Value_And_Commands()
+    public void CompleteResult_Should_Support_Value()
     {
-        var result = new ActionResult
-        {
-            Value = new
+        var result = new CompleteResult(
+            new
             {
                 Success = true
-            },
-            Commands =
-            [
-                new JobCommand(
-                    "audit", new AuditInput())
-            ]
-        };
+            });
 
-        Assert.NotNull(result.Value);
-        Assert.Single(result.Commands);
+        Assert.NotNull(
+            result.Value);
+    }
+
+    [Fact]
+    public void NextResult_Should_Support_Commands()
+    {
+        var result =
+            new NextResult(
+                new JobCommand(
+                    "audit",
+                    new AuditInput()));
+
+        Assert.Single(
+            result.Commands);
     }
 
     private sealed class EmailInput
     {
-        public string To { get; init; } = "";
+        public string To { get; init; } = string.Empty;
     }
 
     private sealed class LogInput
     {
-        public string Message { get; init; } = "";
+        public string Message { get; init; } = string.Empty;
     }
 
     private sealed class AuditInput
     {
-        public string Event { get; init; } = "";
+        public string Event { get; init; } = string.Empty;
     }
 }

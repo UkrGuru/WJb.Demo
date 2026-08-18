@@ -24,25 +24,25 @@ builder.Services.AddSingleton<IWJb>(sp =>
     var wjb = WJbBuilder.Create(store, cfg =>
     {
         // Basic demos
-        cfg.AddAction<HelloAction>(HelloAction.Key);
-        cfg.AddAction<ProgressAction>(ProgressAction.Key);
+        cfg.AddAction<HelloAction>("hello");
+        cfg.AddAction<ProgressAction>("progress");
 
         // Configured
-        cfg.AddAction<ConfiguredAction>(ConfiguredAction.Key);
+        cfg.AddAction<ConfiguredAction>("configured");
 
         // Chained
-        cfg.AddAction<SendEmailAction>(SendEmailAction.Key);
-        cfg.AddAction<LogAction>(LogAction.Key);
-        cfg.AddAction<ErrorLogAction>(ErrorLogAction.Key);
+        cfg.AddAction<SendEmailAction>("send-email");
+        cfg.AddAction<LogAction>("log");
+        cfg.AddAction<ErrorLogAction>("error-log");
 
         // Retry Workflow
-        cfg.AddAction<RetryEmailAction>(RetryEmailAction.Key);
+        cfg.AddAction<RetryEmailAction>("retry-email");
 
         // Order Workflow
-        cfg.AddAction<CreateOrderAction>(CreateOrderAction.Key);
-        cfg.AddAction<ReserveStockAction>(ReserveStockAction.Key);
-        cfg.AddAction<ChargePaymentAction>(ChargePaymentAction.Key);
-        cfg.AddAction<SendConfirmationAction>(SendConfirmationAction.Key);
+        cfg.AddAction<CreateOrderAction>("create-order");
+        cfg.AddAction<ReserveStockAction>("reserve-stock");
+        cfg.AddAction<ChargePaymentAction>("charge-payment");
+        cfg.AddAction<SendConfirmationAction>("send-confirmation");
 
         cfg.AddService(new SmtpSettings
         {

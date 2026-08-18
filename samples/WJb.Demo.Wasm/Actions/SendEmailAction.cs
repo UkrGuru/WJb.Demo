@@ -1,21 +1,21 @@
 ﻿namespace WJb.Demo.Wasm.Actions;
 
-public sealed class SendEmailAction : JobAction<EmailInput>
+[ActionName("send-email")]
+public sealed class SendEmailAction
+    : JobAction<EmailInput>
 {
-    public const string Key = "send-email";
-
-    public override async Task<ActionResult> ExecuteAsync(
-        EmailInput input, CancellationToken ct)
+    public override async Task<IActionResult> ExecuteAsync(
+        EmailInput input,
+        CancellationToken ct)
     {
         ReportProgress(100, "Email delivered.");
 
         await Task.Delay(300, ct);
 
-        return ActionResults.Next(new JobCommand(
-            LogAction.Key,
+        return await NextAsync<LogAction>(
             new LogInput
             {
                 Message = $"Email sent to {input.To}"
-            }));
+            });
     }
 }

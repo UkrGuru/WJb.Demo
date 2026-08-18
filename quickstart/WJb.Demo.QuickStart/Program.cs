@@ -39,46 +39,43 @@ public static class Actions
     public const string Log = "log";
 }
 
-// Action: SendEmailAction
+[ActionName(Actions.SendEmail)]
 public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
 {
-    private readonly SmtpSettings _smtp = smtp;
-
-    public override Task<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
+    public override Task<IActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
     {
-        Console.WriteLine($"[Action] {Actions.SendEmail} → {input.To} via {_smtp.Host}");
+        Console.WriteLine($"[Action] {Actions.SendEmail} -> {input.To} via {smtp.Host}");
 
-        return Task.FromResult(
-            ActionResults.Next(new JobCommand(
-                Actions.Log, new LogInput { Message = $"Email sent to {input.To}" })));
+        return NextAsync<LogAction>(
+            new LogInput
+            {
+                Message = $"Email sent to {input.To}"
+            });
     }
 }
 
-// Action: LogAction
+[ActionName(Actions.Log)]
 public sealed class LogAction : JobAction<LogInput>
 {
-    public override Task<ActionResult> ExecuteAsync(LogInput input, CancellationToken ct)
+    public override Task<IActionResult> ExecuteAsync(LogInput input, CancellationToken ct)
     {
-        Console.WriteLine($"[Action] {Actions.Log} → {input.Message}");
+        Console.WriteLine($"[Action] {Actions.Log} -> {input.Message}");
 
-        return Task.FromResult(ActionResults.None());
+        return CompleteAsync();
     }
 }
 
-// Input: EmailInput
 public sealed class EmailInput
 {
-    public string? To { get; set; }
+    public string To { get; set; } = string.Empty;
 }
 
-// Input: LogInput
 public sealed class LogInput
 {
-    public string? Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 }
 
-// Service: SmtpSettings
-public class SmtpSettings
+public sealed class SmtpSettings
 {
-    public string Host { get; set; } = default!;
+    public string Host { get; set; } = string.Empty;
 }

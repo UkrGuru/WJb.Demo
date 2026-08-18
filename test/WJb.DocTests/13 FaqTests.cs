@@ -31,7 +31,7 @@ public class _13_FaqTests
     [Fact]
     public void JobCommand_Should_Schedule_Next_Work()
     {
-        var result = ActionResults.Next(
+        var result = Results.Next(
             new JobCommand(
                 "audit",
                 new
@@ -39,39 +39,51 @@ public class _13_FaqTests
                     Id = 1
                 }));
 
-        Assert.Single(result.Commands);
+        var next =
+            Assert.IsType<NextResult>(result);
+
+        Assert.Single(next.Commands);
     }
 
     [Fact]
-    public void ActionResults_Should_Support_Object_Result()
+    public void Complete_Should_Support_Object_Result()
     {
-        var result = ActionResults.Result(
+        var result = Results.Complete(
             new
             {
                 Success = true
             });
 
-        Assert.NotNull(result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.NotNull(complete.Value);
     }
 
     [Fact]
-    public void ActionResults_Should_Support_Integer_Result()
+    public void Complete_Should_Support_Integer_Result()
     {
-        var result = ActionResults.Result(123);
+        var result = Results.Complete(123);
+
+        var complete =
+            Assert.IsType<CompleteResult>(result);
 
         Assert.Equal(
             123,
-            result.Value);
+            complete.Value);
     }
 
     [Fact]
-    public void ActionResults_Should_Support_String_Result()
+    public void Complete_Should_Support_String_Result()
     {
-        var result = ActionResults.Result("done");
+        var result = Results.Complete("done");
+
+        var complete =
+            Assert.IsType<CompleteResult>(result);
 
         Assert.Equal(
             "done",
-            result.Value);
+            complete.Value);
     }
 
     [Fact]
@@ -108,6 +120,7 @@ public class _13_FaqTests
             ExponentialBackoff = true
         };
 
-        Assert.True(options.ExponentialBackoff);
+        Assert.True(
+            options.ExponentialBackoff);
     }
 }

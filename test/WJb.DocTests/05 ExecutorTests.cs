@@ -14,7 +14,7 @@ public class _05_ExecutorTests
             },
             CancellationToken.None);
 
-        Assert.False(result.Failed);
+        Assert.IsType<CompleteResult>(result);
     }
 
     [Fact]
@@ -26,7 +26,10 @@ public class _05_ExecutorTests
             new EmailInput(),
             CancellationToken.None);
 
-        Assert.NotNull(result.Value);
+        var complete =
+            Assert.IsType<CompleteResult>(result);
+
+        Assert.NotNull(complete.Value);
     }
 
     [Fact]
@@ -38,7 +41,10 @@ public class _05_ExecutorTests
             new EmailInput(),
             CancellationToken.None);
 
-        Assert.Single(result.Commands);
+        var next =
+            Assert.IsType<NextResult>(result);
+
+        Assert.Single(next.Commands);
     }
 
     [Fact]
@@ -50,9 +56,12 @@ public class _05_ExecutorTests
             new EmailInput(),
             CancellationToken.None);
 
+        var next =
+            Assert.IsType<NextResult>(result);
+
         Assert.Equal(
             2,
-            result.Commands.Count());
+            next.Commands.Count);
     }
 
     [Fact]
@@ -81,67 +90,62 @@ public class _05_ExecutorTests
                 cts.Token));
     }
 
+    [ActionName("send-email")]
     private sealed class SendEmailAction
         : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
+        public override async Task<IActionResult> ExecuteAsync(
             EmailInput input,
             CancellationToken ct)
         {
-            return Task.FromResult(
-                ActionResults.None());
+            return await CompleteAsync();
         }
     }
 
     private sealed class ResultAction
         : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
+        public override async Task<IActionResult> ExecuteAsync(
             EmailInput input,
             CancellationToken ct)
         {
-            return Task.FromResult(
-                ActionResults.Result(
-                    new
-                    {
-                        Success = true
-                    }));
+            return await CompleteAsync(
+                new
+                {
+                    Success = true
+                });
         }
     }
 
     private sealed class NextAction
         : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
+        public override async Task<IActionResult> ExecuteAsync(
             EmailInput input,
             CancellationToken ct)
         {
-            return Task.FromResult(
-                ActionResults.Next(
-                    new JobCommand(
-                        "audit",
-                        new AuditInput())));
+            return await NextAsync<AuditAction>(
+                new AuditInput());
         }
     }
 
     private sealed class FanOutAction
         : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
+        public override async Task<IActionResult> ExecuteAsync(
             EmailInput input,
             CancellationToken ct)
         {
-            return Task.FromResult(
-                ActionResults.Next(
-                    new JobCommand("email"),
-                    new JobCommand("audit")));
+            return Results.Next(
+                JobCommands.Next<EmailAction>(),
+                JobCommands.Next<AuditAction>());
         }
     }
 
     private sealed class FailingAction
         : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
+        public override Task<IActionResult> ExecuteAsync(
             EmailInput input,
             CancellationToken ct)
         {
@@ -153,20 +157,43 @@ public class _05_ExecutorTests
     private sealed class CancellableAction
         : JobAction<EmailInput>
     {
-        public override Task<ActionResult> ExecuteAsync(
+        public override async Task<IActionResult> ExecuteAsync(
             EmailInput input,
             CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
 
-            return Task.FromResult(
-                ActionResults.None());
+            return await CompleteAsync();
+        }
+    }
+
+    [ActionName("email")]
+    private sealed class EmailAction
+        : JobAction<EmailInput>
+    {
+        public override async Task<IActionResult> ExecuteAsync(
+            EmailInput input,
+            CancellationToken ct)
+        {
+            return await CompleteAsync();
+        }
+    }
+
+    [ActionName("audit")]
+    private sealed class AuditAction
+        : JobAction<AuditInput>
+    {
+        public override async Task<IActionResult> ExecuteAsync(
+            AuditInput input,
+            CancellationToken ct)
+        {
+            return await CompleteAsync();
         }
     }
 
     private sealed class EmailInput
     {
-        public string To { get; init; } = "";
+        public string To { get; init; } = string.Empty;
     }
 
     private sealed class AuditInput
