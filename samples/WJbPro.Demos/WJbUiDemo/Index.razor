@@ -1,0 +1,57 @@
+﻿@using WJb.UI.Blazor
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="col-md-3 border-end mb-4">
+            <SelectDemo OnSelect="SelectDemo" />
+        </div>
+
+        <div class="col-md-9">
+            @switch (SelectedDemo)
+            {
+                case "Jobs":
+                    <Jobs />
+                    break;
+
+                case "Actions":
+                    <Actions />
+                    break;
+
+                case "Services":
+                    <Services />
+                    break;
+
+            }
+        </div>
+
+    </div>
+
+    <hr class="my-4" />
+
+    @switch (SelectedDemo)
+    {
+        case "Jobs":
+            <JobsDemo />
+            break;
+
+        case "Actions":
+            <ActionsDemo />
+            break;
+
+        case "Services":
+            <ServicesDemo />
+            break;
+    }
+
+</div>
+
+@code {
+    private string SelectedDemo = "Jobs";
+
+    private void SelectDemo(string demo)
+    {
+        SelectedDemo = demo;
+    }
+}

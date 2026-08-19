@@ -1,22 +1,18 @@
 ﻿@page "/"
+<PageTitle>WJb Demo</PageTitle>
 
-@using WJb
-@using WJb.UI.Blazor
+<div class="d-flex align-items-center gap-3 mb-2">
+    <img src="_content/WJbPro.Demos/images/wjb.png" alt="WJb" width="48" />
+    <h1 class="mb-0">
+        WJb Demo (WASM)
+    </h1>
+    <a href="https://www.nuget.org/packages/WJb" target="_blank" class="btn btn-outline-primary" title="View on NuGet">
+        📦
+    </a>
+</div>
 
-@inject IWJb Wjb
+<p class="lead">
+    💡 Explore WJb through interactive examples. Learn how to build background jobs, orchestrate workflows, monitor execution, and inspect the source code behind each sample.
+</p>
 
-<h3 class="mb-3">WJb Demo (WASM)</h3>
-
-<JobsTab RefreshInterval="@(TimeSpan.FromSeconds(1))" />
-
-@code {
-
-    // private Task RunDemoAsync()
-    //     => Wjb.EnqueueAsync(
-    //         ImportCustomersAction.Key,
-    //         new ImportCustomersInput
-    //         {
-    //             Source = "CRM"
-    //         });
-
-}
+<WJbPro.Demos.WJbDemo.Index />

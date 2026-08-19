@@ -1,0 +1,33 @@
+﻿@using WJb
+@using WJbPro.Demos.Actions
+
+@inject IStore Store
+
+<h3 class="mb-3">⚙️ Configured</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Demonstrates dependency injection via settings.
+        </p>
+
+        <button class="btn btn-primary mb-3" @onclick="Run">
+            ▶ Run
+        </button>
+
+        <div class="small text-muted">
+            Flow: Enqueue → Resolve Settings → Execute → Complete
+        </div>
+
+    </div>
+</div>
+
+<SourceViewer Source="WJb.Configured" />
+
+@code {
+    private async Task Run()
+        => await Store.EnqueueAsync(
+            ConfiguredAction.Key,
+            new EmailInput { To = "test@test.com" });
+}

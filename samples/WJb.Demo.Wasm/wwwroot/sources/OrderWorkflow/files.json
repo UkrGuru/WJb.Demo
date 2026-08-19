@@ -1,7 +1,0 @@
-[
-  "Start.cs",
-  "CreateOrderAction.cs",
-  "ReserveStockAction.cs",
-  "ChargePaymentAction.cs",
-  "SendConfirmationAction.cs"
-]

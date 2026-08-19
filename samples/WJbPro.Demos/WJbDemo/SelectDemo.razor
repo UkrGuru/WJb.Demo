@@ -1,0 +1,37 @@
+﻿
+<h5 class="mt-2">Getting Started</h5>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("Hello")'>
+    🚀 Hello World
+</button>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("Progress")'>
+    📊 Progress Tracking
+</button>
+
+<h5 class="mt-2">Configuration</h5>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("Configured")'>
+    ⚙️ Configured 
+</button>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("Ping")'>
+    ⏰ Ping Website
+</button>
+
+<h5 class="mt-2">Workflows</h5>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("RetryWorkflow")'>
+    🔄 Retry Workflow
+</button>
+<button class="btn btn-link text-start w-100" @onclick='() => Select("OrderWorkflow")'>
+    🛒 Order Workflow
+</button>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnSelect { get; set; }
+
+    private Task Select(string demo)
+        => OnSelect.InvokeAsync(demo);
+}

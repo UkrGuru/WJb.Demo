@@ -1,0 +1,23 @@
+﻿@using WJb
+@using WJb.UI.Blazor
+
+@inject IStore Store
+
+<ServicesTab />
+
+<div class="fixed-bottom text-center mb-3">
+    <button class="btn btn-warning btn-lg" @onclick="SaveAsync">
+        💾 Save File
+    </button>
+</div>
+
+@code {
+    private Task SaveAsync()
+    {
+        var json = ((IDefinitionStore)Store).GetServicesJson();
+
+        File.WriteAllText("App_Data/services.json", json);
+
+        return Task.CompletedTask;
+    }
+}

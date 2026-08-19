@@ -1,0 +1,33 @@
+﻿@using WJb
+@using WJbPro.Demos.Actions
+
+@inject IStore Store
+
+<h3 class="mb-3">🚀 Hello World</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Minimal job that immediately completes with a message.
+        </p>
+
+        <button class="btn btn-primary mb-3" @onclick="Run">
+            ▶ Run
+        </button>
+
+        <div class="small text-muted">
+            Flow: Enqueue → Execute → Complete
+        </div>
+
+    </div>
+</div>
+
+<SourceViewer Source="WJb.Hello" />
+
+@code {
+    private async Task Run()
+        => await Store.EnqueueAsync(
+            HelloAction.Key,
+            new HelloPayload { Text = "Hello World! ✅" });
+}

@@ -1,0 +1,23 @@
+﻿@using WJb
+@using WJbPro.Demos.Actions
+
+@inject IStore Store
+
+<h3 class="mb-3">🔧 Services</h3>
+
+<div class="card">
+    <div class="card-body">
+        <p class="text-muted mb-3">
+            Manage service configuration, edit settings, and persist changes through a built-in administration interface.
+        </p>
+    </div>
+</div>
+
+<SourceViewer Source="WJbUi.Services" />
+
+@code {
+    private async Task Run()
+        => await Store.EnqueueAsync(
+            ImportCustomersAction.Key,
+            new ImportCustomersInput { Source = "CRM" });
+}

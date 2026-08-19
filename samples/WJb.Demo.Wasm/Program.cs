@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using WJb;
 using WJb.Demo.Wasm;
-using WJb.Demo.Wasm.Actions;
+using WJbPro.Demos.Actions;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -33,10 +33,12 @@ builder.Services.AddSingleton<IWJb>(sp =>
         // Chained
         cfg.AddAction<SendEmailAction>("send-email");
         cfg.AddAction<LogAction>("log");
-        cfg.AddAction<ErrorLogAction>("error-log");
 
         // Retry Workflow
         cfg.AddAction<RetryEmailAction>("retry-email");
+
+        // Http Ping
+        cfg.AddAction<HttpPingAction>(HttpPingAction.Key, new { cron = "* * * * *" });
 
         // Order Workflow
         cfg.AddAction<CreateOrderAction>("create-order");
@@ -54,9 +56,11 @@ builder.Services.AddSingleton<IWJb>(sp =>
 });
 
 builder.Services.AddSingleton<WasmWorker>();
+builder.Services.AddSingleton<CronWorker>();
 
 var app = builder.Build();
 
 app.Services.GetRequiredService<WasmWorker>().Start();
+app.Services.GetRequiredService<CronWorker>().Start();
 
 await app.RunAsync();

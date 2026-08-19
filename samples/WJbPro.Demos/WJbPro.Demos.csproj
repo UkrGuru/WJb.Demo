@@ -1,0 +1,124 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="wwwroot\sources\**" />
+        <Content Remove="wwwroot\sources\**" />
+        <EmbeddedResource Remove="wwwroot\sources\**" />
+        <None Remove="wwwroot\sources\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="Actions\ErrorLogAction.cs" />
+        <Compile Remove="Resources\WJbUi\Services\Setup.cs" />
+        <Compile Remove="Resources\WJbUi\Actions\Setup.cs" />
+        <Compile Remove="Resources\WJb\Configured\ConfiguredAction.cs" />
+        <Compile Remove="Resources\WJb\Configured\Run.cs" />
+        <Compile Remove="Resources\WJb\Configured\Setup.cs" />
+        <Compile Remove="Resources\WJb\Ping\HttpPingAction.cs" />
+        <Compile Remove="Resources\WJb\Ping\Run.cs" />
+        <Compile Remove="Resources\WJb\Ping\Setup.cs" />
+        <Compile Remove="Resources\WJb\Hello\HelloAction.cs" />
+        <Compile Remove="Resources\WJb\Hello\Run.cs" />
+        <Compile Remove="Resources\WJb\Hello\Setup.cs" />
+        <Compile Remove="Resources\WJb\OrderWorkflow\ChargePaymentAction.cs" />
+        <Compile Remove="Resources\WJb\OrderWorkflow\CreateOrderAction.cs" />
+        <Compile Remove="Resources\WJb\OrderWorkflow\ReserveStockAction.cs" />
+        <Compile Remove="Resources\WJb\OrderWorkflow\Run.cs" />
+        <Compile Remove="Resources\WJb\OrderWorkflow\SendConfirmationAction.cs" />
+        <Compile Remove="Resources\WJb\OrderWorkflow\Setup.cs" />
+        <Compile Remove="Resources\WJb\RetryWorkflow\ErrorLogAction.cs" />
+        <Compile Remove="Resources\WJb\RetryWorkflow\LogAction.cs" />
+        <Compile Remove="Resources\WJb\RetryWorkflow\RetryEmailAction.cs" />
+        <Compile Remove="Resources\WJb\RetryWorkflow\Run.cs" />
+        <Compile Remove="Resources\WJb\RetryWorkflow\Setup.cs" />
+        <Compile Remove="Resources\WJb\Progress\ProgressAction.cs" />
+        <Compile Remove="Resources\WJb\Progress\Run.cs" />
+        <Compile Remove="Resources\WJb\Progress\Setup.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Remove="Resources\WJbUi\Jobs\files.json" />
+        <Content Remove="Resources\WJbUi\Jobs\JobsDemo.razor" />
+        <Content Remove="Resources\WJbUi\Services\files.json" />
+        <Content Remove="Resources\WJbUi\Actions\ActionsDemo.razor" />
+        <Content Remove="Resources\WJbUi\Actions\files.json" />
+        <Content Remove="Resources\WJbUi\Services\ServicesDemo.razor" />
+        <Content Remove="Resources\WJb\Configured\files.json" />
+        <Content Remove="Resources\WJb\Ping\files.json" />
+        <Content Remove="Resources\WJb\Hello\files.json" />
+        <Content Remove="Resources\WJb\OrderWorkflow\files.json" />
+        <Content Remove="Resources\WJb\RetryWorkflow\files.json" />
+        <Content Remove="Resources\WJb\Progress\files.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\WJbUi\Jobs\JobsDemo.razor" />
+        <EmbeddedResource Include="Resources\WJbUi\Jobs\files.json" />
+        <EmbeddedResource Include="Resources\WJbUi\Services\ServicesDemo.razor" />
+        <EmbeddedResource Include="Resources\WJbUi\Services\files.json" />
+        <EmbeddedResource Include="Resources\WJbUi\Services\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJbUi\Actions\files.json" />
+        <EmbeddedResource Include="Resources\WJbUi\Actions\ActionsDemo.razor" />
+        <EmbeddedResource Include="Resources\WJbUi\Actions\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJb\Configured\files.json" />
+        <EmbeddedResource Include="Resources\WJb\Configured\ConfiguredAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\Configured\Run.cs" />
+        <EmbeddedResource Include="Resources\WJb\Configured\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJb\Ping\files.json" />
+        <EmbeddedResource Include="Resources\WJb\Ping\HttpPingAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\Ping\Run.cs" />
+        <EmbeddedResource Include="Resources\WJb\Ping\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJb\OrderWorkflow\files.json" />
+        <EmbeddedResource Include="Resources\WJb\OrderWorkflow\ChargePaymentAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\OrderWorkflow\SendConfirmationAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\OrderWorkflow\ReserveStockAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\OrderWorkflow\CreateOrderAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\OrderWorkflow\Run.cs" />
+        <EmbeddedResource Include="Resources\WJb\OrderWorkflow\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJb\RetryWorkflow\files.json" />
+        <EmbeddedResource Include="Resources\WJb\RetryWorkflow\LogAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\RetryWorkflow\RetryEmailAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\RetryWorkflow\Run.cs" />
+        <EmbeddedResource Include="Resources\WJb\RetryWorkflow\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJb\Progress\files.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\WJb\Hello\files.json" />
+        <EmbeddedResource Include="Resources\WJb\Hello\HelloAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\Hello\Run.cs" />
+        <EmbeddedResource Include="Resources\WJb\Hello\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJb\Progress\ProgressAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\Progress\Run.cs" />
+        <EmbeddedResource Include="Resources\WJb\Progress\Setup.cs" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <SupportedPlatform Include="browser" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.11" />
+        <PackageReference Include="WJb.UI.Blazor" Version="0.117.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="wwwroot\" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>none</DebugType>
+    </PropertyGroup>
+
+</Project>

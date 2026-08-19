@@ -1,0 +1,22 @@
+﻿
+<h5 class="mt-2">Getting Started</h5>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("Jobs")'>
+    📋 Jobs
+</button>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("Actions")'>
+    ⚡ Actions
+</button>
+
+<button class="btn btn-link text-start w-100" @onclick='() => Select("Services")'>
+    🔧 Services
+</button>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnSelect { get; set; }
+
+    private Task Select(string demo)
+        => OnSelect.InvokeAsync(demo);
+}

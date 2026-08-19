@@ -1,0 +1,33 @@
+@using WJb
+@using WJbPro.Demos.Actions
+
+@inject IStore Store
+
+<h3 class="mb-3">🛒 Order Workflow</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Execute a multi-step business process.
+        </p>
+
+        <button class="btn btn-primary mb-3" @onclick="Run">
+            ▶ Run
+        </button>
+
+        <div class="small text-muted">
+            Workflow: Create Order → Reserve Stock → Process Payment → Send Confirmation
+        </div>
+
+    </div>
+</div>
+
+<SourceViewer Source="WJb.OrderWorkflow" />
+
+@code {
+    private async Task Run() 
+        => await Store.EnqueueAsync(
+            CreateOrderAction.Key,
+            new OrderInput { OrderId = 1001 });
+}
