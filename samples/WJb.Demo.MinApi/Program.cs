@@ -16,13 +16,11 @@ builder.Services.AddSingleton<IWJb>(sp =>
 
 builder.Services.AddSingleton(sp => new WasmWorker(sp.GetRequiredService<IWJb>()));
 
-builder.Services.AddSingleton<IJobExecutor>(sp => sp.GetRequiredService<IWJb>());
-
 var app = builder.Build();
 
-app.MapPost("/jobs", async Task<IResult> (IJobExecutor executor) =>
+app.MapPost("/jobs", async Task<IResult> (IWJb wjb) =>
     {
-        var jobId = await executor.EnqueueAsync(
+        var jobId = await wjb.EnqueueAsync(
             DemoAction.Key,
             new DemoPayload
             {
@@ -65,12 +63,12 @@ public sealed class DemoPayload
     public string Text { get; set; } = "";
 }
 
-public sealed class DemoAction : JobAction<DemoPayload>
+public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 {
     public const string Key = "demo";
 
     public override async Task<IActionResult> ExecuteAsync(
-        DemoPayload input, CancellationToken ct)
+        DemoPayload input, CancellationToken ct=default)
     {
         for (var i = 0; i <= 100; i += 10)
         {
@@ -78,27 +76,10 @@ public sealed class DemoAction : JobAction<DemoPayload>
 
             await Task.Delay(input.DelayMs / 10, ct);
 
-            ReportProgress(
-                i,
-                $"Progress {i}%");
+            ReportProgress(i, $"Progress {i}%");
+
         }
 
-        return WJb.Results.Complete(new
-        {
-            ok = true,
-            text = input.Text
-        });
-    }
-}
-
-public sealed class JobWorker(IJobExecutor executor) : BackgroundService
-{
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await executor.ExecuteLoopAsync(stoppingToken);
-            await Task.Delay(1000, stoppingToken);
-        }
+        return await CompleteAsync("Done ✅");
     }
 }

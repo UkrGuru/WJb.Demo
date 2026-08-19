@@ -1,0 +1,55 @@
+﻿@using WJb.UI.Blazor
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="col-md-3 border-end mb-4">
+            <SelectDemo OnSelect="SelectDemo" />
+        </div>
+
+        <div class="col-md-9">
+            @switch (SelectedDemo)
+            {
+                case "Hello":
+                    <Hello />
+                    break;
+
+                case "Progress":
+                    <Progress />
+                    break;
+
+                case "Configured":
+                    <Configured />
+                    break;
+
+                case "Ping":
+                    <Ping />
+                    break;
+
+                case "RetryWorkflow":
+                    <RetryWorkflow />
+                    break;
+
+                case "OrderWorkflow":
+                    <OrderWorkflow />
+                    break;
+            }
+        </div>
+
+    </div>
+
+    <hr class="my-4" />
+
+    <JobsTab RefreshInterval="@(TimeSpan.FromSeconds(1))" />
+
+</div>
+
+@code {
+    private string SelectedDemo = "Hello";
+
+    private void SelectDemo(string demo)
+    {
+        SelectedDemo = demo;
+    }
+}

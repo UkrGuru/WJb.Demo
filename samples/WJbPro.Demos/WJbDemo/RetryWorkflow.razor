@@ -1,0 +1,41 @@
+@using WJb
+@using WJbPro.Demos.Actions
+
+@inject IStore Store
+
+<h3 class="mb-3">🔄 Retry Workflow</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Automatically retry failed operations.
+        </p>
+
+        <button class="btn btn-primary mb-3" @onclick="Run">
+            ▶ Run
+        </button>
+
+        <div class="small text-muted">
+            Workflow: Retry Email → Fail → Retry → Log
+        </div>
+
+    </div>
+</div>
+
+<SourceViewer Source="WJb.RetryWorkflow" />
+
+@code {
+    private async Task Run() 
+        => await Store.EnqueueAsync(
+            RetryEmailAction.Key,
+            payload: new
+            {
+                payload = new RetryEmailInput { To = "test@test.com" },
+                options = new JobOptions
+                {
+                    MaxRetries = 1,
+                    RetryDelay = TimeSpan.FromSeconds(1)
+                }
+            });
+}

@@ -1,4 +1,4 @@
-# WJb.Sql
+# 🗄️ WJb.Sql
 
 WJb.Sql is the SQL Server storage provider for WJb.
 
@@ -12,7 +12,37 @@ WJb.Sql
 SQL Server
 ```
 
-It provides durable job storage, scheduling, progress tracking, and job history.
+It provides durable storage for jobs, payloads, results, progress updates, definitions, and workflow history.
+
+---
+
+## Why WJb.Sql
+
+The in-memory store is ideal for development.
+
+Production systems need durability.
+
+```text
+Process Restart
+        ↓
+Server Reboot
+        ↓
+Deployment
+        ↓
+WJb.Sql
+        ↓
+Nothing Lost
+```
+
+WJb.Sql persists:
+
+- Jobs
+- Payloads
+- Results
+- Progress updates
+- Action definitions
+- Service definitions
+- Workflow history
 
 ---
 
@@ -36,26 +66,6 @@ The connection factory is used whenever database access is required.
 
 ---
 
-## Creating Tables
-
-Run the provided SQL installation script.
-
-```text
-WJb_Jobs
-```
-
-The table stores:
-
-- Jobs
-- Status
-- Payload
-- Results
-- Errors
-- Progress
-- Scheduling information
-
----
-
 ## Basic Usage
 
 ```csharp
@@ -63,8 +73,11 @@ var store =
     new SqlStore(
         () => new SqlConnection(connectionString));
 
-var wjb = WJbBuilder.Create(store);
+var wjb =
+    await WJbBuilder.CreateAsync(store);
 ```
+
+Once the instance is created, WJb is used exactly the same way as with the in-memory store.
 
 ---
 
@@ -114,7 +127,7 @@ await wjb.ExecuteLoopAsync(
 Actions may report progress.
 
 ```csharp
-await Context.UpdateProgressAsync(
+ReportProgress(
     50,
     "Processing records");
 ```
@@ -127,8 +140,6 @@ Progress is persisted in SQL Server.
 
 Job results are stored as JSON.
 
-Examples:
-
 ```json
 123
 ```
@@ -139,7 +150,7 @@ Examples:
 
 ```json
 {
-    "sent": true
+  "sent": true
 }
 ```
 
@@ -147,25 +158,21 @@ Examples:
 
 ## Errors
 
-Failure information is stored as JSON.
+Failure information is stored and preserved.
 
-Examples:
-
-```json
-"SMTP unavailable"
+```text
+SMTP unavailable
 ```
 
-```json
-{
-    "message": "SMTP unavailable"
-}
+```text
+Validation failed
 ```
 
 ---
 
 ## Monitoring
 
-The SQL store keeps historical job information.
+The SQL store keeps workflow history and job execution information.
 
 Useful for:
 
@@ -176,7 +183,7 @@ Useful for:
 
 ---
 
-## Production Usage
+## Scaling
 
 Typical deployment:
 
@@ -224,23 +231,23 @@ SQL Server
 
 WJb.Sql is a commercial package.
 
-The core WJb package remains independent of SQL Server.
+The WJb runtime remains independent of SQL Server.
 
 ---
 
 ## Mental Model
 
 ```text
-WJb     = Execution
+WJb         = Job Engine
 
-Action  = Business Logic
+Action      = Business Logic
 
-WJb.Sql = Persistence
+WJb.Sql     = Persistence
+
+SQL Server  = Storage
 ```
 
-WJb.Sql is responsible for storing jobs.
-
-Nothing else changes.
+That's it.
 
 ---
 
@@ -250,4 +257,12 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/12 WjbSqlTests.cs](../test/WJb.DocTests/12%20WjbSqlTests.cs)
+```text
+../test/WJb.DocTests/12_WJbSqlTests.cs
+```
+
+---
+
+> WJb defines execution flow.
+>
+> WJb.Sql makes it durable.

@@ -1,0 +1,33 @@
+﻿@using WJb
+@using WJbPro.Demos.Actions
+
+@inject IStore Store
+
+<h3 class="mb-3">📋 Jobs</h3>
+
+<div class="card">
+    <div class="card-body">
+
+        <p class="text-muted mb-3">
+            Monitor job execution, track progress, inspect payloads, and retry failed jobs in real time.
+        </p>
+
+        <button class="btn btn-primary mb-3" @onclick="Run">
+            ▶ Run Demo Workflow
+        </button>
+
+        <div class="small text-muted">
+            Flow: Import Customers → Generate Report → Send Email
+        </div>
+
+    </div>
+</div>
+
+<SourceViewer Source="WJbUi.Jobs" />
+
+@code {
+    private async Task Run()
+        => await Store.EnqueueAsync(
+            ImportCustomersAction.Key,
+            new ImportCustomersInput { Source = "CRM" });
+}

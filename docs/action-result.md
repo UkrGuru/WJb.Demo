@@ -1,29 +1,29 @@
-# ActionResult
+# IActionResult
 
-`ActionResult` describes the outcome of an action.
+`IActionResult` describes the outcome of an action.
 
-Every action returns an `ActionResult`.
+Every action returns an `IActionResult`.
 
 ```text
 Action
    ↓
-ActionResult
+IActionResult
 ```
 
 The result tells WJb:
 
-- Did the action succeed?
+- Is the workflow complete?
 - Should another job run?
 - Should a value be stored?
 
 ---
 
-## Returning Nothing
+## Complete the Workflow
 
-Use `ActionResults.None()` when the action has completed successfully and no additional information is required.
+Use `CompleteAsync()` when the action has completed successfully and no additional information is required.
 
 ```csharp
-public override async Task<ActionResult> ExecuteAsync(
+public override async Task<IActionResult> ExecuteAsync(
     EmailInput input,
     CancellationToken ct)
 {
@@ -33,18 +33,18 @@ public override async Task<ActionResult> ExecuteAsync(
         input.Body,
         ct);
 
-    return ActionResults.None();
+    return await CompleteAsync();
 }
 ```
 
 ---
 
-## Returning a Result
+## Complete with a Result
 
 Actions can return a value.
 
 ```csharp
-return ActionResults.Result(
+return Results.Complete(
     new
     {
         Sent = true,
@@ -58,8 +58,8 @@ Stored result:
 
 ```json
 {
-    "Sent": true,
-    "Count": 1
+  "Sent": true,
+  "Count": 1
 }
 ```
 
@@ -70,7 +70,7 @@ Stored result:
 Scalar values are fully supported.
 
 ```csharp
-return ActionResults.Result(123);
+return Results.Complete(123);
 ```
 
 Stored result:
@@ -80,7 +80,7 @@ Stored result:
 ```
 
 ```csharp
-return ActionResults.Result("done");
+return Results.Complete("done");
 ```
 
 Stored result:
@@ -90,7 +90,7 @@ Stored result:
 ```
 
 ```csharp
-return ActionResults.Result(true);
+return Results.Complete(true);
 ```
 
 Stored result:
@@ -108,13 +108,11 @@ No wrapper objects are required.
 Actions can schedule new jobs.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "log",
-        new LogInput
-        {
-            Message = "Completed"
-        }));
+return await NextAsync<LogAction>(
+    new LogInput
+    {
+        Message = "Completed"
+    });
 ```
 
 Workflow:
@@ -132,15 +130,13 @@ current-action
 Multiple commands can be returned.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "email",
+return Results.Next(
+    JobCommands.Next<EmailAction>(
         new EmailInput
         {
             To = customer.Email
         }),
-    new JobCommand(
-        "audit",
+    JobCommands.Next<AuditAction>(
         new AuditInput
         {
             Event = "OrderCompleted"
@@ -157,112 +153,62 @@ current-action
 
 ---
 
-## ActionResult API
+## CompleteResult
+
+Represents a completed workflow.
 
 ```csharp
-public sealed class ActionResult
+public sealed class CompleteResult
+    : IActionResult
 {
-    public object? Value { get; init; }
-
-    public bool Failed { get; init; }
-
-    public IEnumerable<JobCommand> Commands { get; init; }
+    public object? Value { get; }
 }
-```
-
-Most applications use the helper methods from `ActionResults`.
-
----
-
-## ActionResults.None
-
-```csharp
-return ActionResults.None();
-```
-
-Produces:
-
-```text
-Success
-No Result
-No Commands
-```
-
----
-
-## ActionResults.Result
-
-```csharp
-return ActionResults.Result(value);
-```
-
-Produces:
-
-```text
-Success
-Result Stored
-No Commands
 ```
 
 Example:
 
 ```csharp
-return ActionResults.Result(
+return Results.Complete(
     new
     {
         OrderId = order.Id
     });
 ```
 
+Produces:
+
+```text
+Workflow Completed
+Result Stored
+```
+
 ---
 
-## ActionResults.Next
+## NextResult
+
+Represents one or more workflow continuations.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "send-email",
+public sealed class NextResult
+    : IActionResult
+{
+    public IReadOnlyList<JobCommand> Commands { get; }
+}
+```
+
+Example:
+
+```csharp
+return Results.Next(
+    JobCommands.Next<SendEmailAction>(
         email));
 ```
 
 Produces:
 
 ```text
-Success
-No Result
-Next Command
-```
-
----
-
-## Result and Commands Together
-
-An action can return a result and schedule additional jobs.
-
-```csharp
-return new ActionResult
-{
-    Value = new
-    {
-        Success = true
-    },
-    Commands =
-    [
-        new JobCommand(
-            "audit",
-            new AuditInput())
-    ]
-};
-```
-
-Workflow:
-
-```text
-Action
-  │
-  ├─ Store Result
-  │
-  └─ Schedule audit
+Workflow Continues
+Next Command Scheduled
 ```
 
 ---
@@ -276,7 +222,7 @@ throw new InvalidOperationException(
     "SMTP server unavailable");
 ```
 
-WJb records the failure and stores the error information.
+WJb records the failure and stores error information.
 
 ---
 
@@ -288,15 +234,13 @@ WJb records the failure and stores the error information.
 
 ✅ Use strongly typed payloads
 
-✅ Keep results small
+✅ Prefer `NextAsync<TAction>()`
 
 ✅ Keep workflows visible
 
 ❌ Hide workflow logic
 
 ❌ Store large files in results
-
-❌ Create unnecessary wrapper objects
 
 ❌ Depend on side effects to drive workflows
 
@@ -305,18 +249,18 @@ WJb records the failure and stores the error information.
 ## Mental Model
 
 ```text
-Action       = Work
+Action         = Work
 
-ActionResult = Outcome
+IActionResult  = Outcome
 
-JobCommand   = Next Work
+JobCommand     = Next Work
 ```
 
-An action does not directly execute another action.
+An action does not execute another action.
 
-An action returns an `ActionResult`.
+An action returns an `IActionResult`.
 
-The `ActionResult` describes what happens next.
+The `IActionResult` describes what happens next.
 
 ---
 
@@ -326,4 +270,6 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/02 ActionResultTests.cs](../test/WJb.DocTests/02%20ActionResultTests.cs)
+```text
+../test/WJb.DocTests/02_ActionResultTests.cs
+```

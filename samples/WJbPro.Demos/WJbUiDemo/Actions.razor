@@ -1,0 +1,23 @@
+﻿@using WJb
+@using WJbPro.Demos.Actions
+
+@inject IStore Store
+
+<h3 class="mb-3">⚡ Actions</h3>
+
+<div class="card">
+    <div class="card-body">
+        <p class="text-muted mb-3">
+            Configure action definitions, test execution, and manage workflow behavior without building custom UI.
+        </p>
+    </div>
+</div>
+
+<SourceViewer Source="WJbUi.Actions" />
+
+@code {
+    private async Task Run()
+        => await Store.EnqueueAsync(
+            ImportCustomersAction.Key,
+            new ImportCustomersInput { Source = "CRM" });
+}

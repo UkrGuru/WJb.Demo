@@ -7,7 +7,7 @@ It is the building block of workflows in WJb.
 ```text
 Action
    ↓
-ActionResult
+IActionResult
    ↓
 JobCommand
    ↓
@@ -33,7 +33,7 @@ new JobCommand(
 
 The command specifies:
 
-- Action key
+- Action name
 - Payload
 - Execution condition
 
@@ -41,21 +41,18 @@ The command specifies:
 
 ## Scheduling the Next Job
 
-Actions can return commands using `ActionResults.Next`.
+Actions can return commands using `NextAsync<TAction>()`.
 
 ```csharp
-public override Task<ActionResult> ExecuteAsync(
+public override async Task<IActionResult> ExecuteAsync(
     OrderInput input,
     CancellationToken ct)
 {
-    return Task.FromResult(
-        ActionResults.Next(
-            new JobCommand(
-                "send-email",
-                new EmailInput
-                {
-                    To = input.Email
-                })));
+    return await NextAsync<SendEmailAction>(
+        new EmailInput
+        {
+            To = input.Email
+        });
 }
 ```
 
@@ -74,15 +71,13 @@ send-email
 An action can schedule more than one next step.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "email",
+return Results.Next(
+    JobCommands.Next<EmailAction>(
         new EmailInput
         {
             To = customer.Email
         }),
-    new JobCommand(
-        "audit",
+    JobCommands.Next<AuditAction>(
         new AuditInput
         {
             Event = "OrderCompleted"
@@ -183,6 +178,15 @@ new JobCommand(
     JobCommandCondition.Success);
 ```
 
+### JobCommands.Next<TAction>
+
+```csharp
+JobCommands.Next<SendEmailAction>(
+    email);
+```
+
+The action name is resolved automatically from the action type.
+
 ### JobCommands.OnFailure
 
 ```csharp
@@ -235,15 +239,15 @@ done
 ```csharp
 CreateOrderAction
     ↓
-JobCommand("send-email")
+NextAsync<SendEmailAction>()
 
 SendEmailAction
     ↓
-JobCommand("audit")
+NextAsync<AuditAction>()
 
 AuditAction
     ↓
-ActionResults.None()
+CompleteAsync()
 ```
 
 No external workflow configuration is required.
@@ -257,6 +261,8 @@ The workflow is defined directly in code.
 ✅ Schedule explicit next steps
 
 ✅ Use strongly typed payloads
+
+✅ Prefer `JobCommands.Next<TAction>()`
 
 ✅ Keep commands focused
 
@@ -277,11 +283,11 @@ The workflow is defined directly in code.
 ## Mental Model
 
 ```text
-Action     = Work
+Action       = Work
 
-Result     = Outcome
+IActionResult = Outcome
 
-JobCommand = Next Work
+JobCommand   = Next Work
 ```
 
 A `JobCommand` does not execute anything.
@@ -298,4 +304,6 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/03 JobCommandTests.cs](../test/WJb.DocTests/03%20JobCommandTests.cs)
+```text
+../test/WJb.DocTests/03_JobCommandTests.cs
+```
