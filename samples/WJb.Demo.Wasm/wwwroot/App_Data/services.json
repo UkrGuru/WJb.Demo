@@ -1,0 +1,6 @@
+{
+  "smtp": {
+    "type": "WJbPro.Demos.Actions.SmtpSettings, WJbPro.Web",
+    "host": "smtp.local"
+  }
+}

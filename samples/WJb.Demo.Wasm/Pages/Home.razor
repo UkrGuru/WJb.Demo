@@ -1,4 +1,6 @@
 ﻿@page "/"
+@inject HttpClient Http
+
 <PageTitle>WJb Demo</PageTitle>
 
 <div class="d-flex align-items-center gap-3 mb-2">
@@ -14,5 +16,24 @@
 <p class="lead">
     💡 Explore WJb through interactive examples. Learn how to build background jobs, orchestrate workflows, monitor execution, and inspect the source code behind each sample.
 </p>
-
 <WJbPro.Demos.WJbDemo.Index />
+
+@code{
+
+    string Json; 
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Json = await Http.GetStringAsync("/App_Data/actions.json");
+
+        }
+        catch (Exception ex)
+        {
+            Json = ex.Message;
+            Console.WriteLine($"Error loading actions.json: {ex.Message}");
+        }
+    }
+
+}

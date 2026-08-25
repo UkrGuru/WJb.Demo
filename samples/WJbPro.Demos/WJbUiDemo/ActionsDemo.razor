@@ -3,13 +3,13 @@
 
 @inject IStore Store
 
-<ActionsTab />
-
-<div class="fixed-bottom text-center mb-3">
+<div class="text-center">
     <button class="btn btn-warning btn-lg" @onclick="SaveAsync">
         💾 Save File
     </button>
 </div>
+
+<ActionsTab />
 
 @code {
     private Task SaveAsync()

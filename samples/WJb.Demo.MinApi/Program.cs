@@ -14,19 +14,15 @@ builder.Services.AddSingleton<IWJb>(sp =>
     });
 });
 
-builder.Services.AddSingleton(sp => new WasmWorker(sp.GetRequiredService<IWJb>()));
+builder.Services.AddSingleton(sp =>
+    new WasmWorker(sp.GetRequiredService<IWJb>()));
 
 var app = builder.Build();
 
 app.MapPost("/jobs", async Task<IResult> (IWJb wjb) =>
     {
-        var jobId = await wjb.EnqueueAsync(
-            DemoAction.Key,
-            new DemoPayload
-            {
-                DelayMs = 5000,
-                Text = "Done ✅"
-            });
+        var jobId = await wjb.EnqueueAsync(DemoAction.Key,
+            new DemoPayload { DelayMs = 5000, Text = "Done ✅" });
 
         return TypedResults.Ok(new { jobId });
     });
@@ -68,7 +64,7 @@ public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
     public const string Key = "demo";
 
     public override async Task<IActionResult> ExecuteAsync(
-        DemoPayload input, CancellationToken ct=default)
+        DemoPayload input, CancellationToken ct = default)
     {
         for (var i = 0; i <= 100; i += 10)
         {
@@ -77,7 +73,6 @@ public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
             await Task.Delay(input.DelayMs / 10, ct);
 
             ReportProgress(i, $"Progress {i}%");
-
         }
 
         return await CompleteAsync("Done ✅");

@@ -18,7 +18,7 @@ public sealed class RetryEmailAction : JobAction<RetryEmailInput>
     {
         _attempts++;
 
-        ReportProgress(50, $"Attempt {_attempts}");
+        ReportProgress(50, $"⚠ Attempt {_attempts} failed. Retry scheduled.");
 
         await Task.Delay(500, ct);
 
