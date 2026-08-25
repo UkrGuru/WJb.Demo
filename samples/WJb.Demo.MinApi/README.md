@@ -1,100 +1,65 @@
 # 🚀 WJb Minimal API Demo
 
-A minimal ASP.NET Core API using **WJb** to execute background jobs.
+A minimal ASP.NET Core API demonstrating background job execution with **WJb**.
 
-This sample demonstrates:
+## Features
 
 - Job enqueueing via HTTP
-- Background job processing
+- Background processing with `WasmWorker`
 - Progress reporting
 - In-memory storage
-- Job monitoring endpoints
+- Job querying and deletion
 
----
-
-## 🧠 Architecture
+## Architecture
 
 ```text
 POST /jobs
-     │
-     ▼
- Enqueue "demo"
-     │
-     ▼
- InMemoryStore
-     │
-     ▼
- JobWorker
-     │
-     ▼
- DemoAction
-     │
-     ▼
- Progress 0% → 100%
-     │
-     ▼
- Result
+    ↓
+IWJb.EnqueueAsync()
+    ↓
+InMemoryStore
+    ↓
+WasmWorker
+    ↓
+DemoAction
+    ↓
+Completed Job
 ```
 
----
-
-## ⚡ Features
-
-✅ ASP.NET Core Minimal API
-
-✅ Background worker
-
-✅ In-memory job store
-
-✅ Progress notifications
-
-✅ Job monitoring endpoints
-
-✅ Explicit action registration
-
----
-
-## 📦 Action Registration
+## Configuration
 
 ```csharp
-cfg.AddAction<DemoAction>(DemoAction.Key);
+builder.Services.AddSingleton<IStore, InMemoryStore>();
+
+builder.Services.AddSingleton<IWJb>(sp =>
+{
+    var store = sp.GetRequiredService<IStore>();
+
+    return WJbBuilder.Create(store, cfg =>
+    {
+        cfg.AddAction<DemoAction>(DemoAction.Key);
+    });
+});
+
+builder.Services.AddSingleton(sp =>
+    new WasmWorker(sp.GetRequiredService<IWJb>()));
 ```
 
-Action key:
-
-```csharp
-public const string Key = "demo";
-```
-
----
-
-## 🚀 Run
+## Run
 
 ```bash
 dotnet run
 ```
 
-Example:
+## API
 
-```text
-http://localhost:5102
-```
-
----
-
-# API
-
-## Create Job
-
-Creates a new background job.
-
-### Request
+### Create Job
 
 ```http
 POST /jobs
 ```
 
-### Response
+Response:
 
 ```json
 {
@@ -102,132 +67,46 @@ POST /jobs
 }
 ```
 
----
-
-## List Jobs
-
-Returns all jobs.
-
-### Request
+### List Jobs
 
 ```http
 GET /jobs
 ```
 
-### Response
-
-```json
-[
-  {
-    "id": "019f37e6-a40f-7639-8a24-d77bf860647a",
-    "action": "demo",
-    "status": 0,
-    "createdAt": "2026-07-06T14:48:09.9993968Z",
-    "progress": 0,
-    "message": null
-  }
-]
-```
-
----
-
-## Get Job
-
-Returns a single job.
-
-### Request
+### Get Job
 
 ```http
 GET /jobs/{id}
 ```
 
-Example:
-
-```http
-GET /jobs/019f37e6-a40f-7639-8a24-d77bf860647a
-```
-
----
-
-## Delete Job
-
-Removes a job from storage.
-
-### Request
+### Delete Job
 
 ```http
 DELETE /jobs/{id}
 ```
 
----
-
-# Demo Action
-
-The sample action simulates long-running work.
+## Demo Action
 
 ```csharp
-public sealed class DemoAction
-    : JobAction<DemoPayload>,
-      IProgressAction
+public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 {
     public const string Key = "demo";
 
-    public override async Task<ActionResult> ExecuteAsync(
-        DemoPayload input,
-        CancellationToken ct)
+    public override async Task<IActionResult> ExecuteAsync(
+        DemoPayload input, CancellationToken ct = default)
     {
         for (var i = 0; i <= 100; i += 10)
         {
             await Task.Delay(input.DelayMs / 10, ct);
-
-            OnProgress?.Invoke(new JobProgress
-            {
-                Progress = i,
-                Message = $"Progress {i}%"
-            });
+            ReportProgress(i, $"Progress {i}%");
         }
 
-        return ActionResults.Result(new
-        {
-            ok = true,
-            text = input.Text
-        });
+        return await CompleteAsync("Done ✅");
     }
 }
 ```
 
----
-
-## Progress Flow
-
-```text
-0%
-10%
-20%
-30%
-40%
-50%
-60%
-70%
-80%
-90%
-100%
-```
-
----
-
 ## Payload
-
-```csharp
-public sealed class DemoPayload
-{
-    public int DelayMs { get; set; }
-
-    public string Text { get; set; } = "";
-}
-```
-
-Example payload:
 
 ```json
 {
@@ -236,66 +115,8 @@ Example payload:
 }
 ```
 
----
-
-# Worker
-
-Jobs are processed continuously by a background service.
-
-```csharp
-public sealed class JobWorker(IJobExecutor executor) : BackgroundService
-{
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await executor.ExecuteLoopAsync(stoppingToken);
-            await Task.Delay(1000, stoppingToken);
-        }
-    }
-}
-```
-
----
-
-# What This Demonstrates
-
-- WJb integrates naturally with ASP.NET Core
-- Actions contain business logic
-- Job execution happens in the background
-- Progress can be reported during execution
-- Jobs can be queried through HTTP endpoints
-- No hosted workflow engine is required
-
----
-
-# Next Steps
-
-Try:
-
-- Email sending
-- File processing
-- Scheduled jobs
-- Workflow chaining with `JobCommand`
-- Persistent stores (SQL Server, PostgreSQL, Redis)
-
----
-
 ## Learn More
 
-➡️ https://www.nuget.org/packages?q=WJb
-
-➡️ https://github.com/UkrGuru/WJb.Demo
-
----
-
-## Support WJb
-
-If you like this project:
-
-👉 https://ko-fi.com/ukrguru
-
-Early supporters (before August 1, 2026):
-
-👉 🎁 **FREE Solo License**
-```
+- https://www.nuget.org/packages?q=WJb
+- https://wjb.pro
+- https://github.com/UkrGuru/WJb.Demo

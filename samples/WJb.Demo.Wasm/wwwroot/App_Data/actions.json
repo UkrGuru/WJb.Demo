@@ -1,0 +1,51 @@
+{
+  "hello": {
+    "type": "WJbPro.Demos.Actions.HelloAction, WJbPro.Demos"
+  },
+
+  "progress": {
+    "type": "WJbPro.Demos.Actions.ProgressAction, WJbPro.Demos"
+  },
+
+  "retry-email": {
+    "type": "WJbPro.Demos.Actions.RetryEmailAction, WJbPro.Demos"
+  },
+  "log": {
+    "type": "WJbPro.Demos.Actions.LogAction, WJbPro.Demos"
+  },
+
+  "create-order": {
+    "type": "WJbPro.Demos.Actions.CreateOrderAction, WJbPro.Demos"
+  },
+  "reserve-stock": {
+    "type": "WJbPro.Demos.Actions.ReserveStockAction, WJbPro.Demos"
+  },
+  "charge-payment": {
+    "type": "WJbPro.Demos.Actions.ChargePaymentAction, WJbPro.Demos"
+  },
+  "send-confirmation": {
+    "type": "WJbPro.Demos.Actions.SendConfirmationAction, WJbPro.Demos"
+  },
+
+  "configured": {
+    "type": "WJbPro.Demos.Actions.ConfiguredAction, WJbPro.Demos"
+  },
+
+  "http-ping": {
+    "type": "WJbPro.Demos.Actions.HttpPingAction, WJbPro.Demos",
+    "cron": "* * * * *"
+  },
+
+  "import-customers": {
+    "type": "WJbPro.Demos.Actions.ImportCustomersAction, WJbPro.Demos"
+  },
+
+  "generate-report": {
+    "type": "WJbPro.Demos.Actions.GenerateReportAction, WJbPro.Demos"
+  },
+
+  "send-email": {
+    "type": "WJbPro.Demos.Actions.SendEmailAction, WJbPro.Demos",
+    "smtpCode": "smtp"
+  }
+}

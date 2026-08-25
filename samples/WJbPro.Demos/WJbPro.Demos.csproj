@@ -17,9 +17,12 @@
         <Compile Remove="Actions\ErrorLogAction.cs" />
         <Compile Remove="Resources\WJbUi\Services\Setup.cs" />
         <Compile Remove="Resources\WJbUi\Actions\Setup.cs" />
+        <Compile Remove="Resources\WJb\CleanUp\CleanUpAction.cs" />
         <Compile Remove="Resources\WJb\Configured\ConfiguredAction.cs" />
         <Compile Remove="Resources\WJb\Configured\Run.cs" />
         <Compile Remove="Resources\WJb\Configured\Setup.cs" />
+        <Compile Remove="Resources\WJb\CleanUp\Run.cs" />
+        <Compile Remove="Resources\WJb\CleanUp\Setup.cs" />
         <Compile Remove="Resources\WJb\Ping\HttpPingAction.cs" />
         <Compile Remove="Resources\WJb\Ping\Run.cs" />
         <Compile Remove="Resources\WJb\Ping\Setup.cs" />
@@ -50,6 +53,7 @@
         <Content Remove="Resources\WJbUi\Actions\files.json" />
         <Content Remove="Resources\WJbUi\Services\ServicesDemo.razor" />
         <Content Remove="Resources\WJb\Configured\files.json" />
+        <Content Remove="Resources\WJb\CleanUp\files.json" />
         <Content Remove="Resources\WJb\Ping\files.json" />
         <Content Remove="Resources\WJb\Hello\files.json" />
         <Content Remove="Resources\WJb\OrderWorkflow\files.json" />
@@ -70,6 +74,10 @@
         <EmbeddedResource Include="Resources\WJb\Configured\ConfiguredAction.cs" />
         <EmbeddedResource Include="Resources\WJb\Configured\Run.cs" />
         <EmbeddedResource Include="Resources\WJb\Configured\Setup.cs" />
+        <EmbeddedResource Include="Resources\WJb\CleanUp\files.json" />
+        <EmbeddedResource Include="Resources\WJb\CleanUp\CleanUpAction.cs" />
+        <EmbeddedResource Include="Resources\WJb\CleanUp\Run.cs" />
+        <EmbeddedResource Include="Resources\WJb\CleanUp\Setup.cs" />
         <EmbeddedResource Include="Resources\WJb\Ping\files.json" />
         <EmbeddedResource Include="Resources\WJb\Ping\HttpPingAction.cs" />
         <EmbeddedResource Include="Resources\WJb\Ping\Run.cs" />
@@ -106,11 +114,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.11" />
-        <PackageReference Include="WJb.UI.Blazor" Version="0.117.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="wwwroot\" />
+        <PackageReference Include="WJb.UI.Blazor" Version="0.117.2" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

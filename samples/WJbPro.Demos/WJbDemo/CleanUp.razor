@@ -3,13 +3,13 @@
 
 @inject IStore Store
 
-<h3 class="mb-3">⏰ Ping Website</h3>
+<h3 class="mb-3">⏰ Clean Up Jobs</h3>
 
 <div class="card">
     <div class="card-body">
 
         <p class="text-muted mb-3">
-            Uses CronScheduler to check website availability every minute and record the response.
+            Removes completed jobs from storage to keep the system clean and reduce database size.
         </p>
 
         <button class="btn btn-primary mb-3" @onclick="Run">
@@ -17,16 +17,16 @@
         </button>
 
         <div class="small text-muted">
-            Flow: Cron Schedule → Enqueue → HTTP Ping → Complete
+            Flow: Enqueue → Cleanup → Complete
         </div>
 
     </div>
 </div>
 
-<SourceViewer Source="WJb.Ping" />
+<SourceViewer Source="WJb.CleanUp" />
 
 @code {
     private async Task Run()
         => await Store.EnqueueAsync(
-            HttpPingAction.Key, null );
+            CleanUpAction.Key, null);
 }
