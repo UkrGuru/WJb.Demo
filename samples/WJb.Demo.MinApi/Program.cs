@@ -19,9 +19,9 @@ builder.Services.AddSingleton(sp =>
 
 var app = builder.Build();
 
-app.MapPost("/jobs", async Task<IResult> (IWJb wjb) =>
+app.MapPost("/jobs", async Task<IResult> (IStore store) =>
     {
-        var jobId = await wjb.EnqueueAsync(DemoAction.Key,
+        var jobId = await store.EnqueueAsync(DemoAction.Key,
             new DemoPayload { DelayMs = 5000, Text = "Done ✅" });
 
         return TypedResults.Ok(new { jobId });

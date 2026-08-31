@@ -14,12 +14,8 @@ The new **WJb.Demo.Monitor** sample demonstrates an end-to-end workflow with liv
 Run a workflow:
 
 ```csharp
-await wjb.EnqueueAsync(
-    "import-customers",
-    new ImportCustomersInput
-    {
-        Source = "CRM"
-    });
+await wjb.EnqueueAsync("import-customers",
+    new ImportCustomersInput {Source = "CRM"});
 ```
 
 WJb automatically executes the workflow:

@@ -52,19 +52,13 @@ var wjb = WJbBuilder.Create(store, cfg =>
 Console.WriteLine("=== WJb Quick Start ===\n");
 
 Console.WriteLine($"""
-Workflow:
-{Actions.SendEmail} → {Actions.Log} → done
-
+Workflow: {Actions.SendEmail} → {Actions.Log} → done
 """);
 
 Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
 
-await wjb.EnqueueAsync(
-    Actions.SendEmail,
-    new EmailInput
-    {
-        To = "user@test.com"
-    });
+await wjb.EnqueueAsync(Actions.SendEmail,
+    new EmailInput { To = "user@test.com" });
 
 Console.WriteLine("[App] Start execution...\n");
 
@@ -79,35 +73,26 @@ public static class Actions
 }
 
 [ActionName(Actions.SendEmail)]
-public sealed class SendEmailAction(
-    SmtpSettings smtp)
+public sealed class SendEmailAction(SmtpSettings smtp)
     : JobAction<EmailInput>
 {
     public override Task<IActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+        EmailInput input, CancellationToken ct)
     {
-        Console.WriteLine(
-            $"[Action] {Actions.SendEmail} -> {input.To} via {smtp.Host}");
+        Console.WriteLine( $"[Action] {Actions.SendEmail} -> {input.To} via {smtp.Host}");
 
         return NextAsync<LogAction>(
-            new LogInput
-            {
-                Message = $"Email sent to {input.To}"
-            });
+            new LogInput { Message = $"Email sent to {input.To}" });
     }
 }
 
 [ActionName(Actions.Log)]
-public sealed class LogAction
-    : JobAction<LogInput>
+public sealed class LogAction : JobAction<LogInput>
 {
     public override Task<IActionResult> ExecuteAsync(
-        LogInput input,
-        CancellationToken ct)
+        LogInput input, CancellationToken ct)
     {
-        Console.WriteLine(
-            $"[Action] {Actions.Log} -> {input.Message}");
+        Console.WriteLine($"[Action] {Actions.Log} -> {input.Message}");
 
         return CompleteAsync();
     }
@@ -168,10 +153,7 @@ send-email → log → done
 
 ```csharp
 return NextAsync<LogAction>(
-    new LogInput
-    {
-        Message = $"Email sent to {input.To}"
-    });
+    new LogInput { Message = $"Email sent to {input.To}" });
 ```
 
 👉 The workflow is defined in code.

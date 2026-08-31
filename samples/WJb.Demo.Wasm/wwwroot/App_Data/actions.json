@@ -32,8 +32,7 @@
   },
 
   "http-ping": {
-    "type": "WJbPro.Demos.Actions.HttpPingAction, WJbPro.Demos",
-    "cron": "* * * * *"
+    "type": "WJbPro.Demos.Actions.HttpPingAction, WJbPro.Demos"
   },
 
   "import-customers": {

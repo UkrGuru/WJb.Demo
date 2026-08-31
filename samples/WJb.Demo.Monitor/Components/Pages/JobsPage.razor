@@ -18,7 +18,6 @@
 
 @code {
     private Task RunDemoAsync()
-        => Wjb.EnqueueAsync(
-            "import-customers",
+        => Wjb.EnqueueAsync("import-customers", 
             new ImportCustomersInput { Source = "CRM" });
 }
