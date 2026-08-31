@@ -16,11 +16,9 @@ builder.Services.AddSingleton<IStore>(_ =>
 {
     var store = new InMemoryStore();
 
-    store.LoadActionsFromJson(
-        File.ReadAllText("App_Data/actions.json"));
+    store.LoadActionsFromJson(        File.ReadAllText("App_Data/actions.json"));
 
-    store.LoadServicesFromJson(
-        File.ReadAllText("App_Data/services.json"));
+    store.LoadServicesFromJson(        File.ReadAllText("App_Data/services.json"));
 
     return store;
 });

@@ -16,15 +16,14 @@ var wjb = WJbBuilder.Create(store, cfg =>
 Console.WriteLine("=== WJb Quick Start ===\n");
 
 Console.WriteLine($"""
-Workflow:
-{Actions.SendEmail} → {Actions.Log} → done
-
+Workflow: {Actions.SendEmail} → {Actions.Log} → done
 """);
 
 // Enqueue first job
 Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
 
-await wjb.EnqueueAsync(Actions.SendEmail, new EmailInput { To = "user@test.com" });
+await wjb.EnqueueAsync(Actions.SendEmail, 
+    new EmailInput { To = "user@test.com" });
 
 // Execute all pending jobs
 Console.WriteLine("[App] Start execution...\n");
@@ -47,10 +46,7 @@ public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
         Console.WriteLine($"[Action] {Actions.SendEmail} -> {input.To} via {smtp.Host}");
 
         return NextAsync<LogAction>(
-            new LogInput
-            {
-                Message = $"Email sent to {input.To}"
-            });
+            new LogInput { Message = $"Email sent to {input.To}" });
     }
 }
 
