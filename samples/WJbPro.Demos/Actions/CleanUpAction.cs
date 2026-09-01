@@ -4,7 +4,7 @@ namespace WJbPro.Demos.Actions;
 
 public sealed class CleanUpPayload
 {
-    public int KeepHours { get; set; } = 1;
+    public int KeepSecs { get; set; } = 10;
 }
 
 public sealed class CleanUpAction(IStore store) : JobAction<CleanUpPayload>
@@ -16,7 +16,7 @@ public sealed class CleanUpAction(IStore store) : JobAction<CleanUpPayload>
     {
         ArgumentNullException.ThrowIfNull(store);
 
-        var before = DateTime.UtcNow.AddHours(-input.KeepHours);
+        var before = DateTime.UtcNow.AddSeconds(-input.KeepSecs);
 
         var removed = 0;
 

@@ -13,8 +13,8 @@ send-email → log → done
 A simple workflow where:
 
 - one job is enqueued
-- the action performs work
-- the action explicitly schedules the next step
+- an action performs work
+- the action explicitly decides what runs next
 - the workflow completes
 
 👉 No hidden behavior. No magic.
@@ -32,87 +32,10 @@ dotnet run
 ## ✅ Code
 
 ```csharp
-using WJb;
-
-Console.OutputEncoding = System.Text.Encoding.UTF8;
-
-var store = new InMemoryStore();
-
-var wjb = WJbBuilder.Create(store, cfg =>
-{
-    cfg.AddAction<SendEmailAction>(Actions.SendEmail);
-    cfg.AddAction<LogAction>(Actions.Log);
-
-    cfg.AddService(new SmtpSettings
-    {
-        Host = "smtp.local"
-    });
-});
-
-Console.WriteLine("=== WJb Quick Start ===\n");
-
-Console.WriteLine($"""
-Workflow: {Actions.SendEmail} → {Actions.Log} → done
-""");
-
-Console.WriteLine($"[App] Enqueue: {Actions.SendEmail}");
-
-await wjb.EnqueueAsync(Actions.SendEmail,
-    new EmailInput { To = "user@test.com" });
-
-Console.WriteLine("[App] Start execution...\n");
-
-await wjb.ExecuteLoopAsync();
-
-Console.WriteLine("\n=== Completed ===");
-
-public static class Actions
-{
-    public const string SendEmail = "send-email";
-    public const string Log = "log";
-}
-
-[ActionName(Actions.SendEmail)]
-public sealed class SendEmailAction(SmtpSettings smtp)
-    : JobAction<EmailInput>
-{
-    public override Task<IActionResult> ExecuteAsync(
-        EmailInput input, CancellationToken ct)
-    {
-        Console.WriteLine( $"[Action] {Actions.SendEmail} -> {input.To} via {smtp.Host}");
-
-        return NextAsync<LogAction>(
-            new LogInput { Message = $"Email sent to {input.To}" });
-    }
-}
-
-[ActionName(Actions.Log)]
-public sealed class LogAction : JobAction<LogInput>
-{
-    public override Task<IActionResult> ExecuteAsync(
-        LogInput input, CancellationToken ct)
-    {
-        Console.WriteLine($"[Action] {Actions.Log} -> {input.Message}");
-
-        return CompleteAsync();
-    }
-}
-
-public sealed class EmailInput
-{
-    public string To { get; set; } = string.Empty;
-}
-
-public sealed class LogInput
-{
-    public string Message { get; set; } = string.Empty;
-}
-
-public sealed class SmtpSettings
-{
-    public string Host { get; set; } = string.Empty;
-}
+// See Program.cs
 ```
+
+The complete runnable example is available in `Program.cs`.
 
 ---
 
@@ -139,10 +62,8 @@ send-email → log → done
 
 - Actions contain business logic
 - Actions can use dependency injection
-- Services are resolved automatically
 - Actions explicitly define what runs next
 - Workflows are deterministic and visible
-- Results describe workflow outcomes
 - Jobs execute through a store-backed runtime
 
 👉 You always know what happens and why.
@@ -153,14 +74,21 @@ send-email → log → done
 
 ```csharp
 return NextAsync<LogAction>(
-    new LogInput { Message = $"Email sent to {input.To}" });
+    new LogInput
+    {
+        Message = $"Email sent to {input.To}"
+    });
 ```
 
-👉 The workflow is defined in code.
+👉 The current action explicitly decides what runs next.
+
+The workflow is ordinary C# code, not hidden framework configuration.
 
 ---
 
 ## ⚡ Learn More
+
+➡️ https://wjb.pro
 
 ➡️ https://www.nuget.org/packages?q=wjb
 

@@ -16,13 +16,24 @@ public sealed class HttpPingAction : JobAction<HttpPingPayload>
     public override async Task<IActionResult> ExecuteAsync(
         HttpPingPayload input, CancellationToken ct = default)
     {
-        ReportProgress(10, $"HttpClient: {_httpClient != null}");
+        ReportProgress(10, $"HttpClient ready: {_httpClient != null}");
 
-        var url = input.Url ?? "https://wjb.pro/";
+        // CORS-friendly URL по умолчанию
+        var url = input.Url ?? "https://httpbin.org/get";
 
-        using var response = await _httpClient.GetAsync(url, ct);
+        try
+        {
+            using var response = await _httpClient.GetAsync(url, ct);
 
-        ReportProgress(100, $"{url} → {(int)response.StatusCode} {response.StatusCode}");
+            ReportProgress(100, $"{url} → {(int)response.StatusCode} {response.StatusCode}");
+        }
+        catch (HttpRequestException ex)
+        {
+            if (OperatingSystem.IsBrowser())
+                ReportProgress(100, $"Browser blocked request to {url}. " + $"Reason: {ex.Message}");
+
+            throw;
+        }
 
         return await CompleteAsync();
     }

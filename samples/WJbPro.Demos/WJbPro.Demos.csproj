@@ -114,7 +114,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.11" />
-        <PackageReference Include="WJb.UI.Blazor" Version="0.118.0" />
+        <PackageReference Include="WJb.UI.Blazor" Version="0.119.0" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

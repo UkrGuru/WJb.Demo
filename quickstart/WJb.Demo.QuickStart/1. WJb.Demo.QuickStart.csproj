@@ -5,6 +5,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>WJb.Demo.QuickStart</AssemblyName>
+        <RootNamespace>WJb.Demo.QuickStart</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
