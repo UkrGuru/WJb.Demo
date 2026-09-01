@@ -2,13 +2,8 @@
 
 Interactive Blazor WebAssembly demo showcasing the WJb background job engine running entirely in the browser.
 
-![WJb Demo (WASM)](https://raw.githubusercontent.com/UkrGuruts/wjb-demo-wasm.png)
-
 🎥 Demo Video:
 https://youtu.be/ayTiF1GiwvU
-
-🔗 Repository:
-https://github.com/UkrGuru/WJb.Demo
 
 ---
 
