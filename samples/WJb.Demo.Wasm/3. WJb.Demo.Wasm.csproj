@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -6,22 +6,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
         <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+        <AssemblyName>WJb.Demo.Wasm</AssemblyName>
+        <RootNamespace>WJb.Demo.Wasm</RootNamespace>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Compile Remove="Engine.cs" />
-      <Compile Remove="WJbWorker.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Remove="Pages\Chain.razor" />
-      <Content Remove="Pages\Configured.razor" />
-      <Content Remove="Pages\Hello.razor" />
-      <Content Remove="Pages\Progress.razor" />
-      <Content Remove="Pages\Retry.razor" />
-      <Content Remove="Pages\SourceViewer.razor" />
-      <Content Remove="Pages\Workflow.razor" />
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />

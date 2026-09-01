@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="WJb.Demo.Wasm/WJb.Demo.Wasm.csproj" />
+  <Project Path="WJb.Demo.Wasm/3. WJb.Demo.Wasm.csproj" />
   <Project Path="WJbPro.Demos/WJbPro.Demos.csproj" />
 </Solution>

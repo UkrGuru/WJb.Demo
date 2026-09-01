@@ -1,24 +1,14 @@
-# 🚀 New WJb Demo: Workflow Monitoring in Action
+# 📊 WJb Monitor Demo
 
-Want to see what a complete workflow looks like in WJb?
+A complete workflow monitoring sample built with WJb.
 
-The new **WJb.Demo.Monitor** sample demonstrates an end-to-end workflow with live monitoring, action management, service configuration, and job inspection.
+Run a workflow, observe execution in real time, inspect payloads, review results, and explore registered actions and services.
 
 ![WJb Monitor](https://raw.githubusercontent.com/UkrGuru/WJb.Demo/main/assets/wjb-monitor.png)
 
-✅ Import Customers  
-✅ Generate Report  
-✅ Send Email  
-✅ Monitor execution in real time
+---
 
-Run a workflow:
-
-```csharp
-await wjb.EnqueueAsync("import-customers",
-    new ImportCustomersInput {Source = "CRM"});
-```
-
-WJb automatically executes the workflow:
+## 🧠 What You Will See
 
 ```text
 import-customers
@@ -28,85 +18,263 @@ generate-report
 send-email
 ```
 
-Every step becomes visible in the monitoring dashboard.
+Every step is visible in the monitoring dashboard.
 
-## What the sample demonstrates
+The sample demonstrates:
 
-- Typed action inputs
-- Constructor dependency injection
-- Workflow chaining via `IAction.NextAsync(...)`
+- Workflow execution
 - Progress reporting
-- Background job execution
-- Real-time monitoring
-- Job failure handling
-- Payload inspection
+- Action chaining
+- Retry handling
+- Job inspection
 - Action discovery
 - Service discovery
 
-## Monitor Features
+👉 Follow a workflow from the first job to the final result.
+
+---
+
+## 🚀 Run
+
+```bash
+dotnet run
+```
+
+Open:
+
+```text
+https://localhost:7077
+```
+
+---
+
+## 🏗 Storage
+
+The demo uses an in-memory store by default:
+
+```csharp
+var store = new InMemoryStore();
+```
+
+No database setup is required.
+
+For production environments, WJb also provides a SQL Server store implementation.
+
+> **Available only in the commercial edition.**
+
+---
+
+## ⚙️ Workflow Setup
+
+Actions and services are registered programmatically:
+
+```csharp
+await store.AddActionAsync<ImportCustomersAction>(Actions.ImportCustomers);
+await store.AddActionAsync<GenerateReportAction>(Actions.GenerateReport);
+await store.AddActionAsync<SendEmailAction>(Actions.SendEmail);
+
+await store.AddServiceAsync(new SmtpSettings
+{
+    Host = "smtp.demo.local",
+    Port = 25,
+    From = "noreply@demo.local"
+});
+```
+
+The **Actions** and **Services** pages allow you to inspect these registrations in real time.
+
+---
+
+## 🏗 Workflow
+
+Start the workflow:
+
+```csharp
+await wjb.EnqueueAsync(Actions.ImportCustomers,
+    new ImportCustomersInput { Source = "CRM" });
+```
+
+Execution flow:
+
+```text
+import-customers
+        ↓
+generate-report
+        ↓
+send-email
+```
+
+Each action explicitly decides what happens next.
+
+---
+
+## 👀 Monitor Features
 
 ### Jobs
 
-The Jobs page provides:
+View and inspect:
 
-- Status tracking
-- Progress visualization
-- Retry support
-- Failure diagnostics
-- Payload inspection
+- Status
+- Progress
+- Payloads
+- Results
 - Execution history
+- Failures
+- Retry information
+
+Additional features:
+
 - Date filtering
 - Paging
+- Job details
 
 ### Actions
 
-The Actions page provides:
+Explore registered actions:
 
-- Registered action discovery
-- Action metadata inspection
-- Action definition editing
-- Action testing
-- JSON configuration editing
+- Action metadata
+- Action definitions
+- Configuration editing
 
 ### Services
 
-The Services page provides:
+Explore registered services:
 
-- Registered service discovery
-- Service configuration editing
-- JSON configuration inspection
+- Service configuration
+- Service metadata
+- Runtime values
 
-## Why it is interesting
+---
 
-The entire workflow is composed of small focused actions:
+## 💡 What This Demonstrates
 
-- `import-customers`
-- `generate-report`
-- `send-email`
+- Typed action inputs
+- Dependency injection
+- Explicit workflow transitions
+- Progress reporting
+- Background execution
+- Job monitoring
+- Failure diagnostics
+- Retry workflows
+
+👉 Monitoring is built around real workflow execution, not simulated data.
+
+---
+
+## 🔥 Key Idea
+
+```text
+Action
+   ↓
+Job
+   ↓
+Monitor
+```
+
+WJb keeps workflow execution explicit while providing complete visibility into what happened, when it happened, and why.
 
 No workflow designer.
 
 No XML.
 
-No complex configuration.
+No hidden execution flow.
 
-Just C# actions connected through explicit workflow transitions.
+Just ordinary C# actions connected through explicit transitions.
 
-## Sample
+---
 
-🔗 https://github.com/UkrGuru/WJb.Demo/tree/main/samples/WJb.Demo.Monitor
+## 🧪 Suggested Scenarios
 
-The sample includes:
+Try the following:
 
-- Workflow execution
-- Action chaining
-- Retry handling
-- Progress reporting
-- Live monitoring
-- Payload inspection
-- Failure inspection
-- Actions explorer
-- Services explorer
-- Configuration editing
+1. Run the demo workflow.
+2. Open the generated jobs.
+3. Inspect payloads.
+4. Review action results.
+5. Force a failure.
+6. Retry the failed job.
+7. Explore registered actions.
+8. Explore registered services.
 
-Perfect for understanding how WJb workflows behave in a real application and how they can be monitored in production.
+---
+
+## 🗄 Using SqlStore
+
+The demo uses `InMemoryStore` by default and runs without any database setup.
+
+To use `SqlStore`, make the following changes.
+
+### 1. Enable the package reference
+
+In the project file:
+
+```xml
+<ItemGroup>
+  <!-- <PackageReference Include="WJb.Sql" Version="0.118.0" /> -->
+  <PackageReference Include="WJb.UI.Blazor" Version="0.118.0" />
+</ItemGroup>
+```
+
+Uncomment:
+
+```xml
+<PackageReference Include="WJb.Sql" Version="0.117.2-beta.1" />
+```
+
+### 2. Switch the store implementation
+
+In `Program.cs` replace:
+
+```csharp
+// use InMemoryStore for testing purposes
+var store = new InMemoryStore();
+```
+
+with:
+
+```csharp
+using Microsoft.Data.SqlClient;
+using WJb.Sql;
+
+const string connectionString =
+    "Server=(localdb)\\MSSQLLocalDB;Database=WJbMonitor;Trusted_Connection=True;TrustServerCertificate=True;";
+
+await using (var conn = new SqlConnection(connectionString))
+{
+    await conn.InitDbAsync();
+}
+
+var store = new SqlStore(() => new SqlConnection(connectionString));
+```
+
+The rest of the application remains unchanged.
+
+> **SqlStore is available only in the commercial edition.**
+
+---
+
+## 💼 Commercial Features
+
+### SqlStore
+
+WJb includes a SQL Server backed store implementation:
+
+```csharp
+using WJb.Sql;
+```
+
+This package is available only in the commercial edition.
+
+Learn more at:
+
+https://wjb.pro/pricing
+
+---
+
+## ⚡ Learn More
+
+➡️ https://wjb.pro
+
+➡️ https://www.nuget.org/packages?q=wjb
+
+➡️ https://github.com/UkrGuru/WJb.Demo

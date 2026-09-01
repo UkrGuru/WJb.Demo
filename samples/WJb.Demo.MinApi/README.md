@@ -1,16 +1,52 @@
 # 🚀 WJb Minimal API Demo
 
-A minimal ASP.NET Core API demonstrating background job execution with **WJb**.
+A minimal ASP.NET Core API demonstrating background job execution with WJb.
 
-## Features
+---
 
-- Job enqueueing via HTTP
-- Background processing with `WasmWorker`
-- Progress reporting
-- In-memory storage
-- Job querying and deletion
+## 🧠 What you will see
 
-## Architecture
+```text
+POST /jobs
+    ↓
+enqueue
+    ↓
+background execution
+    ↓
+progress updates
+    ↓
+completed job
+```
+
+This sample demonstrates:
+
+- job creation through HTTP
+- background execution
+- progress reporting
+- job querying
+- job deletion
+
+👉 The API remains responsive while jobs run in the background.
+
+---
+
+## 🚀 Run
+
+```bash
+dotnet run
+```
+
+Open:
+
+```text
+WJb.Demo.MinApi.http
+```
+
+and execute the requests directly from Visual Studio.
+
+---
+
+## 🏗 Architecture
 
 ```text
 POST /jobs
@@ -26,32 +62,9 @@ DemoAction
 Completed Job
 ```
 
-## Configuration
+---
 
-```csharp
-builder.Services.AddSingleton<IStore, InMemoryStore>();
-
-builder.Services.AddSingleton<IWJb>(sp =>
-{
-    var store = sp.GetRequiredService<IStore>();
-
-    return WJbBuilder.Create(store, cfg =>
-    {
-        cfg.AddAction<DemoAction>(DemoAction.Key);
-    });
-});
-
-builder.Services.AddSingleton(sp =>
-    new WasmWorker(sp.GetRequiredService<IWJb>()));
-```
-
-## Run
-
-```bash
-dotnet run
-```
-
-## API
+## 🔌 API
 
 ### Create Job
 
@@ -73,11 +86,15 @@ Response:
 GET /jobs
 ```
 
+Returns all jobs in the store.
+
 ### Get Job
 
 ```http
 GET /jobs/{id}
 ```
+
+Returns a single job.
 
 ### Delete Job
 
@@ -85,38 +102,80 @@ GET /jobs/{id}
 DELETE /jobs/{id}
 ```
 
-## Demo Action
+Removes a job from the store.
 
-```csharp
-public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
-{
-    public const string Key = "demo";
+---
 
-    public override async Task<IActionResult> ExecuteAsync(
-        DemoPayload input, CancellationToken ct = default)
-    {
-        for (var i = 0; i <= 100; i += 10)
-        {
-            await Task.Delay(input.DelayMs / 10, ct);
-            ReportProgress(i, $"Progress {i}%");
-        }
+## ✅ Example Flow
 
-        return await CompleteAsync("Done ✅");
-    }
-}
+### 1. Create Job
+
+```http
+POST /jobs
 ```
 
-## Payload
+Response:
 
 ```json
 {
-  "delayMs": 5000,
-  "text": "Done ✅"
+  "jobId": "019f37e6-a40f-7639-8a24-d77bf860647a"
 }
 ```
 
-## Learn More
+### 2. Check Progress
 
-- https://www.nuget.org/packages?q=WJb
-- https://wjb.pro
-- https://github.com/UkrGuru/WJb.Demo
+```json
+{
+  "action": "demo",
+  "status": 0,
+  "progress": 0
+}
+```
+
+### 3. Check Completed Job
+
+```json
+{
+  "action": "demo",
+  "status": 2,
+  "progress": 100,
+  "message": "Progress 100%",
+  "result": {
+    "value": "Done ✅"
+  }
+}
+```
+
+---
+
+## 💡 What this demonstrates
+
+- Minimal API integration
+- Background execution
+- Progress reporting
+- Store-based job management
+- Explicit action execution
+
+👉 Jobs are created through HTTP and executed by WJb outside the request pipeline.
+
+---
+
+## 🔥 Key Idea
+
+```csharp
+await wjb.EnqueueAsync(DemoAction.Key, payload);
+```
+
+👉 HTTP requests enqueue jobs.
+
+The actual work executes later in the background.
+
+---
+
+## ⚡ Learn More
+
+➡️ https://wjb.pro
+
+➡️ https://www.nuget.org/packages?q=wjb
+
+➡️ https://github.com/UkrGuru/WJb.Demo

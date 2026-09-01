@@ -1,5 +1,14 @@
 ﻿namespace WJb.Demo.Monitor;
 
+public static class Actions
+{
+    public const string ImportCustomers = "import-customers";
+
+    public const string GenerateReport = "generate-report";
+
+    public const string SendEmail = "send-email";
+}
+
 public sealed class ImportCustomersInput
 {
     public string Source { get; set; } = "CRM";
@@ -10,12 +19,12 @@ public sealed class ReportInput
     public int ImportedCustomers { get; set; }
 }
 
-[ActionName("import-customers")]
-public sealed class ImportCustomersAction 
+[ActionName(Actions.ImportCustomers)]
+public sealed class ImportCustomersAction
     : JobAction<ImportCustomersInput>, IProgressAction
 {
     public override async Task<IActionResult> ExecuteAsync(
-        ImportCustomersInput input, CancellationToken ct)
+        ImportCustomersInput input,        CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 25)
         {
@@ -35,16 +44,15 @@ public sealed class ImportCustomersAction
 public sealed class EmailInput
 {
     public string To { get; set; } = string.Empty;
-
     public string Subject { get; set; } = string.Empty;
 }
 
-[ActionName("generate-report")]
+[ActionName(Actions.GenerateReport)]
 public sealed class GenerateReportAction
     : JobAction<ReportInput>, IProgressAction
 {
     public override async Task<IActionResult> ExecuteAsync(
-        ReportInput input, CancellationToken ct)
+        ReportInput input,        CancellationToken ct)
     {
         ReportProgress(25, "Preparing report");
 
@@ -67,17 +75,13 @@ public sealed class GenerateReportAction
 
 public sealed class SmtpSettings
 {
-    public const string Key = "smtp";
-
     public string Host { get; set; } = string.Empty;
-
     public int Port { get; set; }
-
     public string From { get; set; } = string.Empty;
 }
 
-[ActionName("send-email")]
-public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
+[ActionName(Actions.SendEmail)]
+public sealed class SendEmailAction(SmtpSettings smtp)    : JobAction<EmailInput>
 {
     public override Task<IActionResult> ExecuteAsync(
         EmailInput input, CancellationToken ct)

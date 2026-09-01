@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="quickstart/WJb.Demo.QuickStart/1. WJb.Demo.QuickStart.csproj" />
+  <Project Path="samples/WJb.Demo.MinApi/2. WJb.Demo.MinApi.csproj" />
+  <Project Path="samples/WJb.Demo.Monitor/4. WJb.Demo.Monitor.csproj" />
+  <Project Path="samples/WJb.Demo.Wasm/3. WJb.Demo.Wasm.csproj" />
+</Solution>

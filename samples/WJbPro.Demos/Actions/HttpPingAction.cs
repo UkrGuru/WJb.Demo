@@ -30,12 +30,7 @@ public sealed class HttpPingAction : JobAction<HttpPingPayload>
         catch (HttpRequestException ex)
         {
             if (OperatingSystem.IsBrowser())
-            {
-                ReportProgress(
-                    100,
-                    $"Browser blocked request to {url}. " +
-                    $"Reason: {ex.Message}");
-            }
+                ReportProgress(100, $"Browser blocked request to {url}. " + $"Reason: {ex.Message}");
 
             throw;
         }

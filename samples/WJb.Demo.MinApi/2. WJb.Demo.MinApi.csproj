@@ -4,6 +4,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <AssemblyName>WJb.Demo.MinApi</AssemblyName>
+        <RootNamespace>WJb.Demo.MinApi</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using WJb;
 using WJb.Demo.Wasm;
 
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.RootComponents.Add<App>("#app");
@@ -15,8 +14,6 @@ builder.Services.AddSingleton<HttpClient>(_ =>
         BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
     });
 
-builder.Services.AddSingleton<IStore, InMemoryStore>();
-
 var http = new HttpClient
 {
     BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
@@ -24,6 +21,9 @@ var http = new HttpClient
 
 var actionsJson = await http.GetStringAsync("App_Data/actions.json");
 var servicesJson = await http.GetStringAsync("App_Data/services.json");
+
+builder.Services.AddSingleton<IStore, InMemoryStore>();
+//builder.Services.AddSingleton<IStore, IdbStore>();
 
 builder.Services.AddSingleton<IWJb>(sp =>
 {
