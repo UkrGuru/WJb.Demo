@@ -1,0 +1,25 @@
+﻿@page "/"
+@inject HttpClient Http
+
+<PageTitle>WJb Demo Blazor WebAssembly IndexedDB</PageTitle>
+
+<div class="d-flex align-items-center gap-3 mb-2">
+    <img src="_content/WJbPro.Demos/images/wjb.png" alt="WJb" width="48" />
+    <div>
+        <h1 class="mb-0">
+            WJb Demo
+        </h1>
+        <p class="text-muted">
+            Blazor WebAssembly + IndexedDB
+        </p>
+    </div>
+    <a href="https://www.nuget.org/packages/WJb" target="_blank" class="btn btn-outline-primary" title="View on NuGet">
+        📦
+    </a>
+</div>
+
+<p class="lead">
+    💡 WJb Demo Interactive examples for background jobs, workflows, scheduling, and monitoring in Blazor WebAssembly using IndexedDB.
+</p>
+
+<WJbPro.Demos.WJbDemo.Index />

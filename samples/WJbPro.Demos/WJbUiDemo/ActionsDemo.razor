@@ -12,12 +12,10 @@
 <ActionsTab />
 
 @code {
-    private Task SaveAsync()
+    private async Task SaveAsync()
     {
-        var json = ((IDefinitionStore)Store).GetActionsJson();
+        var json = await ((IDefinitionStore)Store).GetActionsJsonAsync();
 
         File.WriteAllText("App_Data/actions.json", json);
-
-        return Task.CompletedTask;
     }
 }

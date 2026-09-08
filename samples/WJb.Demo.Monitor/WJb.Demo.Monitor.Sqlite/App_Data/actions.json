@@ -1,0 +1,18 @@
+{
+  "import-customers": {
+    "type": "WJbPro.Demos.Actions.ImportCustomersAction, WJbPro.Demos"
+  },
+
+  "generate-report": {
+    "type": "WJbPro.Demos.Actions.GenerateReportAction, WJbPro.Demos"
+  },
+
+  "send-email": {
+    "type": "WJbPro.Demos.Actions.SendEmailAction, WJbPro.Demos",
+    "smtpCode": "smtp"
+  },
+
+  "clean-up": {
+    "type": "WJbPro.Demos.Actions.CleanUpAction, WJbPro.Demos"
+  }
+}

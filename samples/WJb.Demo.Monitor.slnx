@@ -1,3 +1,8 @@
 <Solution>
-  <Project Path="WJb.Demo.Monitor/4. WJb.Demo.Monitor.csproj" />
+  <Project Path="WJb.Demo.Monitor/WJb.Demo.Monitor.InMemory/1. WJb.Demo.Monitor.InMemory.csproj" />
+  <Project Path="WJb.Demo.Monitor/WJb.Demo.Monitor.MySql/5. WJb.Demo.Monitor.MySql.csproj" />
+  <Project Path="WJb.Demo.Monitor/WJb.Demo.Monitor.PostgreSql/3. WJb.Demo.Monitor.PostgreSql.csproj" />
+  <Project Path="WJb.Demo.Monitor/WJb.Demo.Monitor.Sqlite/4. WJb.Demo.Monitor.Sqlite.csproj" />
+  <Project Path="WJb.Demo.Monitor/WJb.Demo.Monitor.SqlServer/2. WJb.Demo.Monitor.SqlServer.csproj" />
+  <Project Path="WJbPro.Demos/WJbPro.Demos.csproj" />
 </Solution>
