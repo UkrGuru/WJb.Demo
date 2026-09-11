@@ -5,12 +5,12 @@ Interactive demo applications showcasing the WJb background job engine in multip
 ---
 
 > [!NOTE]
-> The solution contains two Blazor WebAssembly demo applications.
+> The solution contains two Blazor WebAssembly demos:
 >
-> - `WJb.Demo.Wasm.InMemory` is available to all users.
-> - `WJb.Demo.Wasm.IndexedDB` depends on `WJb.IndexedDB`.
+> - `WJb.Demo.Wasm.InMemory`
+> - `WJb.Demo.Wasm.IndexedDB`
 >
-> `WJb.IndexedDB` is available only in the commercial edition.
+> `WJb.IndexedDB` is included only in the commercial edition.
 >
 > Learn more: https://wjb.pro/pricing
 
@@ -24,7 +24,7 @@ WJb.Demo.Wasm.InMemory
     └─ No persistence between page refreshes
 
 WJb.Demo.Wasm.IndexedDB
-    ├─ Uses IndexedDB storage
+    ├─ Uses IndexedDB
     ├─ Persists jobs and definitions locally
     └─ Requires WJb.IndexedDB (commercial edition)
 
@@ -36,7 +36,28 @@ WJbPro.Demos
     └─ JSON definitions
 ```
 
-The demo content is shared between both applications, allowing the same actions, workflows, pages, and examples to run against different storage providers.
+The demo content is shared between both applications, allowing the same actions, workflows, pages, and examples to run against different stores.
+
+---
+
+## Same Workflows, Different Stores
+
+The demo applications share the same:
+
+- Actions
+- Workflows
+- UI pages
+- JSON definitions
+
+Only the store implementation changes.
+
+```text
+InMemoryStore
+        ↓
+IdbStore
+```
+
+Everything else remains the same.
 
 ---
 
@@ -61,7 +82,7 @@ The demo allows you to:
 - Explore workflow examples
 - Inspect payloads and results
 - Review source code behind every sample
-- Compare different storage providers
+- Compare different stores
 
 ---
 
@@ -89,7 +110,6 @@ The demo allows you to:
 
 ### Workflow Samples
 
-- ✅ Chained Actions
 - ✅ Retry Workflow
 - ✅ Order Workflow
 
@@ -133,7 +153,7 @@ This makes it easy to:
 ### WASM InMemory
 
 ```text
-Storage: InMemory
+Store: InMemory
 Persistence: No
 License: Included
 ```
@@ -145,7 +165,7 @@ Refreshing the page starts with a clean store.
 ### WASM IndexedDB
 
 ```text
-Storage: IndexedDB
+Store: IndexedDB
 Persistence: Yes
 License: Commercial Edition
 ```
@@ -163,7 +183,7 @@ Jobs, definitions, and configuration remain available after page refreshes.
 ## 💡 What This Demonstrates
 
 - Background jobs running inside Blazor WebAssembly
-- Multiple storage implementations
+- Multiple store implementations
 - Action execution
 - Workflow orchestration
 - Real-time progress reporting
@@ -224,7 +244,7 @@ WJb workflows are ordinary C# code.
 
 Actions explicitly determine what happens next, progress is fully observable, and execution remains transparent from start to finish.
 
-The demo applications showcase the same workflows running against different storage providers using a shared set of actions, workflows, pages, and JSON definitions.
+The demo applications showcase the same workflows running against different store implementations using a shared set of actions, workflows, pages, and JSON definitions.
 
 ---
 

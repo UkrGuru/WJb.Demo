@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using WJb;
-using WJb.Demo.Wasm;
+using WJb.Demo.Wasm.InMemory;
 using WJbPro.Demos;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
