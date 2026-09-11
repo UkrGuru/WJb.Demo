@@ -18,7 +18,7 @@ public sealed class ImportCustomersAction
     public const string Key = "import-customers";
 
     public override async Task<IActionResult> ExecuteAsync(
-        ImportCustomersInput input, CancellationToken ct)
+        ImportCustomersInput? input, CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 25)
         {

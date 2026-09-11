@@ -10,15 +10,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="WJb.SqlServer" Version="1.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\WJbPro.Demos\WJbPro.Demos.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="App_Data\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="WJb.SqlServer" Version="1.0.0-beta1.2" />
     </ItemGroup>
 
     <ItemGroup>
