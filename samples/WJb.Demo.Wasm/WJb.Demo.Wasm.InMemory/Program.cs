@@ -20,7 +20,7 @@ builder.Services.AddSingleton(http);
 builder.Services.AddSingleton<IStore, InMemoryStore>();
 
 // WJb demo setup: load JSON definitions and register WJb services.
-await builder.Services.AddWJbDemoAsync(http);
+await builder.Services.AddWJbDemoAsync(http: http);
 
 var app = builder.Build();
 
