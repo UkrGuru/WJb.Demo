@@ -12,12 +12,10 @@
 <ServicesTab />
 
 @code {
-    private Task SaveAsync()
+    private async Task SaveAsync()
     {
-        var json = ((IDefinitionStore)Store).GetServicesJson();
+        var json = await ((IDefinitionStore)Store).GetServicesJsonAsync();
 
         File.WriteAllText("App_Data/services.json", json);
-
-        return Task.CompletedTask;
     }
 }

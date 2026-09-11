@@ -1,9 +1,63 @@
-# 📦 WJb Demo (WASM)
+# 📦 WJb Demo
 
-Interactive Blazor WebAssembly demo showcasing the WJb background job engine running entirely in the browser.
+Interactive demo applications showcasing the WJb background job engine in multiple environments.
 
-🎥 Demo Video:
-https://youtu.be/ayTiF1GiwvU
+---
+
+> [!NOTE]
+> The solution contains two Blazor WebAssembly demos:
+>
+> - `WJb.Demo.Wasm.InMemory`
+> - `WJb.Demo.Wasm.IndexedDB`
+>
+> `WJb.IndexedDB` is included only in the commercial edition.
+>
+> Learn more: https://wjb.pro/pricing
+
+---
+
+## 🏗 Solution Structure
+
+```text
+WJb.Demo.Wasm.InMemory
+    ├─ Runs entirely in browser memory
+    └─ No persistence between page refreshes
+
+WJb.Demo.Wasm.IndexedDB
+    ├─ Uses IndexedDB
+    ├─ Persists jobs and definitions locally
+    └─ Requires WJb.IndexedDB (commercial edition)
+
+WJbPro.Demos
+    ├─ Shared actions
+    ├─ Shared workflows
+    ├─ Shared UI pages
+    ├─ Demo resources
+    └─ JSON definitions
+```
+
+The demo content is shared between both applications, allowing the same actions, workflows, pages, and examples to run against different stores.
+
+---
+
+## Same Workflows, Different Stores
+
+The demo applications share the same:
+
+- Actions
+- Workflows
+- UI pages
+- JSON definitions
+
+Only the store implementation changes.
+
+```text
+InMemoryStore
+        ↓
+IdbStore
+```
+
+Everything else remains the same.
 
 ---
 
@@ -21,15 +75,14 @@ Workflow Completion
 Monitor Results
 ```
 
-This demo allows you to:
+The demo allows you to:
 
 - Run jobs directly from the browser
 - Observe progress updates in real time
 - Explore workflow examples
 - Inspect payloads and results
 - Review source code behind every sample
-
-👉 No setup required beyond running the application.
+- Compare different stores
 
 ---
 
@@ -57,7 +110,6 @@ This demo allows you to:
 
 ### Workflow Samples
 
-- ✅ Chained Actions
 - ✅ Retry Workflow
 - ✅ Order Workflow
 
@@ -67,95 +119,94 @@ Every sample includes source code directly inside the UI.
 
 View:
 
-- Start code
-- Payload definitions
+- Action definitions
+- Service definitions
+- Payload models
 - Action implementations
 - Workflow logic
+- Startup configuration
 
 ---
 
-## 🖥️ Demo Pages
+## 📄 JSON-Based Definitions
 
-### Hello Action
-
-```text
-hello
-    ↓
-completed
-```
-
-### Progress Tracking
+Demo actions and services are defined in JSON files:
 
 ```text
-0%
-25%
-50%
-75%
-100%
+App_Data/actions.json
+App_Data/services.json
 ```
 
-### Chained Workflow
+At startup the demo can automatically load or refresh definitions in the selected store.
+
+This makes it easy to:
+
+- Add new examples
+- Modify demo workflows
+- Experiment with configuration
+- Keep demo content synchronized
+
+---
+
+## 🖥 Demo Hosts
+
+### WASM InMemory
 
 ```text
-send-email
-      ↓
-log
+Store: InMemory
+Persistence: No
+License: Included
 ```
 
-### Retry Workflow
+Runs entirely in browser memory.
+
+Refreshing the page starts with a clean store.
+
+### WASM IndexedDB
 
 ```text
-retry-email
-      ↓
-failure
-      ↓
-retry
-      ↓
-success
-      ↓
-log
+Store: IndexedDB
+Persistence: Yes
+License: Commercial Edition
 ```
 
-### Order Workflow
+Uses the `WJb.IndexedDB` package.
 
-```text
-create-order
-      ↓
-reserve-stock
-      ↓
-charge-payment
-      ↓
-send-confirmation
-      ↓
-log
-```
+Jobs, definitions, and configuration remain available after page refreshes.
+
+> `WJb.IndexedDB` is available only in the commercial edition.
+>
+> Learn more: https://wjb.pro/pricing
 
 ---
 
 ## 💡 What This Demonstrates
 
-- Actions execute in the browser
-- Jobs continue independently of UI interactions
-- Progress can be reported in real time
-- Workflows can schedule additional actions
-- Failed jobs can be retried
-- Monitoring remains fully transparent
+- Background jobs running inside Blazor WebAssembly
+- Multiple store implementations
+- Action execution
+- Workflow orchestration
+- Real-time progress reporting
+- Retry scenarios
+- Transparent monitoring
+- Source-driven configuration
 
-👉 Every workflow step is visible and inspectable.
+Every workflow step is visible and fully inspectable.
 
 ---
 
 ## 🧪 Suggested Scenarios
 
-Try the following:
-
 1. Run Hello Action.
-2. Run Progress Tracking and watch updates.
-3. Execute a workflow.
-4. Open completed jobs.
-5. Inspect payloads and results.
+2. Execute Progress Tracking.
+3. Open the Jobs dashboard.
+4. Review live progress updates.
+5. Explore workflow examples.
 6. Trigger a retry scenario.
-7. Review the source code for each example.
+7. Inspect payloads and results.
+8. Compare InMemory and IndexedDB behavior.
+9. Review the JSON definitions.
+10. Explore the source code behind each example.
 
 ---
 
@@ -163,15 +214,27 @@ Try the following:
 
 ```bash
 git clone https://github.com/UkrGuru/WJb.Demo
-cd samples/WJb.Demo.Wasm
+```
+
+### Run InMemory Demo
+
+```bash
+cd WJb.Demo.Wasm.InMemory
 dotnet run
 ```
 
-Open:
+### Run IndexedDB Demo
 
-```text
-https://localhost:7268
+```bash
+cd WJb.Demo.Wasm.IndexedDB
+dotnet run
 ```
+
+> [!IMPORTANT]
+> The IndexedDB demo requires the `WJb.IndexedDB` package.
+>
+> Available only in the commercial edition:
+> https://wjb.pro/pricing
 
 ---
 
@@ -179,13 +242,17 @@ https://localhost:7268
 
 WJb workflows are ordinary C# code.
 
-Actions explicitly define what happens next, progress is fully observable, and execution remains transparent from start to finish.
+Actions explicitly determine what happens next, progress is fully observable, and execution remains transparent from start to finish.
+
+The demo applications showcase the same workflows running against different store implementations using a shared set of actions, workflows, pages, and JSON definitions.
 
 ---
 
 ## ⚡ Learn More
 
 ➡️ https://wjb.pro
+
+➡️ https://wjb.pro/pricing
 
 ➡️ https://www.nuget.org/packages?q=wjb
 

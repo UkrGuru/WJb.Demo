@@ -8,6 +8,29 @@ Run a workflow, observe execution in real time, inspect payloads, review results
 
 ---
 
+## ✅ Supported Storage Providers
+
+### Included
+
+- InMemoryStore
+
+### Commercial Edition
+
+SQL providers:
+
+- WJb.SqlServer
+- WJb.PostgreSql
+- WJb.Sqlite
+- WJb.MySql
+
+Additional providers:
+
+- WJb.IndexedDB
+
+All providers expose the same WJb APIs and monitoring experience.
+
+---
+
 ## 🧠 What You Will See
 
 ```text
@@ -34,6 +57,24 @@ The sample demonstrates:
 
 ---
 
+## 📦 Available Monitor Samples
+
+The solution includes dedicated monitor applications for different storage providers:
+
+```text
+WJb.Demo.Monitor.InMemory
+WJb.Demo.Monitor.SqlServer
+WJb.Demo.Monitor.PostgreSql
+WJb.Demo.Monitor.Sqlite
+WJb.Demo.Monitor.MySql
+```
+
+Each sample demonstrates the same workflow and monitoring experience.
+
+Only the storage provider changes.
+
+---
+
 ## 🚀 Run
 
 ```bash
@@ -50,7 +91,7 @@ https://localhost:7077
 
 ## 🏗 Storage
 
-The demo uses an in-memory store by default:
+The default sample uses an in-memory store:
 
 ```csharp
 var store = new InMemoryStore();
@@ -58,7 +99,7 @@ var store = new InMemoryStore();
 
 No database setup is required.
 
-For production environments, WJb also provides a SQL Server store implementation.
+SQL and IndexedDB providers are also available for production scenarios.
 
 > **Available only in the commercial edition.**
 
@@ -90,8 +131,12 @@ The **Actions** and **Services** pages allow you to inspect these registrations 
 Start the workflow:
 
 ```csharp
-await wjb.EnqueueAsync(Actions.ImportCustomers,
-    new ImportCustomersInput { Source = "CRM" });
+await wjb.EnqueueAsync(
+    Actions.ImportCustomers,
+    new ImportCustomersInput
+    {
+        Source = "CRM"
+    });
 ```
 
 Execution flow:
@@ -198,74 +243,55 @@ Try the following:
 
 ---
 
-## 🗄 Using SqlStore
+## 🗄 Commercial Storage Providers
 
-The demo uses `InMemoryStore` by default and runs without any database setup.
+WJb offers multiple production-ready storage providers.
 
-To use `SqlStore`, make the following changes.
+### SQL Providers
 
-### 1. Enable the package reference
-
-In the project file:
-
-```xml
-<ItemGroup>
-  <!-- <PackageReference Include="WJb.Sql" Version="0.118.0" /> -->
-  <PackageReference Include="WJb.UI.Blazor" Version="0.118.0" />
-</ItemGroup>
+```text
+WJb.SqlServer
+WJb.PostgreSql
+WJb.Sqlite
+WJb.MySql
 ```
 
-Uncomment:
+### Browser Storage
 
-```xml
-<PackageReference Include="WJb.Sql" Version="0.117.2-beta.1" />
+```text
+WJb.IndexedDB
 ```
 
-### 2. Switch the store implementation
+All providers use the same programming model and monitoring UI.
 
-In `Program.cs` replace:
+Switching providers typically requires only store registration changes.
 
-```csharp
-// use InMemoryStore for testing purposes
-var store = new InMemoryStore();
-```
-
-with:
-
-```csharp
-using Microsoft.Data.SqlClient;
-using WJb.Sql;
-
-const string connectionString =
-    "Server=(localdb)\\MSSQLLocalDB;Database=WJbMonitor;Trusted_Connection=True;TrustServerCertificate=True;";
-
-await using (var conn = new SqlConnection(connectionString))
-{
-    await conn.InitDbAsync();
-}
-
-var store = new SqlStore(() => new SqlConnection(connectionString));
-```
-
-The rest of the application remains unchanged.
-
-> **SqlStore is available only in the commercial edition.**
+> **Available only in the commercial edition.**
 
 ---
 
 ## 💼 Commercial Features
 
-### SqlStore
+### Storage Providers
 
-WJb includes a SQL Server backed store implementation:
+Included in the commercial edition:
 
-```csharp
-using WJb.Sql;
-```
+- WJb.SqlServer
+- WJb.PostgreSql
+- WJb.Sqlite
+- WJb.MySql
+- WJb.IndexedDB
 
-This package is available only in the commercial edition.
+Benefits:
 
-Learn more at:
+- Persistent storage
+- Monitoring history
+- Job retention
+- Production deployment support
+- Identical WJb APIs
+- Identical monitoring experience
+
+Learn more:
 
 https://wjb.pro/pricing
 

@@ -1,4 +1,5 @@
 <Solution>
-  <Project Path="WJb.Demo.Wasm/3. WJb.Demo.Wasm.csproj" />
+<!--  <Project Path="WJb.Demo.Wasm/WJb.Demo.Wasm.IndexedDB/2. WJb.Demo.Wasm.IndexedDB.csproj" /> -->
+  <Project Path="WJb.Demo.Wasm/WJb.Demo.Wasm.InMemory/1. WJb.Demo.Wasm.InMemory.csproj" />
   <Project Path="WJbPro.Demos/WJbPro.Demos.csproj" />
 </Solution>
