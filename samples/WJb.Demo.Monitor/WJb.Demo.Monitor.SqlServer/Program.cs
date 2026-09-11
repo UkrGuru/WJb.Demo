@@ -22,6 +22,9 @@ builder.Services.AddSingleton<IStore>(_ =>
     new MsSqlStore(() => new SqlConnection(connectionString)));
 
 // WJb demo setup: load JSON definitions and register WJb services.
+await builder.Services.AddWJbDemoAsync(workers: 4);
+
+// WJb demo setup: load JSON definitions and register WJb services.
 await builder.Services.AddWJbDemoAsync();
 
 var app = builder.Build();

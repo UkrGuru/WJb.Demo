@@ -20,6 +20,9 @@ await WJbPostgreSql.InitDbAsync(connectionString);
 builder.Services.AddSingleton<IStore>(_ => new PgStore(() => new(connectionString)));
 
 // WJb demo setup: load JSON definitions and register WJb services.
+await builder.Services.AddWJbDemoAsync(workers: 4);
+
+// WJb demo setup: load JSON definitions and register WJb services.
 await builder.Services.AddWJbDemoAsync();
 
 var app = builder.Build();

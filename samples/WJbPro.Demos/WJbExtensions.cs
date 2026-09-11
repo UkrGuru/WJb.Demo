@@ -5,9 +5,11 @@ namespace WJbPro.Demos;
 
 public static class WJbExtensions
 {
-    public static async Task AddWJbDemoAsync(this IServiceCollection services, HttpClient? http = null)
+    public static async Task AddWJbDemoAsync(this IServiceCollection services, int workers = 4, HttpClient? http = null)
     {
-        string? actionsJson = null, servicesJson = null;
+        string actionsJson;
+        string servicesJson;
+
         if (http == null)
         {
             actionsJson = await File.ReadAllTextAsync("App_Data/actions.json");
@@ -18,6 +20,12 @@ public static class WJbExtensions
             actionsJson = await http.GetStringAsync("App_Data/actions.json");
             servicesJson = await http.GetStringAsync("App_Data/services.json");
         }
+
+        services.AddSingleton(new WJbStartupData
+        {
+            ActionsJson = actionsJson,
+            ServicesJson = servicesJson
+        });
 
         services.AddSingleton<IWJb>(sp =>
         {
@@ -31,13 +39,15 @@ public static class WJbExtensions
             });
         });
 
-        services.AddSingleton(new WJbStartupData
+        services.AddSingleton(sp =>
         {
-            ActionsJson = actionsJson,
-            ServicesJson = servicesJson
+            Func<IWJb> factory = () => sp.GetRequiredService<IWJb>();
+            return new WasmWorkerPool(factory, count: workers);
         });
 
-        services.AddSingleton<WasmWorker>();
+        services.AddSingleton<IWorkNotifier>(sp =>
+            sp.GetRequiredService<WasmWorkerPool>());
+
         services.AddSingleton<CronWorker>();
     }
 
@@ -47,13 +57,19 @@ public static class WJbExtensions
 
         var data = services.GetRequiredService<WJbStartupData>();
 
-        if (forceReloadDefinitions || !(await store.GetListAsync(DefinitionType.Actions)).Any())
+        if (forceReloadDefinitions ||
+            !(await store.GetListAsync(DefinitionType.Actions)).Any())
+        {
             await store.LoadActionsFromJsonAsync(data.ActionsJson);
+        }
 
-        if (forceReloadDefinitions || !(await store.GetListAsync(DefinitionType.Services)).Any())
+        if (forceReloadDefinitions ||
+            !(await store.GetListAsync(DefinitionType.Services)).Any())
+        {
             await store.LoadServicesFromJsonAsync(data.ServicesJson);
+        }
 
-        services.GetRequiredService<WasmWorker>().Start();
+        services.GetRequiredService<WasmWorkerPool>().Start();
         services.GetRequiredService<CronWorker>().Start();
     }
 }
