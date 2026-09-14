@@ -5,7 +5,8 @@ namespace WJbPro.Demos;
 
 public static class WJbExtensions
 {
-    public static async Task AddWJbDemoAsync(this IServiceCollection services, int workers = 4, HttpClient? http = null)
+    public static async Task AddWJbDemoAsync(
+        this IServiceCollection services, int workers = 4, HttpClient? http = null)
     {
         string actionsJson;
         string servicesJson;
@@ -51,7 +52,8 @@ public static class WJbExtensions
         services.AddSingleton<CronWorker>();
     }
 
-    public static async Task UseWJbDemoAsync(this IServiceProvider services, bool forceReloadDefinitions = true)
+    public static async Task UseWJbDemoAsync(
+        this IServiceProvider services, bool forceReloadDefinitions = true)
     {
         var store = services.GetRequiredService<IStore>();
 
