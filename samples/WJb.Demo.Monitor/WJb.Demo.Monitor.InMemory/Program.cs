@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IStore, InMemoryStore>();
 
 // WJb demo setup.
-await builder.Services.AddWJbDemoAsync(workers: 8);
+await builder.Services.AddWJbDemoAsync(workers: 2);
 
 var app = builder.Build();
 
