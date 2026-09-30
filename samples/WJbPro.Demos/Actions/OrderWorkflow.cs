@@ -11,14 +11,20 @@ public sealed class CreateOrderAction : JobAction<OrderInput>
 {
     public const string Key = "create-order";
 
-    public override async Task<IActionResult> ExecuteAsync(
-        OrderInput input, CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input,
+        CancellationToken ct = default)
     {
-        ReportProgress(25, "Order created");
+        ReportProgress(
+            25,
+            "Order created");
 
         await Task.Delay(300, ct);
 
-        return Results.Next(new JobCommand(ReserveStockAction.Key, input));
+        return Results.Done()
+            .Next(
+                ReserveStockAction.Key,
+                input);
     }
 }
 
@@ -26,14 +32,20 @@ public sealed class ReserveStockAction : JobAction<OrderInput>
 {
     public const string Key = "reserve-stock";
 
-    public override async Task<IActionResult> ExecuteAsync(
-        OrderInput input, CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input,
+        CancellationToken ct = default)
     {
-        ReportProgress(50, "Stock reserved");
+        ReportProgress(
+            50,
+            "Stock reserved");
 
         await Task.Delay(300, ct);
 
-        return Results.Next(new JobCommand(ChargePaymentAction.Key, input));
+        return Results.Done()
+            .Next(
+                ChargePaymentAction.Key,
+                input);
     }
 }
 
@@ -41,14 +53,20 @@ public sealed class ChargePaymentAction : JobAction<OrderInput>
 {
     public const string Key = "charge-payment";
 
-    public override async Task<IActionResult> ExecuteAsync(
-        OrderInput input, CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input,
+        CancellationToken ct = default)
     {
-        ReportProgress(75, "Payment charged");
+        ReportProgress(
+            75,
+            "Payment charged");
 
         await Task.Delay(300, ct);
 
-        return Results.Next(new JobCommand(SendConfirmationAction.Key, input));
+        return Results.Done()
+            .Next(
+                SendConfirmationAction.Key,
+                input);
     }
 }
 
@@ -56,14 +74,23 @@ public sealed class SendConfirmationAction : JobAction<OrderInput>
 {
     public const string Key = "send-confirmation";
 
-    public override async Task<IActionResult> ExecuteAsync(
-        OrderInput input, CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input,
+        CancellationToken ct = default)
     {
-        ReportProgress(100, $"Order #{input.OrderId} completed");
+        ReportProgress(
+            100,
+            $"Order #{input?.OrderId} completed");
 
         await Task.Delay(300, ct);
 
-        return Results.Next(new JobCommand(LogAction.Key,
-                new LogInput { Message = $"Workflow completed for order #{input.OrderId}" }));
+        return Results.Done()
+            .Next(
+                LogAction.Key,
+                new LogInput
+                {
+                    Message =
+                        $"Workflow completed for order #{input?.OrderId}"
+                });
     }
 }

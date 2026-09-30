@@ -7,14 +7,14 @@ This is the fastest way to understand how WJb works.
 ## 🧠 What you will see
 
 ```text
-send-email → log → done
+send-email → log-email → done
 ```
 
 A simple workflow where:
 
 - one job is enqueued
 - an action performs work
-- the action explicitly decides what runs next
+- the action explicitly schedules the next step
 - the workflow completes
 
 👉 No hidden behavior. No magic.
@@ -45,13 +45,13 @@ The complete runnable example is available in `Program.cs`.
 === WJb Quick Start ===
 
 Workflow:
-send-email → log → done
+send-email → log-email → done
 
 [App] Enqueue: send-email
 [App] Start execution...
 
 [Action] send-email -> user@test.com via smtp.local
-[Action] log -> Email sent to user@test.com
+[Action] log-email -> Email sent to user@test.com
 
 === Completed ===
 ```
@@ -73,16 +73,74 @@ send-email → log → done
 ## 🔥 Key Idea
 
 ```csharp
-return NextAsync<LogAction>(
-    new LogInput
+return Results.Done()
+    .Next("log-email", new
     {
-        Message = $"Email sent to {input.To}"
+        Message = $"Email sent to {input?.To}"
     });
 ```
 
 👉 The current action explicitly decides what runs next.
 
 The workflow is ordinary C# code, not hidden framework configuration.
+
+---
+
+## 🧩 ActionResult
+
+Complete the current job:
+
+```csharp
+return Results.Done();
+```
+
+Complete and store a result:
+
+```csharp
+return Results.Done(customer);
+```
+
+Complete and schedule another step:
+
+```csharp
+return Results.Done()
+    .Next("send-email");
+```
+
+Schedule multiple steps:
+
+```csharp
+return Results.Done()
+    .Next("email")
+    .Next("audit")
+    .Next("metrics");
+```
+
+Failures are represented by exceptions:
+
+```csharp
+throw new InvalidOperationException(
+    "SMTP server unavailable.");
+```
+
+---
+
+## 🧠 Mental Model
+
+```text
+Action
+ ↓
+ActionResult
+ ↓
+Step
+```
+
+An action returns:
+
+- a result
+- zero or more next workflow steps
+
+Nothing more.
 
 ---
 

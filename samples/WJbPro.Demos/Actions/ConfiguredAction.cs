@@ -27,7 +27,7 @@ public sealed class ConfiguredAction(SmtpSettings? smtp)
 
     private readonly SmtpSettings? _smtp = smtp;
 
-    public override Task<IActionResult> ExecuteAsync(
+    public override ValueTask<ActionResult> ExecuteAsync(
         EmailInput input, CancellationToken ct = default)
     {
         var host = _smtp?.Host ?? "<not configured>";
@@ -37,6 +37,6 @@ public sealed class ConfiguredAction(SmtpSettings? smtp)
 
         ReportProgress(100, message);
 
-        return CompleteAsync();
+        return new ValueTask<ActionResult>(new ActionResult());
     }
 }

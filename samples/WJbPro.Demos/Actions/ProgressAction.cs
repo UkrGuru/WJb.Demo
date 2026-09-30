@@ -11,7 +11,7 @@ public sealed class ProgressAction : JobAction<ProgressPayload>, IProgressAction
 {
     public const string Key = "progress";
 
-    public override async Task<IActionResult> ExecuteAsync(
+    public override async ValueTask<ActionResult> ExecuteAsync(
         ProgressPayload input, CancellationToken ct)
     {
         for (var i = 0; i <= 100; i += 25)
@@ -25,6 +25,6 @@ public sealed class ProgressAction : JobAction<ProgressPayload>, IProgressAction
 
         ReportProgress(100, "Completed ✅");
 
-        return await CompleteAsync();
+        return new();
     }
 }

@@ -11,13 +11,13 @@ public sealed class HelloAction : JobAction<HelloPayload>
 {
     public const string Key = "hello";
 
-    public override Task<IActionResult> ExecuteAsync(
+    public override ValueTask<ActionResult> ExecuteAsync(
         HelloPayload input, CancellationToken ct = default)
     {
         var message = input.Text ?? "Hello! ✅";
 
         ReportProgress(100, message);
 
-        return CompleteAsync();
+        return new ValueTask<ActionResult>(new ActionResult());
     }
 }

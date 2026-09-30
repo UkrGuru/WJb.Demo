@@ -29,61 +29,51 @@ public class _13_FaqTests
     }
 
     [Fact]
-    public void JobCommand_Should_Schedule_Next_Work()
+    public void ActionResult_Should_Schedule_Next_Work()
     {
-        var result = Results.Next(
-            new JobCommand(
+        var result = Results.Done()
+            .Next(
                 "audit",
                 new
                 {
                     Id = 1
-                }));
+                });
 
-        var next =
-            Assert.IsType<NextResult>(result);
-
-        Assert.Single(next.Commands);
+        Assert.Single(result.Steps);
     }
 
     [Fact]
-    public void Complete_Should_Support_Object_Result()
+    public void Done_Should_Support_Object_Result()
     {
-        var result = Results.Complete(
+        var result = Results.Done(
             new
             {
                 Success = true
             });
 
-        var complete =
-            Assert.IsType<CompleteResult>(result);
-
-        Assert.NotNull(complete.Value);
+        Assert.NotNull(result.Result);
     }
 
     [Fact]
-    public void Complete_Should_Support_Integer_Result()
+    public void Done_Should_Support_Integer_Result()
     {
-        var result = Results.Complete(123);
-
-        var complete =
-            Assert.IsType<CompleteResult>(result);
+        var result = Results.Done(123);
 
         Assert.Equal(
             123,
-            complete.Value);
+            result.Result!
+                .GetValue<int>());
     }
 
     [Fact]
-    public void Complete_Should_Support_String_Result()
+    public void Done_Should_Support_String_Result()
     {
-        var result = Results.Complete("done");
-
-        var complete =
-            Assert.IsType<CompleteResult>(result);
+        var result = Results.Done("done");
 
         Assert.Equal(
             "done",
-            complete.Value);
+            result.Result!
+                .GetValue<string>());
     }
 
     [Fact]

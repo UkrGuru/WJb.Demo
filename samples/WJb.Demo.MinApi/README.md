@@ -13,7 +13,7 @@ enqueue
     ↓
 background execution
     ↓
-progress updates
+action execution
     ↓
 completed job
 ```
@@ -22,7 +22,7 @@ This sample demonstrates:
 
 - job creation through HTTP
 - background execution
-- progress reporting
+- action execution
 - job querying
 - job deletion
 
@@ -53,11 +53,13 @@ POST /jobs
     ↓
 IWJb.EnqueueAsync()
     ↓
-InMemoryStore
+Store
     ↓
-WasmWorker
+Worker
     ↓
-DemoAction
+Action
+    ↓
+ActionResult
     ↓
 Completed Job
 ```
@@ -114,22 +116,11 @@ Removes a job from the store.
 POST /jobs
 ```
 
-Response:
+### 2. Execute Action
 
-```json
-{
-  "jobId": "019f37e6-a40f-7639-8a24-d77bf860647a"
-}
-```
-
-### 2. Check Progress
-
-```json
-{
-  "action": "demo",
-  "status": 0,
-  "progress": 0
-}
+```csharp
+return Results.Done()
+    .Next("send-email");
 ```
 
 ### 3. Check Completed Job
@@ -137,9 +128,7 @@ Response:
 ```json
 {
   "action": "demo",
-  "status": 2,
-  "progress": 100,
-  "message": "Progress 100%",
+  "status": "completed",
   "result": {
     "value": "Done ✅"
   }
@@ -152,9 +141,9 @@ Response:
 
 - Minimal API integration
 - Background execution
-- Progress reporting
 - Store-based job management
 - Explicit action execution
+- Explicit workflow transitions
 
 👉 Jobs are created through HTTP and executed by WJb outside the request pipeline.
 
@@ -163,12 +152,64 @@ Response:
 ## 🔥 Key Idea
 
 ```csharp
-await wjb.EnqueueAsync(DemoAction.Key, payload);
+await wjb.EnqueueAsync("demo", payload);
 ```
 
-👉 HTTP requests enqueue jobs.
+HTTP requests enqueue jobs.
 
-The actual work executes later in the background.
+```csharp
+return Results.Done()
+    .Next("process-order");
+```
+
+Actions explicitly decide what runs next.
+
+The workflow is ordinary C# code, not hidden framework configuration.
+
+---
+
+## 🧩 ActionResult
+
+```csharp
+return Results.Done();
+```
+
+```csharp
+return Results.Done(customer);
+```
+
+```csharp
+return Results.Done()
+    .Next("send-email");
+```
+
+```csharp
+return Results.Done()
+    .Next("email")
+    .Next("audit");
+```
+
+Failures are represented by exceptions:
+
+```csharp
+throw new InvalidOperationException("Something failed.");
+```
+
+---
+
+## 🧠 Mental Model
+
+```text
+HTTP
+ ↓
+Action
+ ↓
+ActionResult
+ ↓
+Step
+```
+
+Everything is explicit.
 
 ---
 

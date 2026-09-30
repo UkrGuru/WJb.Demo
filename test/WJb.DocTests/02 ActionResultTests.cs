@@ -3,143 +3,114 @@
 public class _02_ActionResultTests
 {
     [Fact]
-    public void Complete_Should_Return_CompleteResult()
+    public void Done_Should_Return_ActionResult()
     {
-        var result = Results.Complete();
+        var result = Results.Done();
 
-        Assert.IsType<CompleteResult>(
-            result);
+        Assert.NotNull(result);
     }
 
     [Fact]
-    public void Complete_Should_Accept_Anonymous_Object()
+    public void Done_Should_Accept_Anonymous_Object()
     {
-        var result = Results.Complete(
+        var result = Results.Done(
             new
             {
                 Sent = true,
                 Count = 1
             });
 
-        var complete =
-            Assert.IsType<CompleteResult>(
-                result);
-
-        Assert.NotNull(
-            complete.Value);
+        Assert.NotNull(result.Result);
     }
 
     [Fact]
-    public void Complete_Should_Accept_Int()
+    public void Done_Should_Accept_Int()
     {
-        var result = Results.Complete(123);
-
-        var complete =
-            Assert.IsType<CompleteResult>(
-                result);
+        var result = Results.Done(123);
 
         Assert.Equal(
             123,
-            complete.Value);
+            result.Result!.GetValue<int>());
     }
 
     [Fact]
-    public void Complete_Should_Accept_String()
+    public void Done_Should_Accept_String()
     {
-        var result = Results.Complete("done");
-
-        var complete =
-            Assert.IsType<CompleteResult>(
-                result);
+        var result = Results.Done("done");
 
         Assert.Equal(
             "done",
-            complete.Value);
+            result.Result!.GetValue<string>());
     }
 
     [Fact]
-    public void Complete_Should_Accept_Boolean()
+    public void Done_Should_Accept_Boolean()
     {
-        var result = Results.Complete(true);
+        var result = Results.Done(true);
 
-        var complete =
-            Assert.IsType<CompleteResult>(
-                result);
-
-        Assert.Equal(
-            true,
-            complete.Value);
+        Assert.True(
+            result.Result!.GetValue<bool>());
     }
 
     [Fact]
-    public void Next_Should_Accept_Single_Command()
+    public void Next_Should_Add_Single_Step()
     {
-        var result = Results.Next(
-            new JobCommand(
+        var result = Results.Done()
+            .Next(
                 "log",
                 new LogInput
                 {
                     Message = "Completed"
-                }));
+                });
 
-        var next =
-            Assert.IsType<NextResult>(
-                result);
-
-        Assert.Single(
-            next.Commands);
+        Assert.Single(result.Steps);
     }
 
     [Fact]
-    public void Next_Should_Accept_Multiple_Commands()
+    public void Next_Should_Add_Multiple_Steps()
     {
-        var result = Results.Next(
-            new JobCommand(
+        var result = Results.Done()
+            .Next(
                 "email",
                 new EmailInput
                 {
                     To = "user@test.com"
-                }),
-            new JobCommand(
+                })
+            .Next(
                 "audit",
                 new AuditInput
                 {
                     Event = "OrderCompleted"
-                }));
-
-        var next =
-            Assert.IsType<NextResult>(
-                result);
+                });
 
         Assert.Equal(
             2,
-            next.Commands.Count);
+            result.Steps.Length);
     }
 
     [Fact]
-    public void CompleteResult_Should_Support_Value()
+    public void ActionResult_Should_Support_Result()
     {
-        var result = new CompleteResult(
+        var result = Results.Done(
             new
             {
                 Success = true
             });
 
         Assert.NotNull(
-            result.Value);
+            result.Result);
     }
 
     [Fact]
-    public void NextResult_Should_Support_Commands()
+    public void ActionResult_Should_Support_Steps()
     {
-        var result =
-            new NextResult(
-                new JobCommand(
-                    "audit",
-                    new AuditInput()));
+        var result = Results.Done()
+            .Next(
+                "audit",
+                new AuditInput());
 
         Assert.Single(
-            result.Commands);
+            result.Steps);
     }
 
     private sealed class EmailInput

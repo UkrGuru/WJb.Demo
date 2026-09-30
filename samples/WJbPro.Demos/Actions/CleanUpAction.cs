@@ -11,12 +11,12 @@ public sealed class CleanUpAction(IStore store) : JobAction<CleanUpPayload>
 {
     public const string Key = "clean-up";
 
-    public override async Task<IActionResult> ExecuteAsync(
+    public override async ValueTask<ActionResult> ExecuteAsync(
         CleanUpPayload input, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(store);
 
-        var before = DateTime.UtcNow.AddSeconds(-input.KeepSecs);
+        var before = DateTime.UtcNow.AddSeconds(-(input?.KeepSecs ?? 0));
 
         var removed = 0;
 
@@ -31,6 +31,6 @@ public sealed class CleanUpAction(IStore store) : JobAction<CleanUpPayload>
 
         ReportProgress(100, $"Removed {removed} jobs.");
 
-        return await CompleteAsync();
+        return new();
     }
 }

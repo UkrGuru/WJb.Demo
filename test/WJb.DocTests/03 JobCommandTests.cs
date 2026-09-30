@@ -1,11 +1,13 @@
-﻿namespace WJb.DocTests;
+﻿using WJb.Helpers;
 
-public class _03_JobCommandTests
+namespace WJb.DocTests;
+
+public class _03_StepTests
 {
     [Fact]
-    public void JobCommand_Should_Store_Action()
+    public void Step_Should_Store_Action()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "send-email",
             new EmailInput
             {
@@ -14,13 +16,13 @@ public class _03_JobCommandTests
 
         Assert.Equal(
             "send-email",
-            command.Action);
+            step.Action);
     }
 
     [Fact]
-    public void JobCommand_Should_Store_Typed_Payload()
+    public void Step_Should_Store_Typed_Payload()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "send-email",
             new EmailInput
             {
@@ -28,7 +30,8 @@ public class _03_JobCommandTests
             });
 
         var payload =
-            command.GetPayload<EmailInput>();
+            JsonHelper.ToModel<EmailInput>(
+                step.Payload);
 
         Assert.NotNull(payload);
 
@@ -38,95 +41,83 @@ public class _03_JobCommandTests
     }
 
     [Fact]
-    public void JobCommand_Should_Store_Anonymous_Payload()
+    public void Step_Should_Store_Anonymous_Payload()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "log",
             new
             {
                 Message = "Completed"
             });
 
-        var payload = command.AsObject();
+        var payload =
+            step.Payload!.AsObject();
 
         Assert.NotNull(payload);
 
         Assert.Equal(
             "Completed",
-            payload!["Message"]!
+            payload["message"]!
                 .GetValue<string>());
     }
 
     [Fact]
-    public void Results_Next_Should_Accept_Single_Command()
+    public void Next_Should_Add_Single_Step()
     {
-        var command = new JobCommand(
-            "send-email",
-            new EmailInput
-            {
-                To = "user@test.com"
-            });
-
-        var result =
-            Results.Next(command);
-
-        var next =
-            Assert.IsType<NextResult>(
-                result);
+        var result = Results.Done()
+            .Next(
+                "send-email",
+                new EmailInput
+                {
+                    To = "user@test.com"
+                });
 
         Assert.Single(
-            next.Commands);
+            result.Steps);
     }
 
     [Fact]
-    public void Results_Next_Should_Accept_Multiple_Commands()
+    public void Next_Should_Add_Multiple_Steps()
     {
-        var result =
-            Results.Next(
-                new JobCommand(
-                    "email",
-                    new EmailInput
-                    {
-                        To = "user@test.com"
-                    }),
-                new JobCommand(
-                    "audit",
-                    new AuditInput
-                    {
-                        Event = "OrderCompleted"
-                    }));
-
-        var next =
-            Assert.IsType<NextResult>(
-                result);
+        var result = Results.Done()
+            .Next(
+                "email",
+                new EmailInput
+                {
+                    To = "user@test.com"
+                })
+            .Next(
+                "audit",
+                new AuditInput
+                {
+                    Event = "OrderCompleted"
+                });
 
         Assert.Equal(
             2,
-            next.Commands.Count);
+            result.Steps.Length);
     }
 
     [Fact]
-    public void JobCommands_Next_Should_Create_Success_Command()
+    public void Steps_Next_Should_Create_Success_Step()
     {
-        var command =
-            JobCommands.Next(
-                "send-email");
+        var step = Steps.Next(
+            "send-email");
 
         Assert.Equal(
-            JobCommandCondition.Success,
-            command.Condition);
+            StepCondition.Success,
+            step.Condition);
     }
 
     [Fact]
-    public void JobCommands_OnFailure_Should_Create_Failure_Command()
+    public void Steps_OnFailure_Should_Create_Failure_Step()
     {
-        var command =
-            JobCommands.OnFailure(
-                "audit");
+        var step = Steps.OnFailure(
+            "audit");
 
         Assert.Equal(
-            JobCommandCondition.Failure,
-            command.Condition);
+            StepCondition.Failure,
+            step.Condition);
     }
 
     private sealed class EmailInput

@@ -16,9 +16,7 @@ await builder.Services.AddWJbDemoAsync(workers: 2);
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
-{
     app.UseExceptionHandler("/Error");
-}
 
 app.UseHttpsRedirection();
 app.UseAntiforgery();
