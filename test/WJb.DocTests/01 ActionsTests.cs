@@ -15,13 +15,21 @@ public class _01_ActionsTests
                 Body = "body"
             });
 
-        Assert.Equal("user@test.com", action.Input!.To);
-        Assert.Equal("subject", action.Input.Subject);
-        Assert.Equal("body", action.Input.Body);
+        Assert.Equal(
+            "user@test.com",
+            action.Input!.To);
+
+        Assert.Equal(
+            "subject",
+            action.Input.Subject);
+
+        Assert.Equal(
+            "body",
+            action.Input.Body);
     }
 
     [Fact]
-    public async Task Action_Should_Return_Next_Command()
+    public async Task Action_Should_Return_Next_Step()
     {
         var action = new SendEmailAction();
 
@@ -31,13 +39,11 @@ public class _01_ActionsTests
                 To = "user@test.com"
             });
 
-        var next = Assert.IsType<NextResult>(result);
-
-        Assert.Single(next.Commands);
+        Assert.Single(result.Steps);
     }
 
     [Fact]
-    public async Task Action_Should_Return_Multiple_Next_Commands()
+    public async Task Action_Should_Return_Multiple_Next_Steps()
     {
         var action = new MultiStepAction();
 
@@ -45,10 +51,9 @@ public class _01_ActionsTests
             await action.ExecuteAsync(
                 new EmailInput());
 
-        var next =
-            Assert.IsType<NextResult>(result);
-
-        Assert.Equal(2, next.Commands.Count);
+        Assert.Equal(
+            2,
+            result.Steps.Length);
     }
 
     [Fact]
@@ -63,8 +68,7 @@ public class _01_ActionsTests
                     To = "user@test.com"
                 });
 
-        Assert.IsType<NextResult>(
-            firstResult);
+        Assert.Single(firstResult.Steps);
 
         var logAction = new LogAction();
 
@@ -76,8 +80,7 @@ public class _01_ActionsTests
                         "Email sent to user@test.com"
                 });
 
-        Assert.IsType<CompleteResult>(
-            secondResult);
+        Assert.Empty(secondResult.Steps);
     }
 
     [Fact]
@@ -88,7 +91,7 @@ public class _01_ActionsTests
         await Assert.ThrowsAsync<
             InvalidOperationException>(
             () => action.ExecuteAsync(
-                new EmailInput()));
+                new EmailInput()).AsTask());
     }
 
     private sealed class CaptureEmailAction
@@ -96,14 +99,15 @@ public class _01_ActionsTests
     {
         public EmailInput? Input { get; private set; }
 
-        public override async Task<IActionResult>
+        public override ValueTask<ActionResult>
             ExecuteAsync(
-                EmailInput input,
+                EmailInput? input,
                 CancellationToken ct = default)
         {
             Input = input;
 
-            return await CompleteAsync();
+            return ValueTask.FromResult(
+                Results.Done());
         }
     }
 
@@ -111,39 +115,42 @@ public class _01_ActionsTests
     private sealed class SendEmailAction
         : JobAction<EmailInput>
     {
-        public override async Task<IActionResult>
+        public override ValueTask<ActionResult>
             ExecuteAsync(
-                EmailInput input,
+                EmailInput? input,
                 CancellationToken ct = default)
         {
-            return await NextAsync<LogAction>(
-                new LogInput
-                {
-                    Message =
-                        $"Email sent to {input.To}"
-                });
+            return ValueTask.FromResult(
+                Results.Done()
+                    .Next<LogAction>(
+                        new LogInput
+                        {
+                            Message =
+                                $"Email sent to {input?.To}"
+                        }));
         }
     }
 
     private sealed class MultiStepAction
         : JobAction<EmailInput>
     {
-        public override async Task<IActionResult>
+        public override ValueTask<ActionResult>
             ExecuteAsync(
-                EmailInput input,
+                EmailInput? input,
                 CancellationToken ct = default)
         {
-            return Results.Next(
-                JobCommands.Next<LogAction>(
-                    new LogInput
-                    {
-                        Message = "Email sent"
-                    }),
-                JobCommands.Next<AuditAction>(
-                    new AuditInput
-                    {
-                        Event = "email"
-                    }));
+            return ValueTask.FromResult(
+                Results.Done()
+                    .Next<LogAction>(
+                        new LogInput
+                        {
+                            Message = "Email sent"
+                        })
+                    .Next<AuditAction>(
+                        new AuditInput
+                        {
+                            Event = "email"
+                        }));
         }
     }
 
@@ -151,12 +158,13 @@ public class _01_ActionsTests
     private sealed class LogAction
         : JobAction<LogInput>
     {
-        public override async Task<IActionResult>
+        public override ValueTask<ActionResult>
             ExecuteAsync(
-                LogInput input,
+                LogInput? input,
                 CancellationToken ct = default)
         {
-            return await CompleteAsync();
+            return ValueTask.FromResult(
+                Results.Done());
         }
     }
 
@@ -164,21 +172,22 @@ public class _01_ActionsTests
     private sealed class AuditAction
         : JobAction<AuditInput>
     {
-        public override async Task<IActionResult>
+        public override ValueTask<ActionResult>
             ExecuteAsync(
-                AuditInput input,
+                AuditInput? input,
                 CancellationToken ct = default)
         {
-            return await CompleteAsync();
+            return ValueTask.FromResult(
+                Results.Done());
         }
     }
 
     private sealed class FailingAction
         : JobAction<EmailInput>
     {
-        public override Task<IActionResult>
+        public override ValueTask<ActionResult>
             ExecuteAsync(
-                EmailInput input,
+                EmailInput? input,
                 CancellationToken ct = default)
         {
             throw new InvalidOperationException(

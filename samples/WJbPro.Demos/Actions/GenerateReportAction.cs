@@ -7,24 +7,33 @@ public sealed class GenerateReportAction
 {
     public const string Key = "generate-report";
 
-    public override async Task<IActionResult> ExecuteAsync(
-        ReportInput input, CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        ReportInput? input,
+        CancellationToken ct = default)
     {
-        ReportProgress(25, "Preparing report");
+        ReportProgress(
+            25,
+            "Preparing report");
 
         await Task.Delay(500, ct);
 
-        ReportProgress(75, "Finalizing report");
+        ReportProgress(
+            75,
+            "Finalizing report");
 
         await Task.Delay(500, ct);
 
-        ReportProgress(100, "Report generated");
+        ReportProgress(
+            100,
+            "Report generated");
 
-        return Results.Next(new JobCommand(SendEmailAction.Key,
+        return Results.Done()
+            .Next(
+                SendEmailAction.Key,
                 new EmailInput
                 {
                     To = "admin@demo.local",
-                    Subject = $"Imported {input.ImportedCustomers} customers"
-                }));
+                    Subject = $"Imported {input?.ImportedCustomers} customers"
+                });
     }
 }

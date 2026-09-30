@@ -149,9 +149,9 @@ Enqueue followed by dequeue.
 
 | Jobs | Time | Memory |
 |----------:|----------:|----------:|
-| 1,000 | 2.96 ms | 1.11 MB |
-| 10,000 | 33.35 ms | 11.51 MB |
-| 100,000 | 167.83 ms | 118.99 MB |
+| 1,000 | 1.19 ms | 0.6 MB |
+| 10,000 | 11.63 ms | 5.4 MB |
+| 100,000 | 113.00 ms | 64.5 MB |
 
 For the largest test this corresponds to roughly:
 

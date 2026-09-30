@@ -1,87 +1,88 @@
-﻿namespace WJb.DocTests;
+﻿using WJb.Helpers;
+
+namespace WJb.DocTests;
 
 public class _11_CustomStoresTests
 {
     [Fact]
-    public void JobCommand_Should_Support_Object_Payload()
+    public void Step_Should_Support_Object_Payload()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "send-email",
             new
             {
                 Email = "user@test.com"
             });
 
-        Assert.NotNull(command.Payload);
+        Assert.NotNull(step.Payload);
     }
 
     [Fact]
-    public void JobCommand_Should_Support_Integer_Payload_Value()
+    public void Step_Should_Support_Integer_Payload_Value()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "customer",
             new
             {
                 CustomerId = 42
             });
 
-        var payload = command.AsObject();
+        var payload = step.Payload!.AsObject();
 
         Assert.Equal(
             42,
-            payload!["CustomerId"]!.GetValue<int>());
+            payload["customerId"]!
+                .GetValue<int>());
     }
 
     [Fact]
-    public void JobCommand_Should_Support_Array_Payload()
+    public void Step_Should_Support_Array_Payload()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "numbers",
             new[] { 1, 2, 3 });
 
-        var payload = command.GetPayload<int[]>();
+        var payload =
+            JsonHelper.ToModel<int[]>(
+                step.Payload);
 
         Assert.NotNull(payload);
-        Assert.Equal(3, payload.Length);
+
+        Assert.Equal(
+            3,
+            payload!.Length);
     }
 
     [Fact]
-    public void Complete_Should_Support_Integer_Value()
+    public void Done_Should_Support_Integer_Value()
     {
-        var result = Results.Complete(123);
-
-        var complete =
-            Assert.IsType<CompleteResult>(result);
+        var result = Results.Done(123);
 
         Assert.Equal(
             123,
-            complete.Value);
+            result.Result!
+                .GetValue<int>());
     }
 
     [Fact]
-    public void Complete_Should_Support_String_Value()
+    public void Done_Should_Support_String_Value()
     {
-        var result = Results.Complete("Done");
-
-        var complete =
-            Assert.IsType<CompleteResult>(result);
+        var result = Results.Done("Done");
 
         Assert.Equal(
             "Done",
-            complete.Value);
+            result.Result!
+                .GetValue<string>());
     }
 
     [Fact]
-    public void Complete_Should_Support_Boolean_Value()
+    public void Done_Should_Support_Boolean_Value()
     {
-        var result = Results.Complete(true);
+        var result = Results.Done(true);
 
-        var complete =
-            Assert.IsType<CompleteResult>(result);
-
-        Assert.Equal(
-            true,
-            complete.Value);
+        Assert.True(
+            result.Result!
+                .GetValue<bool>());
     }
 
     [Fact]

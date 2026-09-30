@@ -63,18 +63,24 @@ public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
 {
     public const string Key = "demo";
 
-    public override async Task<IActionResult> ExecuteAsync(
-        DemoPayload input, CancellationToken ct = default)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        DemoPayload? input, CancellationToken ct = default)
     {
+        var delayMs = input?.DelayMs ?? 0;
+
         for (var i = 0; i <= 100; i += 10)
         {
             ct.ThrowIfCancellationRequested();
 
-            await Task.Delay(input.DelayMs / 10, ct);
+            await Task.Delay(
+                delayMs / 10,
+                ct);
 
-            ReportProgress(i, $"Progress {i}%");
+            ReportProgress(
+                i,
+                $"Progress {i}%");
         }
 
-        return await CompleteAsync("Done ✅");
+        return WJb.Results.Done(input?.Text);
     }
 }

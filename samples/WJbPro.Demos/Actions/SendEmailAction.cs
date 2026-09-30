@@ -7,10 +7,10 @@ public sealed class SendEmailAction(SmtpSettings smtp)
 {
     public const string Key = "send-email";
 
-    public override Task<IActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
+    public override ValueTask<ActionResult> ExecuteAsync(EmailInput input, CancellationToken ct)
     {
         ReportProgress(100, "Email sent");
 
-        return CompleteAsync();
+        return new ValueTask<ActionResult>(new ActionResult());
     }
 }

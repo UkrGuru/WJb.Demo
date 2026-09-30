@@ -13,13 +13,13 @@ public sealed class HttpPingAction : JobAction<HttpPingPayload>
 
     private readonly HttpClient _httpClient = new();
 
-    public override async Task<IActionResult> ExecuteAsync(
+    public override async ValueTask<ActionResult> ExecuteAsync(
         HttpPingPayload input, CancellationToken ct = default)
     {
         ReportProgress(10, $"HttpClient ready: {_httpClient != null}");
 
         // CORS-friendly URL по умолчанию
-        var url = input.Url ?? "https://httpbin.org/get";
+        var url = input?.Url ?? "https://httpbin.org/get";
 
         try
         {
@@ -35,6 +35,6 @@ public sealed class HttpPingAction : JobAction<HttpPingPayload>
             throw;
         }
 
-        return await CompleteAsync();
+        return new();
     }
 }

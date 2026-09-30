@@ -11,118 +11,112 @@ public class _10_StoreTests
     }
 
     [Fact]
-    public void JobCommand_Should_Support_Guid_Payload_Values()
+    public void Step_Should_Support_Guid_Payload_Values()
     {
         var id = Guid.NewGuid();
 
-        var command = new JobCommand(
+        var step = Steps.Next(
             "test",
             new
             {
                 Id = id
             });
 
-        var payload = command.AsObject();
-
-        Assert.NotNull(payload);
+        Assert.NotNull(step.Payload);
     }
 
     [Fact]
-    public void JobCommand_Should_Support_Integer_Payload_Values()
+    public void Step_Should_Support_Integer_Payload_Values()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "test",
             new
             {
                 CustomerId = 42
             });
 
-        var payload = command.AsObject();
+        var payload = step.Payload!.AsObject();
 
         Assert.NotNull(payload);
 
         Assert.Equal(
             42,
-            payload!["CustomerId"]!.GetValue<int>());
+            payload["customerId"]!
+                .GetValue<int>());
     }
 
     [Fact]
-    public void JobCommand_Should_Support_String_Payload_Values()
+    public void Step_Should_Support_String_Payload_Values()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "test",
             new
             {
                 File = "report.pdf"
             });
 
-        var payload = command.AsObject();
+        var payload = step.Payload!.AsObject();
 
         Assert.NotNull(payload);
 
         Assert.Equal(
             "report.pdf",
-            payload!["File"]!.GetValue<string>());
+            payload["file"]!
+                .GetValue<string>());
     }
 
     [Fact]
-    public void Complete_Should_Support_Integer_Result()
+    public void Done_Should_Support_Integer_Result()
     {
-        var result = Results.Complete(123);
-
-        var complete =
-            Assert.IsType<CompleteResult>(result);
+        var result = Results.Done(123);
 
         Assert.Equal(
             123,
-            complete.Value);
+            result.Result!
+                .GetValue<int>());
     }
 
     [Fact]
-    public void Complete_Should_Support_String_Result()
+    public void Done_Should_Support_String_Result()
     {
-        var result = Results.Complete("Done");
-
-        var complete =
-            Assert.IsType<CompleteResult>(result);
+        var result = Results.Done("Done");
 
         Assert.Equal(
             "Done",
-            complete.Value);
+            result.Result!
+                .GetValue<string>());
     }
 
     [Fact]
-    public void Complete_Should_Support_Object_Result()
+    public void Done_Should_Support_Object_Result()
     {
-        var result = Results.Complete(
+        var result = Results.Done(
             new
             {
                 Sent = true
             });
 
-        var complete =
-            Assert.IsType<CompleteResult>(result);
-
         Assert.NotNull(
-            complete.Value);
+            result.Result);
     }
 
     [Fact]
-    public void JobCommand_Should_Support_Small_Metadata_Payloads()
+    public void Step_Should_Support_Small_Metadata_Payloads()
     {
-        var command = new JobCommand(
+        var step = Steps.Next(
             "send-email",
             new
             {
                 BodyId = "html-123"
             });
 
-        var payload = command.AsObject();
+        var payload = step.Payload!.AsObject();
 
         Assert.NotNull(payload);
 
         Assert.Equal(
             "html-123",
-            payload!["BodyId"]!.GetValue<string>());
+            payload["bodyId"]!
+                .GetValue<string>());
     }
 }

@@ -23,24 +23,33 @@ public sealed class ReportInput
 public sealed class ImportCustomersAction
     : JobAction<ImportCustomersInput>, IProgressAction
 {
-    public override async Task<IActionResult> ExecuteAsync(
-        ImportCustomersInput input, CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        ImportCustomersInput? input,
+        CancellationToken ct = default)
     {
         for (var i = 0; i <= 100; i += 25)
         {
-            ReportProgress(i, $"Importing customers {i}%");
+            ReportProgress(
+                i,
+                $"Importing customers {i}%");
 
             await Task.Delay(500, ct);
         }
 
-        return await NextAsync<GenerateReportAction>(
-            new ReportInput { ImportedCustomers = 1250 });
+        return Results.Done()
+            .Next(
+                Actions.GenerateReport,
+                new ReportInput
+                {
+                    ImportedCustomers = 1250
+                });
     }
 }
 
 public sealed class EmailInput
 {
     public string To { get; set; } = string.Empty;
+
     public string Subject { get; set; } = string.Empty;
 }
 
@@ -48,43 +57,60 @@ public sealed class EmailInput
 public sealed class GenerateReportAction
     : JobAction<ReportInput>, IProgressAction
 {
-    public override async Task<IActionResult> ExecuteAsync(
-        ReportInput input, CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        ReportInput? input,
+        CancellationToken ct = default)
     {
-        ReportProgress(25, "Preparing report");
+        ReportProgress(
+            25,
+            "Preparing report");
 
         await Task.Delay(500, ct);
 
-        ReportProgress(75, "Finalizing report");
+        ReportProgress(
+            75,
+            "Finalizing report");
 
         await Task.Delay(500, ct);
 
-        ReportProgress(100, "Report generated");
+        ReportProgress(
+            100,
+            "Report generated");
 
-        return await NextAsync<SendEmailAction>(
-            new EmailInput
-            {
-                To = "admin@demo.local",
-                Subject = $"Imported {input.ImportedCustomers} customers"
-            });
+        return Results.Done()
+            .Next(
+                Actions.SendEmail,
+                new EmailInput
+                {
+                    To = "admin@demo.local",
+                    Subject = $"Imported {input?.ImportedCustomers} customers"
+                });
     }
 }
 
 public sealed class SmtpSettings
 {
     public string Host { get; set; } = string.Empty;
+
     public int Port { get; set; }
+
     public string From { get; set; } = string.Empty;
 }
 
 [ActionName(Actions.SendEmail)]
-public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
+public sealed class SendEmailAction(
+    SmtpSettings smtp)
+    : JobAction<EmailInput>
 {
-    public override Task<IActionResult> ExecuteAsync(
-        EmailInput input, CancellationToken ct)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
-        ReportProgress(100, $"Email sent via {smtp.Host}");
+        ReportProgress(
+            100,
+            $"Email sent via {smtp.Host}");
 
-        return CompleteAsync();
+        return ValueTask.FromResult(
+            Results.Done());
     }
 }
