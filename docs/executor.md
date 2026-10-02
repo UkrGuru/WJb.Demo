@@ -10,9 +10,9 @@ Executor
 Action
 ```
 
-It loads jobs from the store, executes actions, stores results, and schedules follow-up work.
+It loads jobs from the store, executes actions, stores results, and schedules follow-up steps.
 
-The executor does not contain business logic.
+The executor does **not** contain business logic.
 
 Business logic belongs inside actions.
 
@@ -29,7 +29,7 @@ Execute Action
     ↓
 Store Result
     ↓
-Schedule Commands
+Schedule Steps
     ↓
 Complete Job
 ```
@@ -71,36 +71,12 @@ This is the most common production configuration.
 
 ---
 
-## Running Continuously
-
-Run jobs in a loop.
-
-```csharp
-await wjb.ExecuteLoopAsync();
-```
-
-The executor continuously:
-
-```text
-Dequeue
-Execute
-Complete
-Repeat
-```
-
-This is the most common production configuration.
-
----
-
 ## Queue Execution
-
-> // Available only in the commercial edition.
 
 Execute jobs from a specific queue.
 
 ```csharp
-await wjb.ExecuteLoopAsync(
-    queue: "email");
+await wjb.ExecuteLoopAsync(queue: "email");
 ```
 
 Only jobs assigned to that queue will run.
@@ -117,8 +93,6 @@ A new job starts in the pending state.
 Pending
 ```
 
----
-
 ### Running
 
 When a worker picks up a job:
@@ -128,8 +102,6 @@ Pending
    ↓
 Running
 ```
-
----
 
 ### Completed
 
@@ -142,8 +114,6 @@ Completed
 ```
 
 Result data is stored.
-
----
 
 ### Failed
 
@@ -167,17 +137,13 @@ Example:
 public sealed class SendEmailAction
     : JobAction<EmailInput>
 {
-    public override async Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
-        await _email.SendAsync(
-            input.To,
-            input.Subject,
-            input.Body,
-            ct);
+        // await _email.SendAsync(...);
 
-        return ActionResults.None();
+        return ValueTask.FromResult(Results.Done());
     }
 }
 ```
@@ -186,11 +152,8 @@ The executor:
 
 ```text
 1. Loads payload
-
 2. Creates action
-
 3. Executes action
-
 4. Processes ActionResult
 ```
 
@@ -199,24 +162,23 @@ The executor:
 ## Returning Results
 
 ```csharp
-return ActionResults.Result(
-    new
+return ValueTask.FromResult(
+    Results.Done(new
     {
         Success = true
-    });
+    }));
 ```
 
 The executor stores the returned value as the job result.
 
 ---
 
-## Scheduling Commands
+## Scheduling Next Steps
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "audit",
-        payload));
+return ValueTask.FromResult(
+    Results.Done()
+        .Next("audit", payload));
 ```
 
 The executor schedules new jobs.
@@ -226,19 +188,20 @@ Workflow:
 ```text
 Current Job
       ↓
-  JobCommand
+     Step
       ↓
    New Job
 ```
 
 ---
 
-## Multiple Commands
+## Multiple Next Steps
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand("email", email),
-    new JobCommand("audit", audit));
+return ValueTask.FromResult(
+    Results.Done()
+        .Next("email", email)
+        .Next("audit", audit));
 ```
 
 Workflow:
@@ -266,9 +229,7 @@ The executor:
 
 ```text
 Marks Job Failed
-
 Stores Error
-
 Stops Execution
 ```
 
@@ -279,15 +240,15 @@ Stops Execution
 Cancellation requests are propagated to actions.
 
 ```csharp
-public override async Task<ActionResult> ExecuteAsync(
-    MyInput input,
-    CancellationToken ct)
+public override ValueTask<ActionResult> ExecuteAsync(
+    MyInput? input,
+    CancellationToken ct = default)
 {
     ct.ThrowIfCancellationRequested();
 
-    await SomeOperationAsync(ct);
+    // await SomeOperationAsync(ct);
 
-    return ActionResults.None();
+    return ValueTask.FromResult(Results.Done());
 }
 ```
 
@@ -300,28 +261,16 @@ Always pass the cancellation token to external operations.
 The executor creates actions through dependency injection.
 
 ```csharp
-public sealed class SendEmailAction
+public sealed class SendEmailAction(IEmailService email)
     : JobAction<EmailInput>
 {
-    private readonly IEmailService _email;
-
-    public SendEmailAction(
-        IEmailService email)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
-        _email = email;
-    }
+        // await email.SendAsync(...);
 
-    public override async Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
-    {
-        await _email.SendAsync(
-            input.To,
-            input.Subject,
-            input.Body,
-            ct);
-
-        return ActionResults.None();
+        return ValueTask.FromResult(Results.Done());
     }
 }
 ```
@@ -330,15 +279,12 @@ public sealed class SendEmailAction
 
 ## What the Executor Does Not Do
 
-The executor does not:
+The executor does **not**:
 
-❌ Implement business rules
-
-❌ Decide workflow transitions
-
-❌ Modify payloads
-
-❌ Know application-specific logic
+❌ Implement business rules  
+❌ Decide workflow transitions  
+❌ Modify payloads  
+❌ Know application-specific logic  
 
 Those responsibilities belong to actions.
 
@@ -346,21 +292,15 @@ Those responsibilities belong to actions.
 
 ## Best Practices
 
-✅ Keep business logic inside actions
+✅ Keep business logic inside actions  
+✅ Use explicit next steps (`.Next(...)`)  
+✅ Return meaningful results  
+✅ Pass cancellation tokens  
+✅ Separate workloads using queues  
 
-✅ Use explicit commands
-
-✅ Return meaningful results
-
-✅ Pass cancellation tokens
-
-✅ Separate workloads using queues
-
-❌ Hide workflow logic inside infrastructure
-
-❌ Build workflows inside the executor
-
-❌ Depend on side effects
+❌ Hide workflow logic inside infrastructure  
+❌ Build workflows inside the executor  
+❌ Depend on side effects  
 
 ---
 
@@ -375,12 +315,11 @@ Action
   ↓
 ActionResult
   ↓
-JobCommand
+Step
 ```
 
-The executor runs the workflow.
-
-The action defines the workflow.
+The executor **runs** the workflow.  
+The action **defines** the workflow.
 
 ---
 
@@ -390,4 +329,6 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/05 ExecutorTests.cs](../test/WJb.DocTests/05%20ExecutorTests.cs)
+```text
+../test/WJb.DocTests/05_ExecutorTests.cs
+```

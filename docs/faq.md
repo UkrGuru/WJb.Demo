@@ -35,7 +35,7 @@ Action
    ↓
 ActionResult
    ↓
-JobCommand
+Step
    ↓
 Next Job
 ```
@@ -68,7 +68,7 @@ What should happen next?
 
 Not in the traditional BPMN sense.
 
-WJb builds workflows using actions and commands.
+WJb builds workflows using actions and steps.
 
 Example:
 
@@ -110,8 +110,7 @@ var options = new JobOptions
     Delay = TimeSpan.FromHours(1)
 };
 
-var runAt =
-    options.GetRunAt(DateTime.UtcNow);
+var runAt = options.GetRunAt(DateTime.UtcNow);
 ```
 
 ---
@@ -119,8 +118,6 @@ var runAt =
 ## Does WJb Support Queues?
 
 Yes.
-
-> // Available only in the commercial edition.
 
 ```csharp
 await wjb.EnqueueAsync(
@@ -135,8 +132,7 @@ await wjb.EnqueueAsync(
 Workers can process specific queues.
 
 ```csharp
-await wjb.ExecuteLoopAsync(
-    queue: "email");
+await wjb.ExecuteLoopAsync(queue: "email");
 ```
 
 ---
@@ -146,10 +142,9 @@ await wjb.ExecuteLoopAsync(
 Yes.
 
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "audit",
-        payload));
+return ValueTask.FromResult(
+    Results.Done()
+        .Next("audit", payload));
 ```
 
 Actions define workflow transitions.
@@ -161,21 +156,21 @@ Actions define workflow transitions.
 Yes.
 
 ```csharp
-return ActionResults.Result(
-    new
+return ValueTask.FromResult(
+    Results.Done(new
     {
         Success = true
-    });
+    }));
 ```
 
 Scalar values are also supported.
 
 ```csharp
-return ActionResults.Result(123);
+return ValueTask.FromResult(Results.Done(123));
 ```
 
 ```csharp
-return ActionResults.Result("done");
+return ValueTask.FromResult(Results.Done("done"));
 ```
 
 ---
@@ -227,15 +222,15 @@ Retry behavior remains explicit because it is configured directly in application
 Yes.
 
 ```csharp
-public sealed class SendEmailAction
+public sealed class SendEmailAction(IEmailService email)
     : JobAction<EmailInput>
 {
-    private readonly IEmailService _email;
-
-    public SendEmailAction(
-        IEmailService email)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
-        _email = email;
+        // ...
+        return ValueTask.FromResult(Results.Done());
     }
 }
 ```
@@ -254,25 +249,14 @@ Examples:
 
 ```text
 SQL Server
-```
-
-```text
 PostgreSQL
-```
-
-```text
 SQLite
-```
-
-```text
 Redis
-```
-
-```text
 MongoDB
+IndexedDB
 ```
 
-You can implement your own store.
+You can implement your own store (implement `IStore` or inherit from `StoreBase` / `DbStoreBase`).
 
 ---
 
@@ -282,7 +266,7 @@ No.
 
 The core package has no dependency on SQL Server.
 
-`WJb.Sql` is an optional storage provider.
+Commercial storage providers (SQL Server, PostgreSQL, MySQL, SQLite, IndexedDB) are available separately.
 
 ---
 
@@ -300,17 +284,8 @@ A store may internally use:
 
 ```text
 Guid
-```
-
-```text
 long
-```
-
-```text
 ULID
-```
-
-```text
 ObjectId
 ```
 
@@ -351,9 +326,7 @@ await wjb.EnqueueAsync(
 Yes.
 
 ```csharp
-ReportProgress(
-    50,
-    "Processing records");
+ReportProgress(50, "Processing records");
 ```
 
 Progress and messages can be displayed by monitoring tools.
@@ -372,19 +345,9 @@ Distribution depends on the selected store implementation.
 
 ## Is WJb Open Source?
 
-The core package is open source.
+The core package is available under a non-commercial license.
 
-Commercial extensions are available separately.
-
-Current commercial packages:
-
-```text
-WJb.Sql
-```
-
-```text
-WJb.Pro
-```
+Commercial use and commercial storage providers require a commercial license.
 
 ---
 
@@ -408,7 +371,7 @@ Action
    ↓
 ActionResult
    ↓
-JobCommand
+Step
    ↓
 Next Job
 ```
@@ -425,4 +388,6 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/13 FaqTests.cs](../test/WJb.DocTests/13%20FaqTests.cs)
+```text
+../test/WJb.DocTests/13_FaqTests.cs
+```

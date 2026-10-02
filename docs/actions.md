@@ -2,16 +2,16 @@
 
 Actions contain the business logic of your application.
 
-An action receives input, performs work, and returns an `IActionResult`.
+An action receives input, performs work, and returns an `ActionResult`.
 
 ```text
 Job
  ↓
 Action
  ↓
-IActionResult
+ActionResult
  ↓
-JobCommand
+Step
 ```
 
 ---
@@ -24,13 +24,13 @@ Inherit from `JobAction<TInput>`:
 public sealed class SendEmailAction
     : JobAction<EmailInput>
 {
-    public override async Task<IActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
-        await Task.CompletedTask;
+        // business logic...
 
-        return await CompleteAsync();
+        return ValueTask.FromResult(Results.Done());
     }
 }
 ```
@@ -40,13 +40,10 @@ public sealed class SendEmailAction
 ## Registering Actions
 
 ```csharp
-var wjb = WJbBuilder.Create(
-    store,
-    cfg =>
-    {
-        cfg.AddAction<SendEmailAction>(
-            "send-email");
-    });
+var wjb = WJbBuilder.Create(store, cfg =>
+{
+    cfg.AddAction<SendEmailAction>("send-email");
+});
 ```
 
 The action key is used when enqueueing jobs:
@@ -74,16 +71,11 @@ public sealed class SendEmailAction
 }
 ```
 
-This name is automatically used by:
+This name is automatically used when scheduling next steps:
 
 ```csharp
-JobCommands.Next<SendEmailAction>()
-```
-
-and
-
-```csharp
-NextAsync<SendEmailAction>()
+Results.Done()
+    .Next("send-email", payload);
 ```
 
 ---
@@ -96,9 +88,7 @@ Actions can use strongly typed input models.
 public sealed class EmailInput
 {
     public string To { get; init; } = string.Empty;
-
     public string Subject { get; init; } = string.Empty;
-
     public string Body { get; init; } = string.Empty;
 }
 ```
@@ -112,18 +102,18 @@ WJb automatically converts job payloads into the action input type.
 ### No Result
 
 ```csharp
-return await CompleteAsync();
+return ValueTask.FromResult(Results.Done());
 ```
 
 ### Return a Value
 
 ```csharp
-return Results.Complete(
-    new
+return ValueTask.FromResult(
+    Results.Done(new
     {
         Sent = true,
         Count = 1
-    });
+    }));
 ```
 
 The value becomes the job result.
@@ -131,29 +121,38 @@ The value becomes the job result.
 Scalar values are also supported:
 
 ```csharp
-return Results.Complete(123);
+return ValueTask.FromResult(Results.Done(123));
 ```
 
 ```csharp
-return Results.Complete("done");
+return ValueTask.FromResult(Results.Done("done"));
 ```
 
 ```csharp
-return Results.Complete(true);
+return ValueTask.FromResult(Results.Done(true));
 ```
 
 ---
 
 ## Scheduling the Next Step
 
-Actions can schedule additional jobs.
+Actions can schedule the next step using the fluent API.
 
 ```csharp
-return await NextAsync<LogAction>(
-    new LogInput
-    {
-        Message = "Email sent"
-    });
+return ValueTask.FromResult(
+    Results.Done()
+        .Next("log", new LogInput
+        {
+            Message = "Email sent"
+        }));
+```
+
+Or with a simple payload:
+
+```csharp
+return ValueTask.FromResult(
+    Results.Done()
+        .Next("log", $"Email sent to {input?.To}"));
 ```
 
 Workflow:
@@ -169,17 +168,10 @@ log
 ## Multiple Next Steps
 
 ```csharp
-return Results.Next(
-    JobCommands.Next<LogAction>(
-        new LogInput
-        {
-            Message = "Email sent"
-        }),
-    JobCommands.Next<AuditAction>(
-        new AuditInput
-        {
-            Event = "email"
-        }));
+return ValueTask.FromResult(
+    Results.Done()
+        .Next("log", new LogInput { Message = "Email sent" })
+        .Next("audit", new AuditInput { Event = "email" }));
 ```
 
 Workflow:
@@ -207,31 +199,27 @@ done
 public sealed class SendEmailAction
     : JobAction<EmailInput>
 {
-    public override async Task<IActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
-        return await NextAsync<LogAction>(
-            new LogInput
-            {
-                Message =
-                    $"Email sent to {input.To}"
-            });
+        return ValueTask.FromResult(
+            Results.Done()
+                .Next("log", $"Email sent to {input?.To}"));
     }
 }
 
 [ActionName("log")]
 public sealed class LogAction
-    : JobAction<LogInput>
+    : JobAction<string?>
 {
-    public override async Task<IActionResult> ExecuteAsync(
-        LogInput input,
-        CancellationToken ct)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        string? message,
+        CancellationToken ct = default)
     {
-        Console.WriteLine(
-            input.Message);
+        Console.WriteLine(message);
 
-        return await CompleteAsync();
+        return ValueTask.FromResult(Results.Done());
     }
 }
 ```
@@ -247,21 +235,16 @@ The action decides what happens next.
 Actions support constructor injection.
 
 ```csharp
-public sealed class SendEmailAction(
-    IEmailService email)
+public sealed class SendEmailAction(IEmailService email)
     : JobAction<EmailInput>
 {
-    public override async Task<IActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
-        await email.SendAsync(
-            input.To,
-            input.Subject,
-            input.Body,
-            ct);
+        // await email.SendAsync(...);
 
-        return await CompleteAsync();
+        return ValueTask.FromResult(Results.Done());
     }
 }
 ```
@@ -273,9 +256,9 @@ public sealed class SendEmailAction(
 Throw an exception when the action cannot complete.
 
 ```csharp
-public override Task<IActionResult> ExecuteAsync(
-    EmailInput input,
-    CancellationToken ct)
+public override ValueTask<ActionResult> ExecuteAsync(
+    EmailInput? input,
+    CancellationToken ct = default)
 {
     throw new InvalidOperationException(
         "SMTP server unavailable");
@@ -291,44 +274,30 @@ WJb records the failure and stores error information.
 Always pass the cancellation token to external operations.
 
 ```csharp
-await httpClient.GetAsync(
-    url,
-    ct);
+await httpClient.GetAsync(url, ct);
 ```
 
 ```csharp
-await repository.SaveAsync(
-    entity,
-    ct);
+await repository.SaveAsync(entity, ct);
 ```
 
 ---
 
 ## Best Practices
 
-✅ One business operation per action
+✅ One business operation per action  
+✅ Small input models  
+✅ Explicit next steps  
+✅ Prefer fluent `.Next(...)`  
+✅ Constructor injection  
+✅ Return meaningful results  
+✅ Pass cancellation tokens  
+✅ Keep actions focused  
 
-✅ Small input models
-
-✅ Explicit next steps
-
-✅ Prefer `NextAsync<TAction>()`
-
-✅ Constructor injection
-
-✅ Return meaningful results
-
-✅ Pass cancellation tokens
-
-✅ Keep actions focused
-
-❌ Hidden workflows
-
-❌ Service locator patterns
-
-❌ Large payloads
-
-❌ Long chains of implicit behavior
+❌ Hidden workflows  
+❌ Service locator patterns  
+❌ Large payloads  
+❌ Long chains of implicit behavior  
 
 ---
 
@@ -336,12 +305,9 @@ await repository.SaveAsync(
 
 ```text
 Action        = Business Logic
-
 Input         = Work To Perform
-
-IActionResult = Outcome
-
-JobCommand    = Next Job
+ActionResult  = Outcome + Next Steps
+Step          = Next Work
 ```
 
 If you can read an action and immediately answer:

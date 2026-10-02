@@ -1,6 +1,7 @@
 # WJb Documentation
 
 WJb is an explicit background job engine for .NET where workflow transitions are defined in code and never hidden behind pipelines or middleware.
+
 ```text
 Job
  ↓
@@ -8,15 +9,13 @@ Action
  ↓
 ActionResult
  ↓
-JobCommand
+Step
  ↓
 Next Job
 ```
 
-Every workflow is visible.
-
-Every transition is explicit.
-
+Every workflow is visible.  
+Every transition is explicit.  
 Every step is defined in code.
 
 ---
@@ -29,7 +28,7 @@ Start here if you are new to WJb.
 
 - [Actions](actions.md)
 - [ActionResult](action-result.md)
-- [JobCommand](job-command.md)
+- [Step](step.md)
 - [JobOptions](job-options.md)
 
 ---
@@ -59,18 +58,17 @@ Learn how jobs are persisted.
 
 ### Core
 
-- **WJb**
-
-Explicit background job engine.
+- **WJb**  
+  Explicit background job engine.
 
 ### Commercial
 
-- **WJb.Sql**
-- **WJb.Pro** (coming soon)
-
-Documentation:
-
-- [WJb.Sql](wjb-sql.md)
+- **WJb.SqlServer**
+- **WJb.PostgreSql**
+- **WJb.MySql**
+- **WJb.Sqlite**
+- **WJb.IndexedDB**
+- **WJb.Pro**
 
 ### UI
 
@@ -101,7 +99,7 @@ Action
  ↓
 ActionResult
  ↓
-JobCommand
+Step
  ↓
 Next Job
 ```
@@ -133,19 +131,18 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
-[../test/WJb.DocTests](../test/WJb.DocTests/README.md)
+```text
+../test/WJb.DocTests
+```
 
 ---
 
 ## Support
 
-📧 ukrguru@gmail.com
+📧 ukrguru@gmail.com  
 
 ☕ https://ko-fi.com/ukrguru
 
 ---
 
 > Background jobs shouldn't be magic.
-
----
-
