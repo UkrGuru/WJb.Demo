@@ -2,10 +2,8 @@
 
 Failures happen.
 
-Networks fail.
-
-Databases become unavailable.
-
+Networks fail.  
+Databases become unavailable.  
 External APIs timeout.
 
 A retry allows a job to be attempted again.
@@ -20,7 +18,7 @@ Retry
 Success
 ```
 
-Retry behavior in WJb is explicit.
+Retry behavior in WJb is **explicit**.
 
 ---
 
@@ -43,7 +41,7 @@ Job
  ↓
 Action
  ↓
-JobCommand
+Step
  ↓
 Retry
 ```
@@ -121,11 +119,8 @@ Produces:
 
 ```text
 Attempt 1 → 2 min
-
 Attempt 2 → 4 min
-
 Attempt 3 → 8 min
-
 Attempt 4 → 16 min
 ```
 
@@ -133,7 +128,7 @@ Attempt 4 → 16 min
 
 ## Retry Counter
 
-Applications can still track attempts in the payload when needed.
+Applications can track attempts in the payload when needed.
 
 Example payload:
 
@@ -141,7 +136,6 @@ Example payload:
 public sealed class EmailInput
 {
     public string To { get; init; } = "";
-
     public int Attempt { get; init; }
 }
 ```
@@ -190,13 +184,7 @@ Stop
 
 Retries are not the only option.
 
-A failed action can trigger follow-up work.
-
-```csharp
-JobCommands.OnFailure(
-    "notify-admin",
-    input);
-```
+A failed action can trigger follow-up work using step conditions (e.g. `StepCondition.Failure`).
 
 Workflow:
 
@@ -210,148 +198,76 @@ notify-admin
 
 ---
 
-## Hidden Retry vs Explicit Retry
+## Manual / Explicit Retry from Action
 
-Hidden:
-
-```text
-Fail
- ↓
-Infrastructure
- ↓
-Retry
-```
-
-WJb:
-
-```text
-Fail
- ↓
-JobOptions
- ↓
-Retry
-```
-
-Retry behavior is configured explicitly and remains visible in code.
-
-## Retry After Failure
-
-A common pattern:
+A common pattern when you want full control:
 
 ```csharp
 public sealed class SendEmailAction
     : JobAction<EmailInput>
 {
-    public override async Task<ActionResult> ExecuteAsync(
-        EmailInput input,
-        CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        EmailInput? input,
+        CancellationToken ct = default)
     {
         try
         {
             await SendAsync(input, ct);
-
-            return ActionResults.None();
+            return Results.Done();
         }
         catch
         {
-            return ActionResults.Next(
-                new JobCommand(
-                    "send-email",
-                    input,
-                    new JobOptions
-                    {
-                        Delay = TimeSpan.FromMinutes(5)
-                    }));
+            return Results.Done()
+                .Next("send-email", input, new JobOptions
+                {
+                    Delay = TimeSpan.FromMinutes(5)
+                });
         }
     }
 }
 ```
 
-The workflow is visible.
-
+The workflow is visible.  
 No hidden retry engine is involved.
 
 ---
 
-## Retry Counter
-
-Applications often track retry attempts.
-
-Example payload:
+## Retry Counter (Manual)
 
 ```csharp
-public sealed class EmailInput
-{
-    public string To { get; init; } = "";
-
-    public int Attempt { get; init; }
-}
-```
-
-Action:
-
-```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "send-email",
-        input with
-        {
-            Attempt = input.Attempt + 1
-        }));
+return Results.Done()
+    .Next("send-email", input with
+    {
+        Attempt = input.Attempt + 1
+    });
 ```
 
 ---
 
-## Maximum Attempts
-
-Prevent infinite retries.
+## Maximum Attempts (Manual)
 
 ```csharp
 if (input.Attempt >= 5)
 {
-    return ActionResults.None();
+    return Results.Done();
 }
-```
-
-Example workflow:
-
-```text
-Attempt 1
-    ↓
-Attempt 2
-    ↓
-Attempt 3
-    ↓
-Attempt 4
-    ↓
-Attempt 5
-    ↓
-Stop
 ```
 
 ---
 
-## Exponential Backoff
-
-A common strategy:
+## Exponential Backoff (Manual)
 
 ```csharp
-var delay =
-    TimeSpan.FromMinutes(
-        Math.Pow(
-            2,
-            input.Attempt));
+var delay = TimeSpan.FromMinutes(
+    Math.Pow(2, input.Attempt));
 ```
 
 Produces:
 
 ```text
 Attempt 1 → 2 min
-
 Attempt 2 → 4 min
-
 Attempt 3 → 8 min
-
 Attempt 4 → 16 min
 ```
 
@@ -361,13 +277,9 @@ Attempt 4 → 16 min
 
 Retries do not have to schedule the same action.
 
-Example:
-
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "notify-admin",
-        input));
+return Results.Done()
+    .Next("notify-admin", input);
 ```
 
 Workflow:
@@ -392,20 +304,16 @@ email-failed
 notify-admin
 ```
 
-Example:
-
 ```csharp
-return ActionResults.Next(
-    new JobCommand(
-        "email-failed",
-        input));
+return Results.Done()
+    .Next("email-failed", input);
 ```
 
 ---
 
 ## Hidden Retry vs Explicit Retry
 
-Hidden:
+**Hidden:**
 
 ```text
 Fail
@@ -415,14 +323,14 @@ Infrastructure
 Retry
 ```
 
-Explicit:
+**Explicit (WJb):**
 
 ```text
 Fail
  ↓
-Action
+Action / JobOptions
  ↓
-JobCommand
+Step
  ↓
 Retry
 ```
@@ -433,23 +341,16 @@ The explicit approach makes workflows easier to understand.
 
 ## Best Practices
 
-✅ Limit retry attempts
+✅ Limit retry attempts  
+✅ Use delays  
+✅ Use exponential backoff  
+✅ Make retries visible  
+✅ Track attempt counts  
 
-✅ Use delays
-
-✅ Use exponential backoff
-
-✅ Make retries visible
-
-✅ Track attempt counts
-
-❌ Infinite retries
-
-❌ Hidden retry logic
-
-❌ Immediate retry loops
-
-❌ Retry everything automatically
+❌ Infinite retries  
+❌ Hidden retry logic  
+❌ Immediate retry loops  
+❌ Retry everything automatically  
 
 ---
 
@@ -457,14 +358,11 @@ The explicit approach makes workflows easier to understand.
 
 ```text
 Failure = Event
-
 Retry   = Decision
-
 Job     = Next Attempt
 ```
 
-A retry is not magic.
-
+A retry is not magic.  
 A retry is simply another job.
 
 ---
@@ -475,4 +373,6 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/07 RetryTests.cs](../test/WJb.DocTests/07%20RetryTests.cs)
+```text
+../test/WJb.DocTests/07_RetryTests.cs
+```

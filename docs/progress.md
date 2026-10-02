@@ -22,24 +22,18 @@ Completed Job
 
 ## Updating Progress
 
-Progress can be updated from an action.
+Progress can be updated from an action using `ReportProgress`.
 
 ```csharp
-await Context.UpdateProgressAsync(
-    25,
-    "Reading file");
+ReportProgress(25, "Reading file");
 ```
 
 ```csharp
-await Context.UpdateProgressAsync(
-    50,
-    "Processing records");
+ReportProgress(50, "Processing records");
 ```
 
 ```csharp
-await Context.UpdateProgressAsync(
-    100,
-    "Completed");
+ReportProgress(100, "Completed");
 ```
 
 ---
@@ -63,9 +57,7 @@ Job completed.
 Example:
 
 ```csharp
-await Context.UpdateProgressAsync(
-    75,
-    "Uploading");
+ReportProgress(75, "Uploading");
 ```
 
 ---
@@ -75,16 +67,13 @@ await Context.UpdateProgressAsync(
 An optional message can be provided.
 
 ```csharp
-await Context.UpdateProgressAsync(
-    40,
-    "Processing customers");
+ReportProgress(40, "Processing customers");
 ```
 
 Stored values:
 
 ```text
 Progress = 40
-
 Message  = Processing customers
 ```
 
@@ -95,27 +84,21 @@ Message  = Processing customers
 ```csharp
 public sealed class ImportAction : JobAction<ImportInput>
 {
-    public override async Task<ActionResult> ExecuteAsync(
-        ImportInput input,
-        CancellationToken ct)
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        ImportInput? input,
+        CancellationToken ct = default)
     {
-        await Context.UpdateProgressAsync(
-            10,
-            "Loading file");
+        ReportProgress(10, "Loading file");
 
         await LoadAsync(ct);
 
-        await Context.UpdateProgressAsync(
-            50,
-            "Processing records");
+        ReportProgress(50, "Processing records");
 
         await ProcessAsync(ct);
 
-        await Context.UpdateProgressAsync(
-            100,
-            "Completed");
+        ReportProgress(100, "Completed");
 
-        return ActionResults.None();
+        return Results.Done();
     }
 }
 ```
@@ -124,7 +107,7 @@ public sealed class ImportAction : JobAction<ImportInput>
 
 ## Monitoring
 
-Progress information can be displayed by monitoring tools such as WJb.UI.Blazor.
+Progress information can be displayed by monitoring tools such as **WJb.UI.Blazor**.
 
 Example:
 
@@ -156,10 +139,20 @@ If a job fails, the last progress value remains available for diagnostics.
 
 ---
 
+## IProgressAction
+
+Actions that need progress reporting typically implement or inherit behavior related to `IProgressAction`.
+
+Most applications simply call `ReportProgress(...)` from within a `JobAction<T>`.
+
+---
+
 ## Source Code
 
 Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/06 ProgressTests.cs](../test/WJb.DocTests/06%20ProgressTests.cs)
+```text
+../test/WJb.DocTests/06_ProgressTests.cs
+```

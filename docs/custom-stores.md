@@ -7,9 +7,9 @@ The core package does not require SQL Server, Redis, MongoDB, or any specific da
 ```text
        WJb
         ↓
-   IJobStore
+     IStore
         ↓
-Your Storage
+  Your Storage
 ```
 
 You decide how jobs are stored.
@@ -24,26 +24,12 @@ Examples:
 
 ```text
 SQL Server
-```
-
-```text
 PostgreSQL
-```
-
-```text
 SQLite
-```
-
-```text
 Redis
-```
-
-```text
 MongoDB
-```
-
-```text
 Cloud Storage
+IndexedDB
 ```
 
 WJb allows each application to choose the most appropriate storage solution.
@@ -54,21 +40,15 @@ WJb allows each application to choose the most appropriate storage solution.
 
 A store is responsible for:
 
-✅ Enqueueing jobs
+✅ Enqueueing jobs  
+✅ Dequeueing jobs  
+✅ Updating progress  
+✅ Completing jobs  
+✅ Recording failures  
+✅ Querying jobs  
+✅ Deleting jobs  
 
-✅ Dequeueing jobs
-
-✅ Updating progress
-
-✅ Completing jobs
-
-✅ Recording failures
-
-✅ Querying jobs
-
-✅ Deleting jobs
-
-A store is persistence.
+A store is **persistence**.
 
 Nothing more.
 
@@ -81,14 +61,33 @@ Application
       ↓
    Executor
       ↓
-   IJobStore
+    IStore
       ↓
- Database
+  Database / Storage
 ```
 
-The executor runs actions.
-
+The executor runs actions.  
 The store persists data.
+
+---
+
+## Key Interfaces (v1.1)
+
+From the official API tree:
+
+```text
+IStore
+  └── StoreBase
+        ├── InMemoryStore
+        └── DbStoreBase
+
+IDefinitionStore
+ICronStore
+IJobStoreQuery
+IDbStore
+```
+
+Most custom stores implement `IStore` (or inherit from `StoreBase` / `DbStoreBase`).
 
 ---
 
@@ -106,21 +105,9 @@ Examples:
 
 ```text
 Guid
-```
-
-```text
 long
-```
-
-```text
 ULID
-```
-
-```text
 ObjectId
-```
-
-```text
 Snowflake
 ```
 
@@ -140,22 +127,18 @@ Examples:
 
 ```json
 {
-    "email": "user@test.com"
+  "email": "user@test.com"
 }
 ```
 
 ```json
 {
-    "customerId": 42
+  "customerId": 42
 }
 ```
 
 ```json
-[
-    1,
-    2,
-    3
-]
+[1, 2, 3]
 ```
 
 Any valid JSON can be stored.
@@ -182,7 +165,7 @@ true
 
 ```json
 {
-    "sent": true
+  "sent": true
 }
 ```
 
@@ -202,7 +185,7 @@ Examples:
 
 ```json
 {
-    "message": "SMTP unavailable"
+  "message": "SMTP unavailable"
 }
 ```
 
@@ -262,7 +245,7 @@ Caller
  Store
 ```
 
-changes made by the caller afterwards should not modify the stored job.
+Changes made by the caller afterwards must **not** modify the stored job.
 
 ---
 
@@ -277,31 +260,40 @@ Useful for:
 - Learning
 - Custom provider implementations
 
-Reading its implementation is a good starting point for building a new provider.
+Reading its implementation is the recommended starting point for building a new provider.
+
+```csharp
+var store = new InMemoryStore();
+var wjb = WJbBuilder.Create(store, cfg => { ... });
+```
+
+---
+
+## Recommended Base Classes
+
+For most custom stores:
+
+- Inherit from `StoreBase` (general purpose)
+- Or inherit from `DbStoreBase` (when working with relational databases)
+
+These base classes already implement common boilerplate.
 
 ---
 
 ## Best Practices
 
-✅ Keep storage concerns inside the store
+✅ Keep storage concerns inside the store  
+✅ Preserve JSON values exactly  
+✅ Support scheduled execution  
+✅ Support queues  
+✅ Keep implementations simple  
+✅ Use the identifier type best suited to your database  
+✅ Prefer inheriting `StoreBase` / `DbStoreBase`  
 
-✅ Preserve JSON values exactly
-
-✅ Support scheduled execution
-
-✅ Support queues
-
-✅ Keep implementations simple
-
-✅ Use the identifier type best suited to your database
-
-❌ Put business logic in the store
-
-❌ Depend on specific action types
-
-❌ Modify payloads during persistence
-
-❌ Assume identifiers are GUIDs
+❌ Put business logic in the store  
+❌ Depend on specific action types  
+❌ Modify payloads during persistence  
+❌ Assume identifiers are GUIDs  
 
 ---
 
@@ -309,9 +301,7 @@ Reading its implementation is a good starting point for building a new provider.
 
 ```text
 Action   = Business Logic
-
 Executor = Execution
-
 Store    = Persistence
 ```
 
@@ -329,4 +319,6 @@ Documentation examples are verified by automated documentation tests.
 
 Tests:
 
--[../test/WJb.DocTests/11 CustomStoresTests.cs](../test/WJb.DocTests/11%20CustomStoresTests.cs)
+```text
+../test/WJb.DocTests/11_CustomStoresTests.cs
+```
