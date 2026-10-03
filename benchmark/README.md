@@ -24,37 +24,12 @@ Validation tests are executed before benchmarking to verify that all frameworks 
 
 ## Job Enqueue Performance
 
-### 1 Job
-
-| Framework | Time |
-|------------|------------:|
-| WJb | 22.62 μs |
-| Quartz.NET | 27.50 μs |
-| Hangfire | 389.62 μs |
-
-### 100 Jobs
-
-| Framework | Time |
-|------------|------------:|
-| WJb | 475.52 μs |
-| Quartz.NET | 1.18 ms |
-| Hangfire | 34.18 ms |
-
-### 1,000 Jobs
-
-| Framework | Time |
-|------------|------------:|
-| WJb | 3.58 ms |
-| Quartz.NET | 9.98 ms |
-| Hangfire | 254.84 ms |
-
-### 10,000 Jobs
-
-| Framework | Time |
-|------------|------------:|
-| WJb | 20.46 ms |
-| Quartz.NET | 113.01 ms |
-| Hangfire | 2,612.89 ms |
+| JobCount | WJb (baseline) | Quartz          | Hangfire              |
+|----------|----------------|-----------------|-----------------------|
+| 1        | 22.6 µs / 1.3 KB | 1.22× / 3.0×   | **17×** / 17.6×      |
+| 100      | 476 µs / 128 KB  | 2.5× / 4.0×    | **73×** / 58.6×      |
+| 1000     | 3.58 ms / 1.28 MB| 3.3× / 3.6×    | **85×** / 58.4×      |
+| 10000    | 20.5 ms / 12.8 MB| 5.5× / 8.5×    | **128×** / 58.5×     |
 
 ## Enqueue Throughput Chart
 
