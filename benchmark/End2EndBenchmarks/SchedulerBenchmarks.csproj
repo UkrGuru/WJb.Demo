@@ -6,27 +6,42 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
+
+        <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <DebugType>none</DebugType>
+        <DebugType>portable</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <DebugType>none</DebugType>
+        <DebugType>none</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Remove="FrameworkValidationTests.cs" />
+        <Compile Remove="Infrastructure - 1.cs" />
+        <Compile Remove="Program - 1.cs" />
+        <Compile Remove="Program - Copy %282%29.cs" />
+        <Compile Remove="Program - Copy %283%29.cs" />
+        <Compile Remove="Program - Copy.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <!-- Benchmark -->
         <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
-        
+
         <!-- WJb -->
         <PackageReference Include="WJb" Version="1.1.0" />
 
         <!-- Hangfire -->
-        <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
         <PackageReference Include="Hangfire.Core" Version="1.8.25" />
+        <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
 
         <!-- Quartz -->
         <PackageReference Include="Quartz" Version="4.3.0" />
+
     </ItemGroup>
+
 </Project>

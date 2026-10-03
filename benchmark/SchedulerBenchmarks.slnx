@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="End2EndBenchmarks/SchedulerBenchmarks.csproj" />
+  <Project Path="End2EndBenchmarks/SchedulerBenchmarks.Tests.csproj" />
+</Solution>
