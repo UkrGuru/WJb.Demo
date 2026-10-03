@@ -10,6 +10,9 @@ public sealed class WJbEchoAction : WJb.JobAction<EchoPayload?>
     public override ValueTask<WJb.ActionResult> ExecuteAsync(
         EchoPayload? payload, CancellationToken ct = default)
     {
+        _ = payload?.Id;
+        _ = payload?.Name;
+
         Interlocked.Increment(ref Completed);
 
         return ValueTask.FromResult(WJb.Results.Done());
@@ -22,6 +25,9 @@ public sealed class HangfireEchoJob
 
     public EchoPayload Execute(EchoPayload payload)
     {
+        _ = payload.Id;
+        _ = payload.Name;
+
         Interlocked.Increment(ref Completed);
 
         return payload;
@@ -35,6 +41,11 @@ public sealed class QuartzEchoJob : Quartz.IJob
     public ValueTask Execute(
         IJobExecutionContext context, CancellationToken ct = default)
     {
+        var payload = (EchoPayload)context.MergedJobDataMap["payload"];
+
+        _ = payload.Id;
+        _ = payload.Name;
+
         Interlocked.Increment(ref Completed);
 
         return ValueTask.CompletedTask;

@@ -86,7 +86,6 @@ public partial class JobEnqueueBenchmarks
             var payload = new EchoPayload(i, $"User {i}");
 
             var job = JobBuilder.Create<QuartzEchoJob>()
-                .WithIdentity($"job_{i}_{Guid.NewGuid():N}")
                 .UsingJobData(new JobDataMap
                 {
                 { "payload", payload }

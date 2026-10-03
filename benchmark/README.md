@@ -1,62 +1,96 @@
-# ⚡ WJb Benchmark
+# WJb Scheduler Benchmarks
 
-End-to-end benchmark comparing WJb, Hangfire, and Quartz.NET using 10,000 in-memory echo jobs.
+Performance comparison of **WJb**, **Quartz.NET**, and **Hangfire** for job enqueue operations.
 
-## Results
-
-```text
-| Framework | Time      | Memory |
-|------------|-----------|--------|
-| WJb        |   43.17 ms| 27.59 MB |
-| Quartz.NET |   52.07 ms| 46.55 MB |
-| Hangfire   | 2929.46 ms| 772.17 MB |
-```
-
-## Throughput
+## Benchmark Environment
 
 ```text
-WJb       ≈ 231,642 jobs/sec
-Quartz    ≈ 192,049 jobs/sec
-Hangfire  ≈   3,414 jobs/sec
-```
-
-## Test
-
-```text
-Enqueue
- ↓
-Execute
- ↓
-Complete
-```
-
-Hardware:
-
-```text
-Intel Core i7-12700K
-.NET 10
+BenchmarkDotNet v0.15.8
+.NET 10.0
 Windows 11
-BenchmarkDotNet 0.15.8
+Intel Core i7-12700K
+20 Logical Cores
 ```
 
-## WJb Action
+## Scenario
+
+Each framework enqueues the same payload:
 
 ```csharp
-[ActionName("echo")]
-public sealed class WJbEchoAction : JobAction<EchoPayload?>
-{
-    public override ValueTask<ActionResult> ExecuteAsync(
-        EchoPayload? payload,
-        CancellationToken ct = default)
-        => ValueTask.FromResult(Results.Done(payload));
-}
+public sealed record EchoPayload(int Id, string Name);
 ```
 
-## Summary
+Validation tests are executed before benchmarking to verify that all frameworks successfully process the same workload and produce identical completion counts.
 
-- Fastest execution time
-- Lowest memory allocation
-- Explicit workflow model
-- Minimal runtime overhead
+## Job Enqueue Performance
 
-> Results reflect this specific benchmark configuration and workload.
+### 1 Job
+
+| Framework | Time |
+|------------|------------:|
+| WJb | 22.62 μs |
+| Quartz.NET | 27.50 μs |
+| Hangfire | 389.62 μs |
+
+### 100 Jobs
+
+| Framework | Time |
+|------------|------------:|
+| WJb | 475.52 μs |
+| Quartz.NET | 1.18 ms |
+| Hangfire | 34.18 ms |
+
+### 1,000 Jobs
+
+| Framework | Time |
+|------------|------------:|
+| WJb | 3.58 ms |
+| Quartz.NET | 9.98 ms |
+| Hangfire | 254.84 ms |
+
+### 10,000 Jobs
+
+| Framework | Time |
+|------------|------------:|
+| WJb | 20.46 ms |
+| Quartz.NET | 113.01 ms |
+| Hangfire | 2,612.89 ms |
+
+## Enqueue Throughput Chart
+
+```text
+10,000 Jobs
+
+WJb         20 ms  █
+Quartz     113 ms  █████▌
+Hangfire 2,613 ms  ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+```
+
+## Memory Consumption
+
+### 10,000 Jobs
+
+| Framework | Allocated Memory |
+|------------|----------------:|
+| WJb | 12.81 MB |
+| Quartz.NET | 108.89 MB |
+| Hangfire | 749.68 MB |
+
+## Memory Usage Chart
+
+```text
+10,000 Jobs
+
+WJb        12.8 MB  █
+Quartz    108.9 MB  ████████▌
+Hangfire  749.7 MB  ███████████████████████████████████████████████████████████
+```
+
+## Conclusion
+
+For high-throughput job scheduling workloads, **WJb** demonstrates:
+
+- **5.5× higher enqueue throughput** than Quartz.NET.
+- **128× higher enqueue throughput** than Hangfire.
+- **8.5× lower memory consumption** than Quartz.NET.
+- **58× lower memory consumption** than Hangfire.
