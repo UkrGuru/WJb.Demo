@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Benchmarks/Benchmarks.csproj" />
+  <Project Path="Benchmarks/Benchmarks.Tests.csproj" />
+</Solution>

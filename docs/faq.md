@@ -93,13 +93,8 @@ The workflow is normal application code.
 Yes.
 
 ```csharp
-await wjb.EnqueueAsync(
-    "send-email",
-    payload,
-    new JobOptions
-    {
-        Delay = TimeSpan.FromMinutes(5)
-    });
+await wjb.EnqueueAsync("send-email", payload,
+    new JobOptions { Delay = TimeSpan.FromMinutes(5) });
 ```
 
 You can also calculate the execution time:
@@ -120,13 +115,8 @@ var runAt = options.GetRunAt(DateTime.UtcNow);
 Yes.
 
 ```csharp
-await wjb.EnqueueAsync(
-    "send-email",
-    payload,
-    new JobOptions
-    {
-        Queue = "email"
-    });
+await wjb.EnqueueAsync("send-email", payload,
+    new JobOptions { Queue = "email" });
 ```
 
 Workers can process specific queues.
@@ -142,9 +132,8 @@ await wjb.ExecuteLoopAsync(queue: "email");
 Yes.
 
 ```csharp
-return ValueTask.FromResult(
-    Results.Done()
-        .Next("audit", payload));
+return new ActionResult()
+    .Next("audit", payload));
 ```
 
 Actions define workflow transitions.
@@ -156,21 +145,17 @@ Actions define workflow transitions.
 Yes.
 
 ```csharp
-return ValueTask.FromResult(
-    Results.Done(new
-    {
-        Success = true
-    }));
+return new ActionResult(new { Success = true }));
 ```
 
 Scalar values are also supported.
 
 ```csharp
-return ValueTask.FromResult(Results.Done(123));
+return new ActionResult(123);
 ```
 
 ```csharp
-return ValueTask.FromResult(Results.Done("done"));
+return new ActionResult("done");
 ```
 
 ---
@@ -180,8 +165,7 @@ return ValueTask.FromResult(Results.Done("done"));
 Actions fail by throwing exceptions.
 
 ```csharp
-throw new InvalidOperationException(
-    "SMTP unavailable");
+throw new InvalidOperationException("SMTP unavailable");
 ```
 
 WJb stores the failure information and marks the job as failed.
@@ -226,11 +210,10 @@ public sealed class SendEmailAction(IEmailService email)
     : JobAction<EmailInput>
 {
     public override ValueTask<ActionResult> ExecuteAsync(
-        EmailInput? input,
-        CancellationToken ct = default)
+        EmailInput? input, CancellationToken ct = default)
     {
         // ...
-        return ValueTask.FromResult(Results.Done());
+        return ActionResult.Empty;
     }
 }
 ```
@@ -300,23 +283,13 @@ Yes, but it is usually better to store large content separately.
 Preferred:
 
 ```csharp
-await wjb.EnqueueAsync(
-    "send-email",
-    new
-    {
-        BodyId = fileId
-    });
+await wjb.EnqueueAsync("send-email", new { BodyId = fileId });
 ```
 
 Instead of:
 
 ```csharp
-await wjb.EnqueueAsync(
-    "send-email",
-    new
-    {
-        Body = hugeHtmlDocument
-    });
+await wjb.EnqueueAsync("send-email", new { Body = hugeHtmlDocument });
 ```
 
 ---

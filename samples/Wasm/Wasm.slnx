@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Wasm.InMemory/Wasm.InMemory.csproj" />
+  <Project Path="../Base/WJbPro.Demos.csproj" />
+</Solution>
