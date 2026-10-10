@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Monitor.InMemory/Monitor.InMemory.csproj" />
+  <Project Path="../Base/WJbPro.Demos.csproj" />
+</Solution>

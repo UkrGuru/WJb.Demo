@@ -26,10 +26,10 @@ Start here if you are new to WJb.
 
 ### Core Concepts
 
-- [Actions](actions.md)
-- [ActionResult](action-result.md)
-- [Step](step.md)
-- [JobOptions](job-options.md)
+- [Actions](concepts/actions.md)
+- [ActionResult](concepts/action-result.md)
+- [Step](concepts/step.md)
+- [JobOptions](concepts/job-options.md)
 
 ---
 
@@ -37,20 +37,20 @@ Start here if you are new to WJb.
 
 Learn how jobs run.
 
-- [Executor](executor.md)
-- [Progress](progress.md)
-- [Retry](retry.md)
-- [Scheduling](scheduling.md)
-- [Queues](queues.md)
+- [Executor](execution/executor.md)
+- [Progress](execution/progress.md)
+- [Retry](execution/retry.md)
+- [Scheduling](execution/scheduling.md)
+- [Queues](execution/queues.md)
 
 ---
 
-## Storage
+## Stores
 
 Learn how jobs are persisted.
 
-- [Store](store.md)
-- [Custom Stores](custom-stores.md)
+- [Store](stores/store.md)
+- [Custom Stores](stores/custom-stores.md)
 
 ---
 
@@ -72,7 +72,7 @@ Learn how jobs are persisted.
 
 ### UI
 
-- [WJb.UI.Blazor](wjb-ui-blazor.md)
+- [WJb.UI.Blazor](integrations/wjb-ui-blazor.md)
 
 ---
 

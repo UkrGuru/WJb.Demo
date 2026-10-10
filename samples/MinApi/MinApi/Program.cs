@@ -1,0 +1,82 @@
+using WJb;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<IStore, InMemoryStore>();
+
+builder.Services.AddSingleton<IWJb>(sp =>
+{
+    var store = sp.GetRequiredService<IStore>();
+
+    return WJbBuilder.Create(store, cfg =>
+    {
+        cfg.AddAction<DemoAction>(DemoAction.Key);
+    });
+});
+
+builder.Services.AddSingleton(sp =>
+    new WasmWorker(sp.GetRequiredService<IWJb>()));
+
+var app = builder.Build();
+
+app.MapPost("/jobs", async Task<IResult> (IStore store) =>
+    {
+        var jobId = await store.EnqueueAsync(DemoAction.Key,
+            new DemoPayload { DelayMs = 5000, Text = "Done ✅" });
+
+        return TypedResults.Ok(new { jobId });
+    });
+
+app.MapGet("/jobs", async Task<IResult> (IStore store) =>
+    {
+        var jobs = await store.GetJobsAsync();
+
+        return TypedResults.Ok(jobs);
+    });
+
+app.MapGet("/jobs/{id}", async Task<IResult> (string id, IStore store) =>
+    {
+        var job = await store.GetJobAsync(id);
+
+        return job is null ? TypedResults.NotFound() : TypedResults.Ok(job);
+    });
+
+app.MapDelete("/jobs/{id}", async Task<IResult> (string id, IStore store) =>
+    {
+        var ok = await store.DeleteJobAsync(id);
+
+        return ok ? TypedResults.Ok() : TypedResults.NotFound();
+    });
+
+app.Services.GetRequiredService<WasmWorker>().Start();
+
+app.Run();
+
+public sealed class DemoPayload
+{
+    public int DelayMs { get; set; }
+
+    public string Text { get; set; } = "";
+}
+
+public sealed class DemoAction : JobAction<DemoPayload>, IProgressAction
+{
+    public const string Key = "demo";
+
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        DemoPayload? input, CancellationToken ct = default)
+    {
+        var delayMs = input?.DelayMs ?? 0;
+
+        for (var i = 0; i <= 100; i += 10)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            await Task.Delay(delayMs / 10, ct);
+
+            ReportProgress(i, $"Progress {i}%");
+        }
+
+        return new ActionResult(input?.Text);
+    }
+}

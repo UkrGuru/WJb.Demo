@@ -1,0 +1,77 @@
+﻿using WJb;
+
+namespace WJbPro.Demos.Actions;
+
+public sealed class OrderInput
+{
+    public int OrderId { get; set; }
+}
+
+public sealed class CreateOrderAction : JobAction<OrderInput>
+{
+    public const string Key = "create-order";
+
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input, CancellationToken ct = default)
+    {
+        ReportProgress(25, "Order created");
+
+        await Task.Delay(300, ct);
+
+        return ActionResult.Empty
+            .Next(ReserveStockAction.Key, input);
+    }
+}
+
+public sealed class ReserveStockAction : JobAction<OrderInput>
+{
+    public const string Key = "reserve-stock";
+
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input, CancellationToken ct = default)
+    {
+        ReportProgress(50, "Stock reserved");
+
+        await Task.Delay(300, ct);
+
+        return ActionResult.Empty
+            .Next(ChargePaymentAction.Key, input);
+    }
+}
+
+public sealed class ChargePaymentAction : JobAction<OrderInput>
+{
+    public const string Key = "charge-payment";
+
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input, CancellationToken ct = default)
+    {
+        ReportProgress(75, "Payment charged");
+
+        await Task.Delay(300, ct);
+
+        return ActionResult.Empty
+            .Next(SendConfirmationAction.Key, input);
+    }
+}
+
+public sealed class SendConfirmationAction : JobAction<OrderInput>
+{
+    public const string Key = "send-confirmation";
+
+    public override async ValueTask<ActionResult> ExecuteAsync(
+        OrderInput? input, CancellationToken ct = default)
+    {
+        ReportProgress(100, $"Order #{input?.OrderId} completed");
+
+        await Task.Delay(300, ct);
+
+        return ActionResult.Empty
+            .Next(LogAction.Key,
+                new LogInput
+                {
+                    Message =
+                        $"Workflow completed for order #{input?.OrderId}"
+                });
+    }
+}

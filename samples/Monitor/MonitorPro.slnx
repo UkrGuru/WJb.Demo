@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Monitor.MySql/Monitor.MySql.csproj" />
+  <Project Path="Monitor.PostgreSql/Monitor.PostgreSql.csproj" />
+  <Project Path="Monitor.Sqlite/Monitor.Sqlite.csproj" />
+  <Project Path="Monitor.SqlServer/Monitor.SqlServer.csproj" />
+  <Project Path="../Base/WJbPro.Demos.csproj" />
+</Solution>
