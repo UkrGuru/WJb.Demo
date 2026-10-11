@@ -19,6 +19,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Remove="Class1.cs" />
+        <Compile Remove="EndToEndValidationTests.cs" />
         <Compile Remove="FrameworkValidationTests.cs" />
         <Compile Remove="Infrastructure - 1.cs" />
         <Compile Remove="Program - 1.cs" />
@@ -31,6 +33,7 @@
 
         <!-- Benchmark -->
         <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+        <PackageReference Include="Quartz" Version="4.4.0" />
 
         <!-- WJb -->
         <PackageReference Include="WJb" Version="1.2.0" />
@@ -40,7 +43,6 @@
         <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
 
         <!-- Quartz -->
-        <PackageReference Include="Quartz" Version="4.4.0" />
 
     </ItemGroup>
 

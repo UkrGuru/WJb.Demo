@@ -10,6 +10,7 @@
     <ItemGroup>
       <Compile Remove="Infrastructure - 1.cs" />
       <Compile Remove="Infrastructure.cs" />
+      <Compile Remove="JobEndToEndBenchmarks.cs" />
       <Compile Remove="JobEnqueueBenchmarks.cs" />
       <Compile Remove="JobExecuteBenchmarks.cs" />
       <Compile Remove="Program - 1.cs" />
@@ -21,8 +22,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
-        <PackageReference Include="xunit.v3" Version="4.0.1" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
+        <PackageReference Include="xunit.v3" Version="4.0.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
