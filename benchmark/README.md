@@ -183,6 +183,30 @@ Quartz      70.9 MB  ██▉
 Hangfire   714.7 MB  ██████████████████████████████
 ```
 
+## Large-Scale Benchmarking
+
+The BenchmarkDotNet suite focuses on micro-benchmarks ranging from 100 to 10,000 jobs.
+
+To complement these measurements, additional console applications can be used to run large-scale workloads (for example, 1,000,000 jobs) and measure total execution time under sustained load.
+
+The purpose of large-scale runs is to evaluate:
+
+- Long-running throughput
+- Memory pressure
+- Queue scalability
+- Scheduler overhead at production-scale workloads
+- End-to-end completion time
+
+These tests are intentionally separated from BenchmarkDotNet because they are designed to measure real-world processing capacity rather than micro-benchmark performance.
+
+Example workload:
+
+```text
+1,000,000 jobs
+1 worker/thread
+In-memory storage
+EchoPayload(Id, Name)
+
 ---
 
 # Summary
