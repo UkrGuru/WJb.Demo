@@ -14,8 +14,8 @@ Comparison of WJb persistent storage providers.
 
 | Provider | Mean |
 |----------|------:|
-| WJb.SqlServer | 88 ms |
-| WJb.SQLite | 1403 ms |
+| WJb.SqlServer | 85 ms |
+| WJb.SQLite | 1420 ms |
 
 WJb.SqlServer is approximately **16x faster**.
 
