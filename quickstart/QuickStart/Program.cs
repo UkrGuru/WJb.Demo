@@ -48,7 +48,7 @@ public sealed class SendEmailAction(SmtpSettings smtp) : JobAction<EmailInput>
         Console.WriteLine(
             $"[Action] {Actions.SendEmail} -> {input?.To} via {smtp.Host}");
 
-        return ActionResult.Empty
+        return new ActionResult()
             .Next(Actions.Log, $"Email sent to {input?.To}");
     }
 }
