@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿
+using Quartz;
 
 public static class Runner
 {
@@ -6,57 +7,84 @@ public static class Runner
 
     public static async Task ExecuteAsync()
     {
+        // Reset benchmark state BEFORE starting Quartz.
         QuartzEchoJob.Completed = 0;
         QuartzEchoJob.Expected = JobCount;
+        QuartzEchoJob.Sum = 0;
 
         QuartzEchoJob.Completion =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        var scheduler = await QuartzSchedulerBuilder
-            .Create(q =>
-            {
-                q.UseInMemoryStore();
+        // Quartz 4.x: one worker to match the WJb benchmark.
+        await using var factory = QuartzSchedulerBuilder
+            .Create(q => q
+                .UseDefaultThreadPool(maxConcurrency: 1)
+                .UseInMemoryStore())
+            .Build();
 
-                q.UseDefaultThreadPool(tp =>
-                {
-                    tp.MaxConcurrency = 1;
-                });
-            })
-            .BuildScheduler();
+        var scheduler = await factory.GetScheduler();
 
-        await scheduler.Start();
-
-        for (int i = 0; i < JobCount; i++)
+        try
         {
-            var payload =
-                new EchoPayload(i, $"User {i}");
+            await scheduler.Start();
 
-            var job = JobBuilder.Create<QuartzEchoJob>()
-                .WithIdentity($"job-{i}")
-                .UsingJobData(new JobDataMap
-                {
-                    ["payload"] = payload
-                })
-                .Build();
+            for (int i = 0; i < JobCount; i++)
+            {
+                var job = JobBuilder
+                    .Create<QuartzEchoJob>()
+                    .UsingJobData(new JobDataMap
+                    {
+                        ["payload"] = new EchoPayload(
+                            i,
+                            $"User {i}")
+                    })
+                    .Build();
 
-            await scheduler.ScheduleJob(
-                job,
-                TriggerBuilder.Create()
+                var trigger = TriggerBuilder
+                    .Create()
                     .StartNow()
-                    .Build());
+                    .Build();
+
+                await scheduler.ScheduleJob(job, trigger);
+            }
+
+            // Wait until all jobs have executed.
+            await QuartzEchoJob.Completion.Task;
+        }
+        finally
+        {
+            // Wait for any currently executing jobs.
+            await scheduler.Shutdown(
+                waitForJobsToComplete: true);
         }
 
-        await QuartzEchoJob.Completion.Task;
+        // Verification.
+        long expectedSum =
+            (long)JobCount * (JobCount - 1) / 2;
 
-        if (QuartzEchoJob.Completed != JobCount)
+        int completed =
+            Volatile.Read(ref QuartzEchoJob.Completed);
+
+        long sum =
+            Interlocked.Read(ref QuartzEchoJob.Sum);
+
+        Console.WriteLine($"Completed   : {completed:N0}");
+        Console.WriteLine($"Expected    : {JobCount:N0}");
+        Console.WriteLine($"Sum         : {sum:N0}");
+        Console.WriteLine($"ExpectedSum : {expectedSum:N0}");
+
+        if (completed != JobCount)
         {
             throw new InvalidOperationException(
-                $"Expected={JobCount}, Actual={QuartzEchoJob.Completed}");
+                $"Completed={completed:N0}, Expected={JobCount:N0}");
         }
 
-        Console.WriteLine(
-            $"Completed   : {QuartzEchoJob.Completed:N0}");
+        if (sum != expectedSum)
+        {
+            throw new InvalidOperationException(
+                $"Sum={sum:N0}, ExpectedSum={expectedSum:N0}");
+        }
 
-        await scheduler.Shutdown(true);
+        Console.WriteLine("Verification: PASSED");
     }
 }

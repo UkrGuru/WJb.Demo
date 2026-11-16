@@ -6,17 +6,18 @@ public static class Runner
 
     public static async Task ExecuteAsync()
     {
-        WJbEchoAction.Completed = 0;
-        WJbEchoAction.Expected = JobCount;
+        Echo.Completed = 0;
+        Echo.Expected = JobCount;
+        Echo.Sum = 0;
 
-        WJbEchoAction.Completion =
+        Echo.Completion =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         var store = new InMemoryStore();
 
         var wjb = WJbBuilder.Create(store, cfg =>
         {
-            cfg.AddAction<WJbEchoAction>("echo");
+            cfg.AddAction<Echo>("echo");
         });
 
         using var cts = new CancellationTokenSource();
@@ -33,17 +34,41 @@ public static class Runner
 
         for (int i = 0; i < JobCount; i++)
         {
-            await wjb.EnqueueAsync("echo",
-                new EchoPayload(i, $"User {i}"));
+            await wjb.EnqueueAsync("echo", new EchoPayload(i, $"User {i}"));
         }
 
-        await WJbEchoAction.Completion.Task;
+        await Echo.Completion.Task;
 
         cts.Cancel();
 
-        try { await worker; }
-        catch (OperationCanceledException) { }
+        try
+        {
+            await worker;
+        }
+        catch (OperationCanceledException)
+        {
+        }
 
-        Console.WriteLine($"Completed   : {WJbEchoAction.Completed:N0}");
+        var expectedSum =
+            (long)JobCount * (JobCount - 1) / 2;
+
+        Console.WriteLine($"Completed   : {Echo.Completed:N0}");
+        Console.WriteLine($"Expected    : {JobCount:N0}");
+        Console.WriteLine($"Sum         : {Echo.Sum:N0}");
+        Console.WriteLine($"ExpectedSum : {expectedSum:N0}");
+
+        if (Echo.Completed != JobCount)
+        {
+            throw new InvalidOperationException(
+                $"Completed={Echo.Completed:N0}, Expected={JobCount:N0}");
+        }
+
+        if (Echo.Sum != expectedSum)
+        {
+            throw new InvalidOperationException(
+                $"Sum={Echo.Sum:N0}, ExpectedSum={expectedSum:N0}");
+        }
+
+        Console.WriteLine("Verification: PASSED");
     }
 }
