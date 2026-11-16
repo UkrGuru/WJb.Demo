@@ -1,69 +1,89 @@
-# Large Scale End-to-End Benchmark
+# WJb Performance Evolution
 
-Real-world processing benchmark using:
+Benchmark: 1,000,000 jobs, single worker, in-memory storage
 
-```text
-1,000,000 jobs
-1 worker/thread
-In-memory storage
-```
+| Stage                               | Jobs/sec | Gain vs Baseline |
+|-------------------------------------|---------:|-----------------:|
+| Baseline (.NET 10)                  | 181,697  | -                |
+| .NET 11 + InMemoryStore + StoreBase | 206,070  | +13.4%           |
+| JobExecute Update                   | 211,188  | +16.2%           |
+| WasmWorker Update                   | 213,723  | +17.6%           |
 
-## Benchmark Environment
+## Current WJb Result
 
-```text
-.NET 10.0
-Windows 11
-Intel Core i7-12700K
-```
+Completed   : 1,000,000
+Expected    : 1,000,000
+Sum         : 499,999,500,000
+ExpectedSum : 499,999,500,000
+Verification: PASSED
 
-## Workload
+Elapsed     : 00:00:04.6789558
+Jobs/sec    : 213,723
+Memory      : 993.87 MB
 
-```csharp
-public sealed record EchoPayload(int Id, string Name);
-```
+## Competitors
 
-Job implementation:
+### Quartz
 
-```csharp
-Interlocked.Increment(ref Completed);
-```
+Completed   : 1,000,000
+Expected    : 1,000,000
+Sum         : 499,999,500,000
+ExpectedSum : 499,999,500,000
+Verification: PASSED
 
-## Results
+Elapsed     : 00:00:24.8474230
+Jobs/sec    : 40,246
+Memory      : 1,492.51 MB
 
-| Framework | Time | Jobs/sec | Memory |
-|-----------|-----------:|-----------:|-----------:|
-| WJb | 4.80 sec | 208,344 | 983.72 MB |
-| Quartz.NET | 23.84 sec | 41,940 | 1,292.79 MB |
-| Hangfire | 299.00 sec | 3,344 | 2,518.56 MB |
+### Hangfire
 
-## Throughput
+Completed   : 1,000,000
+Expected    : 1,000,000
+Sum         : 499,999,500,000
+ExpectedSum : 499,999,500,000
+Verification: PASSED
 
-```text
-WJb       208,344 jobs/sec
-Quartz     41,940 jobs/sec
-Hangfire    3,344 jobs/sec
-```
+Elapsed     : 00:05:55.4745246
+Jobs/sec    : 2,813
+Memory      : 2,527.67 MB
 
-## Processing Time
+## Comparison
 
-```text
-1,000,000 Jobs
+WJb vs Quartz   : 5.31x faster
+WJb vs Hangfire : 75.98x faster
 
-WJb          4.80 sec
-Quartz      23.84 sec
-Hangfire   299.00 sec
-```
+Memory Usage
 
-## Summary
+WJb      :   993.87 MB
+Quartz   : 1,492.51 MB
+Hangfire : 2,527.67 MB
 
-- WJb processed 1,000,000 jobs approximately 5× faster than Quartz.NET.
-- WJb processed 1,000,000 jobs approximately 62× faster than Hangfire.
-- WJb used approximately 31% less memory than Quartz.NET.
-- WJb used approximately 61% less memory than Hangfire.
+## Performance Chart
+
+Jobs/sec
+
+220k |                                        ● WJb (213,723)
+200k |
+180k |
+160k |
+140k |
+120k |
+100k |
+ 80k |
+ 60k |
+ 40k |         ● Quartz (40,246)
+ 20k |
+   0 | ● Hangfire (2,813)
+      +------------------------------------------------
 
 ## Notes
 
-- In-memory storage only.
-- Single worker/thread for all frameworks.
-- End-to-end execution includes enqueue, scheduling, execution, and completion.
-- Results were measured using standalone console applications.
+WJb processed 1,000,000 jobs in under 5 seconds.
+
+Quartz completed the same workload in about 25 seconds.
+
+Hangfire completed the same workload in nearly 6 minutes.
+
+By the time Hangfire finished the benchmark, my coffee was already cold. ☕😄
+
+Apparently, Hangfire treats one million jobs as a serious enterprise process.
