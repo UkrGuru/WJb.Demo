@@ -9,7 +9,7 @@ using WJb.SqlServer;
 
 namespace Benchmarks;
 
-[SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
 [MemoryDiagnoser]
 public class PersistentStorageBenchmark
 {
