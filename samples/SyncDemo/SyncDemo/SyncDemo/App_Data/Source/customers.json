@@ -1,0 +1,17 @@
+[
+  {
+    "Id": "CUS-001",
+    "Name": "John Updated",
+    "Email": "john@example.com"
+  },
+  {
+    "Id": "CUS-002",
+    "Name": "Jane",
+    "Email": "jane@example.com"
+  },
+  {
+    "Id": "CUS-003",
+    "Name": "Bob",
+    "Email": "bob@example.com"
+  }
+]
